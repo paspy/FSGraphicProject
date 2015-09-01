@@ -43,7 +43,7 @@ float4 main(VS_OUTPUT input) : SV_TARGET {
 	float4 diffuse = ObjTexture.Sample(ObjSamplerState, input.TexCoord);
 
 	//Set diffuse color of material
-	// diffuse = difColor;
+	 //diffuse = difColor;
 
 	//If material has a diffuse texture map, set it now
 	//if (hasTexture == true)

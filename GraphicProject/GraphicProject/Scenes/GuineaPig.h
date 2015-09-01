@@ -90,6 +90,8 @@ private:
 	ID3D11RasterizerState			*m_ccwCullingMode = nullptr;
 
 	// obj loader
+	ConstPerObject						m_cbMeshObject;
+	ID3D11Buffer						*m_cbMeshBuffer = nullptr;
 	ID3D11Buffer						*m_meshVertBuff = nullptr;
 	ID3D11Buffer						*m_meshIndexBuff = nullptr;
 	XMMATRIX							m_meshWorld;

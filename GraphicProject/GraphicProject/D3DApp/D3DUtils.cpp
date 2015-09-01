@@ -542,7 +542,9 @@ bool D3DUtils::CreateModelFromObjFile(
 
 	//Close the obj file, and open the mtl file
 	fileIn.close();
-	fileIn.open(meshMatLib.c_str());
+	wstring mtlFileName = L"Resources/Models/";
+	mtlFileName += meshMatLib.c_str();
+	fileIn.open(mtlFileName);
 
 	std::wstring lastStringRead;
 	size_t matCount = _materials.size();	//total materials
@@ -666,7 +668,9 @@ bool D3DUtils::CreateModelFromObjFile(
 									//if the texture is not already loaded, load it now
 									if (!alreadyLoaded) {
 										ID3D11ShaderResourceView* tempMeshSRV;
-										hr = CreateDDSTextureFromFile(_d3dDevice, fileNamePath.c_str(), NULL, &tempMeshSRV);
+										wstring fileName = L"Resources/Models/";
+										fileName += fileNamePath.c_str();
+										hr = CreateDDSTextureFromFile(_d3dDevice, fileName.c_str(), NULL, &tempMeshSRV);
 										//hr = D3DX11CreateShaderResourceViewFromFile(d3d11Device, fileNamePath.c_str(), NULL, NULL, &tempMeshSRV, NULL);
 
 										if (SUCCEEDED(hr)) {
@@ -730,7 +734,9 @@ bool D3DUtils::CreateModelFromObjFile(
 												ID3D11ShaderResourceView* tempMeshSRV;
 												/*hr = D3DX11CreateShaderResourceViewFromFile(d3d11Device, fileNamePath.c_str(),
 												NULL, NULL, &tempMeshSRV, NULL);*/
-												hr = CreateDDSTextureFromFile(_d3dDevice, fileNamePath.c_str(), NULL, &tempMeshSRV);
+												wstring fileName = L"Resources/Models/";
+												fileName += fileNamePath.c_str();
+												hr = CreateDDSTextureFromFile(_d3dDevice, fileName.c_str(), NULL, &tempMeshSRV);
 												if (SUCCEEDED(hr)) {
 													_textureNameArray.push_back(fileNamePath.c_str());
 													_materials[matCount - 1].normMapTexArrayIndex = (int)_meshShaderResView.size();

@@ -35,6 +35,7 @@ GuineaPig::~GuineaPig() {
 
 	// release constant buffer ptr
 	SafeRelease(m_cbCubeBuffer);
+	SafeRelease(m_cbMeshBuffer);
 	SafeRelease(m_cbGroundBuffer);
 	SafeRelease(m_cbPerFrameBuffer);
 
@@ -107,6 +108,8 @@ void GuineaPig::BuildObjConstBuffer() {
 
 	HR(m_d3dDevice->CreateBuffer(&cbbd, NULL, &m_cbGroundBuffer));
 	m_cbGroundObject.texIndex = 0;
+
+	HR(m_d3dDevice->CreateBuffer(&cbbd, NULL, &m_cbMeshBuffer));
 
 	// lightings
 	ZeroMemory(&cbbd, sizeof(D3D11_BUFFER_DESC));
@@ -496,6 +499,14 @@ void GuineaPig::UpdateScene(double _dt) {
 	XMMATRIX translationMat = XMMatrixTranslation(0.0f, 2.0f, 0.0f);
 
 	m_cubeWorldMat = rotationMat * translationMat;
+
+	m_meshWorld = XMMatrixIdentity();
+
+	XMMATRIX Rotation = XMMatrixRotationY(XM_PI);
+	XMMATRIX Scale = XMMatrixScaling(1.0f, 1.0f, 1.0f);
+	XMMATRIX Translation = XMMatrixTranslation(0.0f, .1f, 50.0f);
+
+	m_meshWorld = Rotation * Scale * Translation;
 }
 
 void GuineaPig::DrawScene() {
@@ -516,30 +527,11 @@ void GuineaPig::DrawScene() {
 	// draw skybox
 	//Set the default blend state (no blending) for opaque objects
 	m_d3dImmediateContext->OMSetBlendState(0, 0, 0xffffffff);
-	//Set the spheres index buffer
-	m_d3dImmediateContext->IASetIndexBuffer(m_sphereIndexBuffer, DXGI_FORMAT_R32_UINT, 0);
-	//Set the spheres vertex buffer
-	m_d3dImmediateContext->IASetVertexBuffers(0, 1, &m_sphereVertBuffer, &stride, &offset);
 
-	//Set the WVP matrix and send it to the constant buffer in effect file
-	m_cbGroundObject.WVP = XMMatrixTranspose(m_sphereWorld * m_camView * m_camProjection);
-	m_cbGroundObject.World = XMMatrixTranspose(m_sphereWorld);
-	m_d3dImmediateContext->UpdateSubresource(m_cbGroundBuffer, 0, NULL, &m_cbGroundObject, 0, 0);
-	m_d3dImmediateContext->VSSetConstantBuffers(0, 1, &m_cbGroundBuffer);
 
-	//Send our skymap resource view to pixel shader
-	m_d3dImmediateContext->PSSetShaderResources(0, 1, &m_skyboxShaderResView);
-	m_d3dImmediateContext->PSSetSamplers(0, 1, &m_baseTexSamplerState);
 
-	//Set the proper VS and PS shaders, and layout
-	m_d3dImmediateContext->VSSetShader(m_skyboxVertexShader, 0, 0);
-	m_d3dImmediateContext->PSSetShader(m_skyboxPixelShader, 0, 0);
-	m_d3dImmediateContext->IASetInputLayout(m_skyboxInputLayout);
-	//Set the new depth/stencil and RS states
-	m_d3dImmediateContext->OMSetDepthStencilState(m_skyboxDSLessEqual, 0);
-	m_d3dImmediateContext->RSSetState(m_skyboxRasterState);
 
-	m_d3dImmediateContext->DrawIndexed(m_numSphereFaces * 3, 0, 0);
+
 
 	//"fine-tune" the blending equation
 	float blendFactor[] = { 0.75f, 0.75f, 0.75f, 1.0f };
@@ -576,11 +568,34 @@ void GuineaPig::DrawScene() {
 	m_d3dImmediateContext->RSSetState(m_antialiasedLine);
 	m_d3dImmediateContext->DrawIndexed(6, 0, 0);
 
-	// Set Shader Resources and Samplers
-	m_d3dImmediateContext->PSSetShaderResources(0, 1, &m_cubeShaderResView);
-	m_d3dImmediateContext->PSSetSamplers(0, 1, &m_baseTexSamplerState);
+	
 
 	// Render opaque objects //
+
+	for (int i = 0; i < m_meshSubsets; i++) {
+		//Set the grounds index buffer
+		m_d3dImmediateContext->IASetIndexBuffer(m_meshIndexBuff, DXGI_FORMAT_R32_UINT, 0);
+		//Set the grounds vertex buffer
+		m_d3dImmediateContext->IASetVertexBuffers(0, 1, &m_meshVertBuff, &stride, &offset);
+
+		//Set the WVP matrix and send it to the constant buffer in effect file
+		m_cbMeshObject.WVP = XMMatrixTranspose(m_meshWorld * m_camView * m_camProjection);
+		m_cbMeshObject.World = XMMatrixTranspose(m_meshWorld);
+		m_cbMeshObject.difColor = m_materials[m_meshSubsetTexture[i]].difColor;
+		m_cbMeshObject.hasTexture = m_materials[m_meshSubsetTexture[i]].hasTexture;
+		m_d3dImmediateContext->UpdateSubresource(m_cbMeshBuffer, 0, NULL, &m_cbMeshObject, 0, 0);
+		m_d3dImmediateContext->VSSetConstantBuffers(0, 1, &m_cbMeshBuffer);
+		m_d3dImmediateContext->PSSetConstantBuffers(1, 1, &m_cbMeshBuffer);
+		if (m_materials[m_meshSubsetTexture[i]].hasTexture)
+			m_d3dImmediateContext->PSSetShaderResources(0, 1, &m_meshShaderResView[m_materials[m_meshSubsetTexture[i]].texArrayIndex]);
+		m_d3dImmediateContext->PSSetSamplers(0, 1, &m_baseTexSamplerState);
+
+		m_d3dImmediateContext->RSSetState(m_antialiasedLine);
+		int indexStart = m_meshSubsetIndexStart[i];
+		int indexDrawAmount = m_meshSubsetIndexStart[i + 1] - m_meshSubsetIndexStart[i];
+		if (!m_materials[m_meshSubsetTexture[i]].transparent)
+			m_d3dImmediateContext->DrawIndexed(indexDrawAmount, indexStart, 0);
+	}
 
 	//*****Transparency Depth Ordering*****//
 	// Find which transparent object is further from the camera
@@ -610,23 +625,51 @@ void GuineaPig::DrawScene() {
 	//Set the blend state for transparent objects
 	//m_d3dImmediateContext->OMSetBlendState(m_blendTransparency, blendFactor, 0xffffffff);
 
-	// draw two cubes
-	m_cbCubeObject.WVP = XMMatrixTranspose(m_cubeWorldMat * m_camView * m_camProjection);
-	m_cbCubeObject.World = XMMatrixTranspose(m_cubeWorldMat);
-	m_d3dImmediateContext->UpdateSubresource(m_cbCubeBuffer, 0, NULL, &m_cbCubeObject, 0, 0);
-	m_d3dImmediateContext->VSSetConstantBuffers(0, 1, &m_cbCubeBuffer);
-	// Set verts buffer
-	m_d3dImmediateContext->IASetVertexBuffers(0, 1, &m_cubeVertexBuffer, &stride, &offset);
-	// Set indeces buffer
-	m_d3dImmediateContext->IASetIndexBuffer(m_cubeIndexBuffer, DXGI_FORMAT_R32_UINT, 0);
+	//// draw two cubes
+	//m_cbCubeObject.WVP = XMMatrixTranspose(m_cubeWorldMat * m_camView * m_camProjection);
+	//m_cbCubeObject.World = XMMatrixTranspose(m_cubeWorldMat);
+	//m_d3dImmediateContext->UpdateSubresource(m_cbCubeBuffer, 0, NULL, &m_cbCubeObject, 0, 0);
+	//m_d3dImmediateContext->VSSetConstantBuffers(0, 1, &m_cbCubeBuffer);
+	// Set Shader Resources and Samplers
+	//m_d3dImmediateContext->PSSetShaderResources(0, 1, &m_cubeShaderResView);
+	//m_d3dImmediateContext->PSSetSamplers(0, 1, &m_baseTexSamplerState);
+	//// Set verts buffer
+	//m_d3dImmediateContext->IASetVertexBuffers(0, 1, &m_cubeVertexBuffer, &stride, &offset);
+	//// Set indeces buffer
+	//m_d3dImmediateContext->IASetIndexBuffer(m_cubeIndexBuffer, DXGI_FORMAT_R32_UINT, 0);
 
-	// Send conterclockwise culling cube first!
-	m_d3dImmediateContext->RSSetState(m_ccwCullingMode);
-	m_d3dImmediateContext->DrawIndexed(36, 0, 0);
+	//// Send conterclockwise culling cube first!
+	//m_d3dImmediateContext->RSSetState(m_ccwCullingMode);
+	//m_d3dImmediateContext->DrawIndexed(36, 0, 0);
 
-	// Send clockwise culling cube following the conter-colockwise culling cube!
-	m_d3dImmediateContext->RSSetState(m_cwCullingMode);
-	m_d3dImmediateContext->DrawIndexed(36, 0, 0);
+	//// Send clockwise culling cube following the conter-colockwise culling cube!
+	//m_d3dImmediateContext->RSSetState(m_cwCullingMode);
+	//m_d3dImmediateContext->DrawIndexed(36, 0, 0);
+
+	//Set the spheres index buffer
+	m_d3dImmediateContext->IASetIndexBuffer(m_sphereIndexBuffer, DXGI_FORMAT_R32_UINT, 0);
+	//Set the spheres vertex buffer
+	m_d3dImmediateContext->IASetVertexBuffers(0, 1, &m_sphereVertBuffer, &stride, &offset);
+
+	//Set the WVP matrix and send it to the constant buffer in effect file
+	m_cbGroundObject.WVP = XMMatrixTranspose(m_sphereWorld * m_camView * m_camProjection);
+	m_cbGroundObject.World = XMMatrixTranspose(m_sphereWorld);
+	m_d3dImmediateContext->UpdateSubresource(m_cbGroundBuffer, 0, NULL, &m_cbGroundObject, 0, 0);
+	m_d3dImmediateContext->VSSetConstantBuffers(0, 1, &m_cbGroundBuffer);
+
+	//Send our skymap resource view to pixel shader
+	m_d3dImmediateContext->PSSetShaderResources(0, 1, &m_skyboxShaderResView);
+	m_d3dImmediateContext->PSSetSamplers(0, 1, &m_baseTexSamplerState);
+
+	//Set the proper VS and PS shaders, and layout
+	m_d3dImmediateContext->VSSetShader(m_skyboxVertexShader, 0, 0);
+	m_d3dImmediateContext->PSSetShader(m_skyboxPixelShader, 0, 0);
+	m_d3dImmediateContext->IASetInputLayout(m_skyboxInputLayout);
+	//Set the new depth/stencil and RS states
+	m_d3dImmediateContext->OMSetDepthStencilState(m_skyboxDSLessEqual, 0);
+	m_d3dImmediateContext->RSSetState(m_skyboxRasterState);
+
+	m_d3dImmediateContext->DrawIndexed(m_numSphereFaces * 3, 0, 0);
 
 	//Present the backbuffer to the screen
 	HR(m_swapChain->Present(0, 0));
