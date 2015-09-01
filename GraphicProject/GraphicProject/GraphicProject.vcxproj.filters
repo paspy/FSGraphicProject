@@ -18,6 +18,15 @@
     <Filter Include="Source Files\Scenes">
       <UniqueIdentifier>{2bda8bf5-b857-44a2-8144-3bbc2bd7b339}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Source Files\Scenes\Shaders">
+      <UniqueIdentifier>{9e4b38da-994f-4e26-ac06-a495d013280e}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Scenes\Shaders\Skybox">
+      <UniqueIdentifier>{fb5fad63-fdf1-45f4-af20-1b386efde339}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Scenes\Shaders\Base">
+      <UniqueIdentifier>{98c06d2d-c9f2-4850-8af5-1e9213880910}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Main.cpp">
@@ -28,6 +37,12 @@
     </ClCompile>
     <ClCompile Include="D3DApp\D3DApp.cpp">
       <Filter>D3DApp</Filter>
+    </ClCompile>
+    <ClCompile Include="D3DApp\DirectXTK\DDSTextureLoader.cpp">
+      <Filter>D3DApp\DirectXTK</Filter>
+    </ClCompile>
+    <ClCompile Include="Scenes\GuineaPig.cpp">
+      <Filter>Source Files\Scenes</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -40,5 +55,25 @@
     <ClInclude Include="D3DApp\D3DApp.h">
       <Filter>D3DApp</Filter>
     </ClInclude>
+    <ClInclude Include="D3DApp\DirectXTK\DDSTextureLoader.h">
+      <Filter>D3DApp\DirectXTK</Filter>
+    </ClInclude>
+    <ClInclude Include="Scenes\GuineaPig.h">
+      <Filter>Source Files\Scenes</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <FxCompile Include="Shaders\Base\Base_PS.hlsl">
+      <Filter>Source Files\Scenes\Shaders\Base</Filter>
+    </FxCompile>
+    <FxCompile Include="Shaders\Base\Base_VS.hlsl">
+      <Filter>Source Files\Scenes\Shaders\Base</Filter>
+    </FxCompile>
+    <FxCompile Include="Shaders\Skybox\Skybox_PS.hlsl">
+      <Filter>Source Files\Scenes\Shaders\Skybox</Filter>
+    </FxCompile>
+    <FxCompile Include="Shaders\Skybox\Skybox_VS.hlsl">
+      <Filter>Source Files\Scenes\Shaders\Skybox</Filter>
+    </FxCompile>
   </ItemGroup>
 </Project>

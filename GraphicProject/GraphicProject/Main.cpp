@@ -5,7 +5,7 @@
 #endif
 
 #include <ctime>
-#include <Windows.h>
+#include "Scenes\GuineaPig.h"
 
 using namespace std;
 
@@ -23,14 +23,14 @@ int main()
 #endif
 
 	srand(unsigned int(time(0)));
-	//GuineaPig GuineaPigApp(GetModuleHandle(NULL));
+	GuineaPig GuineaPigApp(GetModuleHandle(NULL));
 
 	MSG msg;
 	ZeroMemory(&msg, sizeof(msg));
 
-	//if ( !GuineaPigApp.Init() ) return 0;
+	if ( !GuineaPigApp.Init() ) return 0;
 
-	while ( msg.message != WM_QUIT /*&& GuineaPigApp.Run()*/ ) {
+	while ( msg.message != WM_QUIT && GuineaPigApp.Run() ) {
 		if ( PeekMessage(&msg, NULL, 0, 0, PM_REMOVE) ) {
 			TranslateMessage(&msg);
 			DispatchMessage(&msg);

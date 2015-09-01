@@ -1,7 +1,5 @@
 #pragma once
 
-
-
 // Convenience macro for releasing objects.
 #define SafeRelease(x) { if(x){ x->Release(); x = nullptr; } }
 
@@ -41,3 +39,11 @@
 #define VK_LS 0x53
 #define VK_LA 0x41
 #define VK_LD 0x44
+
+
+namespace Mathlib {
+	template<typename T>
+	inline T Clamp(const T& _x, const T& _low, const T& _high) {
+		return _x < _low ? _low : (_x > _high ? _high : _x);
+	}
+}
