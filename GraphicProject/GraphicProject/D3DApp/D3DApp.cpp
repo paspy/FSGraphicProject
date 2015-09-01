@@ -28,7 +28,7 @@ D3DApp::D3DApp(HINSTANCE hinst) :
 	m_maximized(false),
 	m_resizing(false),
 	m_timerStop(false),
-	m_4xMsaaQuality(0),
+	m_4xMsaaQuality(1),
 
 	m_d3dDevice(nullptr),
 	m_d3dImmediateContext(nullptr),
