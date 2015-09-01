@@ -1,21 +1,9 @@
 #pragma once
 
-#include <Windows.h>
-#include <d3d11.h>
-#include <DirectXMath.h>
-#include <DirectXColors.h>
-#include <DirectXPackedVector.h>
-#include <vector>
-#include <fstream>
 #include "D3DUtils.h"
 #include "XTime.h"
 
-using namespace DirectX;
-using namespace std;
 
-inline float DegreesToradians(float _degree) {
-	return (_degree * XM_PI / 180.0f);
-}
 
 class D3DApp {
 public:

@@ -171,6 +171,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="D3DApp\D3DApp.cpp" />
+    <ClCompile Include="D3DApp\D3DUtils.cpp" />
     <ClCompile Include="D3DApp\DirectXTK\DDSTextureLoader.cpp" />
     <ClCompile Include="D3DApp\DirectXTK\pch.cpp" />
     <ClCompile Include="D3DApp\XTime.cpp" />

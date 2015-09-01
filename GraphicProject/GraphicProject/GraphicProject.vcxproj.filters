@@ -47,6 +47,9 @@
     <ClCompile Include="D3DApp\DirectXTK\pch.cpp">
       <Filter>D3DApp\DirectXTK</Filter>
     </ClCompile>
+    <ClCompile Include="D3DApp\D3DUtils.cpp">
+      <Filter>D3DApp</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="D3DApp\D3DUtils.h">

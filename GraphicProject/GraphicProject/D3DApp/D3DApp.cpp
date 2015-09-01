@@ -1,8 +1,5 @@
 #include "D3DApp.h"
 
-#include <Windowsx.h>
-#include <sstream>
-
 namespace {
 	D3DApp *g_d3dApp = nullptr;
 }
