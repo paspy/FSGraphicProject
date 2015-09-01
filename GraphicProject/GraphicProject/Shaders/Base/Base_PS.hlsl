@@ -13,7 +13,6 @@ struct BaseLight {
 cbuffer ConstPerObject {
 	float4x4 WVP;
 	float4x4 World;
-	int texIndex;
 
 	float4 difColor;
 	bool hasTexture;
@@ -40,35 +39,35 @@ struct VS_OUTPUT {
 float4 main(VS_OUTPUT input) : SV_TARGET {
 	input.Normal = normalize(input.Normal);
 
-	float4 diffuse = ObjTexture.Sample(ObjSamplerState, input.TexCoord);
+	//float4 diffuse = ObjTexture.Sample(ObjSamplerState, input.TexCoord);
 
 	//Set diffuse color of material
-	 //diffuse = difColor;
+	float4 diffuse = difColor;
 
 	//If material has a diffuse texture map, set it now
-	//if (hasTexture == true)
-	//	diffuse = ObjTexture.Sample(ObjSamplerState, input.TexCoord);
+	if (hasTexture == true)
+		diffuse = ObjTexture.Sample(ObjSamplerState, input.TexCoord);
 
-	////If material has a normal map, we can set it now
-	//if (hasNormMap == true) {
-	//	//Load normal from normal map
-	//	float4 normalMap = ObjNormMap.Sample(ObjSamplerState, input.TexCoord);
+	//If material has a normal map, we can set it now
+	if (hasNormMap == true) {
+		//Load normal from normal map
+		float4 normalMap = ObjNormMap.Sample(ObjSamplerState, input.TexCoord);
 
-	//	//Change normal map range from [0, 1] to [-1, 1]
-	//	normalMap = (2.0f*normalMap) - 1.0f;
+		//Change normal map range from [0, 1] to [-1, 1]
+		normalMap = (2.0f*normalMap) - 1.0f;
 
-	//	//Make sure tangent is completely orthogonal to normal
-	//	input.Tangent = normalize(input.Tangent - dot(input.Tangent, input.Normal)*input.Normal);
+		//Make sure tangent is completely orthogonal to normal
+		input.Tangent = normalize(input.Tangent - dot(input.Tangent, input.Normal)*input.Normal);
 
-	//	//Create the biTangent
-	//	float3 biTangent = cross(input.Normal, input.Tangent);
+		//Create the biTangent
+		float3 biTangent = cross(input.Normal, input.Tangent);
 
-	//	//Create the "Texture Space"
-	//	float3x3 texSpace = float3x3(input.Tangent, biTangent, input.Normal);
+		//Create the "Texture Space"
+		float3x3 texSpace = float3x3(input.Tangent, biTangent, input.Normal);
 
-	//	//Convert normal from normal map to texture space and store in input.normal
-	//	input.Normal = (normalize(mul((float3)normalMap, texSpace)));
-	//}
+		//Convert normal from normal map to texture space and store in input.normal
+		input.Normal = (normalize(mul((float3)normalMap, texSpace)));
+	}
 
 	
 	float3 finalColor = float3(0.0f, 0.0f, 0.0f);

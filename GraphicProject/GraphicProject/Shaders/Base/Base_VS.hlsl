@@ -2,8 +2,6 @@
 cbuffer ConstPerObject {
 	float4x4 WVP;
 	float4x4 World;
-	int texIndex;
-
 	float4 difColor;
 	bool hasTexture;
 	bool hasNormMap;
@@ -40,8 +38,6 @@ VS_OUTPUT main(float4 inPos : POSITION,
 	output.Color = inColor;
 
 	output.TexCoord = inTexCoord;
-
-	output.TexCoord.x += 0.25 * texIndex;
 
 	return output;
 }

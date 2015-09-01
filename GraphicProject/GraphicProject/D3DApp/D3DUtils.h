@@ -105,7 +105,6 @@ struct ConstPerObject {
 	ConstPerObject() : hasTexture(false), hasNormal(false) {}
 	XMMATRIX WVP;
 	XMMATRIX World;
-	int texIndex;
 	XMFLOAT4 difColor;
 	// need to 4 bytes
 	bool hasTexture;

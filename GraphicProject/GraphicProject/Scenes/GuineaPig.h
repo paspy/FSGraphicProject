@@ -20,7 +20,6 @@ public:
 private:
 	void BuildObjConstBuffer();
 	void BuildGeometryBuffers();
-	void BuildGroundBuffers();
 	void BuildTextureAndState();
 	void BuildLighting();
 	void BuildShader();
@@ -47,32 +46,26 @@ private:
 
 	XMMATRIX						m_sphereWorld;
 
-	// objects
-	ID3D11Buffer					*m_cubeVertexBuffer;
-	ID3D11Buffer					*m_cubeIndexBuffer;
-	ID3D11Buffer					*m_groundVertexBuffer;
-	ID3D11Buffer					*m_groundIndexBuffer;
+	// ground
+	ID3D11Buffer					*m_groundVertexBuffer = nullptr;
+	ID3D11Buffer					*m_groundIndexBuffer = nullptr;
+
 
 	ID3D11InputLayout				*m_inputLayout;
 	ID3D11VertexShader				*m_vertexShader;
 	ID3D11PixelShader				*m_pixelShader;
-
-	ConstPerObject					m_cbCubeObject;
-	ID3D11Buffer					*m_cbCubeBuffer = nullptr;
 
 	ConstPerObject					m_cbGroundObject;
 	ID3D11Buffer					*m_cbGroundBuffer = nullptr;
 
 	// Object
 	vector<Vertex3D>				m_gridVerts;
-	XMMATRIX						m_cubeWorldMat;
 	XMMATRIX						m_groundWorldMat;
 
 	// Render States
 	ID3D11RasterizerState			*m_antialiasedLine = nullptr;
 
 	// texture
-	ID3D11ShaderResourceView		*m_cubeShaderResView = nullptr;
 	ID3D11SamplerState				*m_baseTexSamplerState = nullptr;
 
 	ID3D11ShaderResourceView		*m_grassShaderResView = nullptr;
