@@ -50,12 +50,10 @@ GuineaPig::~GuineaPig() {
 	// release texture ptr
 	// the cube
 	SafeRelease(m_cubeShaderResView);
-	SafeRelease(m_cubeTexture2D);
 	SafeRelease(m_baseTexSamplerState);
 
 	// the ground
 	SafeRelease(m_grassShaderResView);
-	SafeRelease(m_grassTexture2D);
 
 	// release lighting ptr
 	SafeRelease(m_perFrameBuffer);
@@ -639,6 +637,7 @@ void GuineaPig::DrawScene() {
 	m_cbGroundObject.World = XMMatrixTranspose(m_sphereWorld);
 	m_d3dImmediateContext->UpdateSubresource(m_cbGroundBuffer, 0, NULL, &m_cbGroundObject, 0, 0);
 	m_d3dImmediateContext->VSSetConstantBuffers(0, 1, &m_cbGroundBuffer);
+
 	//Send our skymap resource view to pixel shader
 	m_d3dImmediateContext->PSSetShaderResources(0, 1, &m_skyboxShaderResView);
 	m_d3dImmediateContext->PSSetSamplers(0, 1, &m_baseTexSamplerState);

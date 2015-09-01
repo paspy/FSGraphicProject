@@ -44,6 +44,9 @@
     <ClCompile Include="Scenes\GuineaPig.cpp">
       <Filter>Source Files\Scenes</Filter>
     </ClCompile>
+    <ClCompile Include="D3DApp\DirectXTK\pch.cpp">
+      <Filter>D3DApp\DirectXTK</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="D3DApp\D3DUtils.h">
@@ -60,6 +63,18 @@
     </ClInclude>
     <ClInclude Include="Scenes\GuineaPig.h">
       <Filter>Source Files\Scenes</Filter>
+    </ClInclude>
+    <ClInclude Include="D3DApp\DirectXTK\dds.h">
+      <Filter>D3DApp\DirectXTK</Filter>
+    </ClInclude>
+    <ClInclude Include="D3DApp\DirectXTK\DirectXHelpers.h">
+      <Filter>D3DApp\DirectXTK</Filter>
+    </ClInclude>
+    <ClInclude Include="D3DApp\DirectXTK\pch.h">
+      <Filter>D3DApp\DirectXTK</Filter>
+    </ClInclude>
+    <ClInclude Include="D3DApp\DirectXTK\PlatformHelpers.h">
+      <Filter>D3DApp\DirectXTK</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

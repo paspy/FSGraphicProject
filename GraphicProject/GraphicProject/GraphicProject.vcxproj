@@ -172,6 +172,7 @@
   <ItemGroup>
     <ClCompile Include="D3DApp\D3DApp.cpp" />
     <ClCompile Include="D3DApp\DirectXTK\DDSTextureLoader.cpp" />
+    <ClCompile Include="D3DApp\DirectXTK\pch.cpp" />
     <ClCompile Include="D3DApp\XTime.cpp" />
     <ClCompile Include="Main.cpp" />
     <ClCompile Include="Scenes\GuineaPig.cpp" />
@@ -179,7 +180,11 @@
   <ItemGroup>
     <ClInclude Include="D3DApp\D3DApp.h" />
     <ClInclude Include="D3DApp\D3DUtils.h" />
+    <ClInclude Include="D3DApp\DirectXTK\dds.h" />
     <ClInclude Include="D3DApp\DirectXTK\DDSTextureLoader.h" />
+    <ClInclude Include="D3DApp\DirectXTK\DirectXHelpers.h" />
+    <ClInclude Include="D3DApp\DirectXTK\pch.h" />
+    <ClInclude Include="D3DApp\DirectXTK\PlatformHelpers.h" />
     <ClInclude Include="D3DApp\XTime.h" />
     <ClInclude Include="Scenes\GuineaPig.h" />
   </ItemGroup>

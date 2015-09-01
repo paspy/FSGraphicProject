@@ -147,6 +147,8 @@ private:
 
 	// texture
 	ID3D11ShaderResourceView		*m_cubeShaderResView = nullptr;
+	ID3D11SamplerState				*m_baseTexSamplerState = nullptr;
+
 	ID3D11ShaderResourceView		*m_grassShaderResView = nullptr;
 
 	// Lighting
