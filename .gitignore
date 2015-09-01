@@ -44,6 +44,7 @@ dlldata.c
 *.ilk
 *.meta
 *.obj
+!Resources/Models/*.obj
 *.pch
 *.pdb
 *.pgc
@@ -196,4 +197,3 @@ FakesAssemblies/
 *.opt
 *.csh
 
-!Resources/Models/*.obj
