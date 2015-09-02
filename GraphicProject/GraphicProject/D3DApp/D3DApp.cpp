@@ -345,7 +345,11 @@ void D3DApp::ShowFPS() {
 		float mspf = 1000.0f / fps;
 		std::wostringstream outs;
 		outs.precision(6);
-		outs << m_mainWindTitle << L" - " << m_deviceName << L" - FPS: " << fps << L", Time: " << mspf << L" (ms)";
+		outs << m_mainWindTitle << L" - " << m_deviceName << L" - FPS: " << fps << L", Time: " << mspf << L" (ms)"
+			 << " - Cam Position: (" 
+			 << XMVectorGetX(m_camPosition) << ", "
+			 << XMVectorGetY(m_camPosition) << ", "
+			 << XMVectorGetZ(m_camPosition) << ")";
 		SetWindowText(m_hWindow, outs.str().c_str());
 		// Reset for next average.
 		frameCnt = 0;

@@ -71,6 +71,7 @@ typedef struct Vertex3D {
 	XMFLOAT3 biTangent;
 }*Vertex3D_ptr;
 
+// constant buffer structures
 struct BaseLight {
 	BaseLight() { ZeroMemory(this, sizeof(BaseLight)); }
 	XMFLOAT3 direction;
@@ -97,7 +98,6 @@ struct SurfaceMaterial {
 };
 
 
-// constant buffer structures
 struct ConstPerObject {
 	ConstPerObject() : hasTexture(false), hasNormal(false) {}
 	XMMATRIX WVP;
@@ -114,33 +114,90 @@ struct ConstPerFrame {
 
 class Skybox {
 public:
+	struct CBuffer {
+		XMMATRIX WVP;
+	};
 	Skybox() {}
 	~Skybox() {
 		SafeRelease(inputLayout);
 		SafeRelease(indexBuffer);
 		SafeRelease(vertBuffer);
+		SafeRelease(constBuffer);
 		SafeRelease(vertexShader);
 		SafeRelease(pixelShader);
 		SafeRelease(shaderResView);
 		SafeRelease(DSLessEqual);
 		SafeRelease(rasterState);
+		SafeRelease(texSamplerState);
 	}
-	ID3D11Buffer						*indexBuffer = nullptr;
-	ID3D11Buffer						*vertBuffer = nullptr;
+	void Init(ID3D11Device *_d3dDevice) {
+		D3D11_BUFFER_DESC cbbd;
+		ZeroMemory(&cbbd, sizeof(D3D11_BUFFER_DESC));
+		cbbd.Usage = D3D11_USAGE_DEFAULT;
+		cbbd.ByteWidth = sizeof(CBuffer);
+		cbbd.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
+		cbbd.CPUAccessFlags = 0;
+		cbbd.MiscFlags = 0;
+		HR(_d3dDevice->CreateBuffer(&cbbd, NULL, &constBuffer));
+
+		D3D11_SAMPLER_DESC sampDesc;
+		ZeroMemory(&sampDesc, sizeof(sampDesc));
+		sampDesc.Filter = D3D11_FILTER_MIN_MAG_MIP_LINEAR;
+		sampDesc.AddressU = D3D11_TEXTURE_ADDRESS_WRAP;
+		sampDesc.AddressV = D3D11_TEXTURE_ADDRESS_WRAP;
+		sampDesc.AddressW = D3D11_TEXTURE_ADDRESS_WRAP;
+		sampDesc.ComparisonFunc = D3D11_COMPARISON_NEVER;
+		sampDesc.MinLOD = 0;
+		sampDesc.MaxLOD = D3D11_FLOAT32_MAX;
+		_d3dDevice->CreateSamplerState(&sampDesc, &texSamplerState);
+
+	}
+
+	CBuffer								cBuffer;
 	ID3D11VertexShader					*vertexShader = nullptr;
 	ID3D11PixelShader					*pixelShader = nullptr;
 	ID3D11InputLayout					*inputLayout = nullptr;
 	ID3D11ShaderResourceView			*shaderResView = nullptr;
+
+	ID3D11Buffer						*indexBuffer = nullptr;
+	ID3D11Buffer						*vertBuffer = nullptr;
+	ID3D11Buffer						*constBuffer = nullptr;
 	ID3D11DepthStencilState				*DSLessEqual = nullptr;
 	ID3D11RasterizerState				*rasterState = nullptr;
-	int									numVertices;
-	int									numFaces;
-	XMMATRIX							worldMat;
+	ID3D11SamplerState					*texSamplerState = nullptr;
+	int									numVertices = 0;
+	int									numFaces = 0;
+	XMMATRIX							worldMat = XMMatrixIdentity();
+	UINT								stride = sizeof(Vertex3D);
+	UINT								offset = 0;
 	D3D11_INPUT_ELEMENT_DESC			vertexLayout[2] =
 	{
 		{ "POSITION",	0, DXGI_FORMAT_R32G32B32_FLOAT,		0, D3D11_APPEND_ALIGNED_ELEMENT,	D3D11_INPUT_PER_VERTEX_DATA, 0 },
 		{ "TEXCOORD",	0, DXGI_FORMAT_R32G32_FLOAT,		0, D3D11_APPEND_ALIGNED_ELEMENT,	D3D11_INPUT_PER_VERTEX_DATA, 0 },
 	};
+};
+
+class ObjMesh {
+public:
+	ObjMesh() {}
+	~ObjMesh() {
+
+	}
+	void Init() {
+
+	}
+
+	ConstPerObject						m_cbMeshObject;
+	ID3D11Buffer						*vertBuffer = nullptr;
+	ID3D11Buffer						*indexBuffer = nullptr;
+	ID3D11Buffer						*constBuffer = nullptr;
+	XMMATRIX							m_meshWorld;
+	int									m_meshSubsets = 0;
+	vector<int>							m_meshSubsetIndexStart;
+	vector<int>							m_meshSubsetTexture;
+	vector<SurfaceMaterial>				m_materials;
+	vector<ID3D11ShaderResourceView*>	m_meshShaderResView;
+	vector<wstring>						m_textureNameArray;
 };
 
 

@@ -28,28 +28,9 @@ private:
 	Skybox								m_skyBox;
 
 	// ground
-	ID3D11Buffer						*m_groundVertexBuffer = nullptr;
-	ID3D11Buffer						*m_groundIndexBuffer = nullptr;
-
-
 	ID3D11InputLayout					*m_inputLayout;
 	ID3D11VertexShader					*m_vertexShader;
 	ID3D11PixelShader					*m_pixelShader;
-
-	ConstPerObject						m_cbGroundObject;
-	ID3D11Buffer						*m_cbGroundBuffer = nullptr;
-
-	// Object
-	vector<Vertex3D>					m_gridVerts;
-	XMMATRIX							m_groundWorldMat;
-
-	// Render States
-	ID3D11RasterizerState				*m_antialiasedLine = nullptr;
-
-	// texture
-	ID3D11SamplerState					*m_baseTexSamplerState = nullptr;
-
-	ID3D11ShaderResourceView			*m_grassShaderResView = nullptr;
 
 	// Lighting
 	ID3D11Buffer						*m_perFrameBuffer = nullptr;
@@ -77,3 +58,4 @@ private:
 	vector<wstring>						m_textureNameArray;
 
 };
+

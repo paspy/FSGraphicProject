@@ -203,9 +203,9 @@ bool D3DUtils::CreateModelFromObjFile(
 											//Arrays to store our model's information
 	vector<DWORD> indices;
 	vector<XMFLOAT3> vertPos;
-	vector<XMFLOAT3> vertNorm;
 	vector<XMFLOAT2> vertTexCoord;
-	vector<std::wstring> meshMaterials;
+	vector<XMFLOAT3> vertNorm;
+	vector<wstring> meshMaterials;
 
 	//Vertex definition indices
 	vector<int> vertPosIndex;
@@ -870,7 +870,7 @@ bool D3DUtils::CreateModelFromObjFile(
 			_subsetMaterialArray.push_back(0); //Use first material in array
 	}
 
-	std::vector<Vertex3D> vertices;
+	vector<Vertex3D> vertices;
 	Vertex3D tempVert;
 
 	//Create our vertices using the information we got 
@@ -990,7 +990,6 @@ bool D3DUtils::CreateModelFromObjFile(
 			normalSum = XMVectorSet(0.0f, 0.0f, 0.0f, 0.0f);
 			tangentSum = XMVectorSet(0.0f, 0.0f, 0.0f, 0.0f);
 			facesUsing = 0;
-
 		}
 	}
 
@@ -1006,7 +1005,7 @@ bool D3DUtils::CreateModelFromObjFile(
 
 	D3D11_SUBRESOURCE_DATA iinitData;
 
-	iinitData.pSysMem = &indices[0];
+	iinitData.pSysMem = indices.data();
 	HR(_d3dDevice->CreateBuffer(&indexBufferDesc, &iinitData, _indexBuff));
 
 	//Create Vertex Buffer
@@ -1014,7 +1013,7 @@ bool D3DUtils::CreateModelFromObjFile(
 	ZeroMemory(&vertexBufferDesc, sizeof(vertexBufferDesc));
 
 	vertexBufferDesc.Usage = D3D11_USAGE_DEFAULT;
-	vertexBufferDesc.ByteWidth = sizeof(Vertex3D) * totalVerts;
+	vertexBufferDesc.ByteWidth = sizeof(Vertex3D) * static_cast<UINT>(vertices.size());
 	vertexBufferDesc.BindFlags = D3D11_BIND_VERTEX_BUFFER;
 	vertexBufferDesc.CPUAccessFlags = 0;
 	vertexBufferDesc.MiscFlags = 0;
@@ -1022,7 +1021,7 @@ bool D3DUtils::CreateModelFromObjFile(
 	D3D11_SUBRESOURCE_DATA vertexBufferData;
 
 	ZeroMemory(&vertexBufferData, sizeof(vertexBufferData));
-	vertexBufferData.pSysMem = &vertices[0];
+	vertexBufferData.pSysMem = vertices.data();
 	HR(_d3dDevice->CreateBuffer(&vertexBufferDesc, &vertexBufferData, _vertBuff));
 
 	return true;

@@ -1,19 +1,15 @@
 #include "GuineaPig.h"
 
 GuineaPig::GuineaPig(HINSTANCE hinst) : D3DApp(hinst),
-m_groundVertexBuffer(nullptr),
 m_inputLayout(nullptr),
 m_vertexShader(nullptr),
 m_pixelShader(nullptr) 
 {
-
 }
 
 GuineaPig::~GuineaPig() {
 
 	// release geometries ptr
-	SafeRelease(m_groundIndexBuffer);
-	SafeRelease(m_groundVertexBuffer);
 
 	// release shader ptr
 	SafeRelease(m_vertexShader);
@@ -24,21 +20,12 @@ GuineaPig::~GuineaPig() {
 
 	// release constant buffer ptr
 	SafeRelease(m_cbMeshBuffer);
-	SafeRelease(m_cbGroundBuffer);
 	SafeRelease(m_cbPerFrameBuffer);
-
-	// release texture ptr
-	// the cube
-	SafeRelease(m_baseTexSamplerState);
-
-	// the ground
-	SafeRelease(m_grassShaderResView);
 
 	// release lighting ptr
 	SafeRelease(m_perFrameBuffer);
 
 	// release render state ptr
-	SafeRelease(m_antialiasedLine);
 	SafeRelease(m_blendTransparency);
 	SafeRelease(m_cwCullingMode);
 	SafeRelease(m_ccwCullingMode);
@@ -70,6 +57,8 @@ void GuineaPig::OnResize() {
 }
 
 void GuineaPig::BuildConstBuffer() {
+	m_skyBox.Init(m_d3dDevice);
+
 	// objects
 	D3D11_BUFFER_DESC cbbd;
 	ZeroMemory(&cbbd, sizeof(D3D11_BUFFER_DESC));
@@ -79,8 +68,6 @@ void GuineaPig::BuildConstBuffer() {
 	cbbd.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
 	cbbd.CPUAccessFlags = 0;
 	cbbd.MiscFlags = 0;
-
-	HR(m_d3dDevice->CreateBuffer(&cbbd, NULL, &m_cbGroundBuffer));
 
 	HR(m_d3dDevice->CreateBuffer(&cbbd, NULL, &m_cbMeshBuffer));
 
@@ -117,20 +104,20 @@ void GuineaPig::BuildGeometry() {
 	//	false);
 
 
-	// Describe the Sample State
-	D3D11_SAMPLER_DESC sampDesc;
-	ZeroMemory(&sampDesc, sizeof(sampDesc));
+	//// Describe the Sample State
+	//D3D11_SAMPLER_DESC sampDesc;
+	//ZeroMemory(&sampDesc, sizeof(sampDesc));
 
-	sampDesc.Filter = D3D11_FILTER_MIN_MAG_MIP_LINEAR;
-	sampDesc.AddressU = D3D11_TEXTURE_ADDRESS_WRAP;
-	sampDesc.AddressV = D3D11_TEXTURE_ADDRESS_WRAP;
-	sampDesc.AddressW = D3D11_TEXTURE_ADDRESS_WRAP;
-	sampDesc.ComparisonFunc = D3D11_COMPARISON_NEVER;
-	sampDesc.MinLOD = 0;
-	sampDesc.MaxLOD = D3D11_FLOAT32_MAX;
+	//sampDesc.Filter = D3D11_FILTER_MIN_MAG_MIP_LINEAR;
+	//sampDesc.AddressU = D3D11_TEXTURE_ADDRESS_WRAP;
+	//sampDesc.AddressV = D3D11_TEXTURE_ADDRESS_WRAP;
+	//sampDesc.AddressW = D3D11_TEXTURE_ADDRESS_WRAP;
+	//sampDesc.ComparisonFunc = D3D11_COMPARISON_NEVER;
+	//sampDesc.MinLOD = 0;
+	//sampDesc.MaxLOD = D3D11_FLOAT32_MAX;
 
-	// Create the Sample State
-	HR(m_d3dDevice->CreateSamplerState(&sampDesc, &m_baseTexSamplerState));
+	//// Create the Sample State
+	//HR(m_d3dDevice->CreateSamplerState(&sampDesc, &m_baseTexSamplerState));
 }
 
 void GuineaPig::BuildLighting() {
@@ -175,14 +162,14 @@ void GuineaPig::BuildShaderAndLayout() {
 void GuineaPig::BuildRenderStates() {
 
 	// Raster Description	
-	D3D11_RASTERIZER_DESC rasterDesc;
-	ZeroMemory(&rasterDesc, sizeof(D3D11_RASTERIZER_DESC));
+	//D3D11_RASTERIZER_DESC rasterDesc;
+	//ZeroMemory(&rasterDesc, sizeof(D3D11_RASTERIZER_DESC));
 
-	rasterDesc.FillMode = D3D11_FILL_SOLID;
-	rasterDesc.CullMode = D3D11_CULL_NONE;
-	rasterDesc.AntialiasedLineEnable = true;
+	//rasterDesc.FillMode = D3D11_FILL_SOLID;
+	//rasterDesc.CullMode = D3D11_CULL_NONE;
+	//rasterDesc.AntialiasedLineEnable = true;
 
-	HR(m_d3dDevice->CreateRasterizerState(&rasterDesc, &m_antialiasedLine));
+	//HR(m_d3dDevice->CreateRasterizerState(&rasterDesc, &m_antialiasedLine));
 
 	// create blending description
 	D3D11_BLEND_DESC blendDesc;
@@ -344,29 +331,24 @@ void GuineaPig::DrawScene() {
 	//		m_d3dImmediateContext->DrawIndexed(indexDrawAmount, indexStart, 0);
 	//}
 
-	//Set the spheres index buffer
-	m_d3dImmediateContext->IASetIndexBuffer(m_skyBox.indexBuffer, DXGI_FORMAT_R32_UINT, 0);
-	//Set the spheres vertex buffer
-	m_d3dImmediateContext->IASetVertexBuffers(0, 1, &m_skyBox.vertBuffer, &stride, &offset);
-
-	//Set the WVP matrix and send it to the constant buffer in effect file
-	m_cbGroundObject.WVP = XMMatrixTranspose(m_skyBox.worldMat * m_camView * m_camProjection);
-	m_cbGroundObject.World = XMMatrixTranspose(m_skyBox.worldMat);
-	m_d3dImmediateContext->UpdateSubresource(m_cbGroundBuffer, 0, NULL, &m_cbGroundObject, 0, 0);
-	m_d3dImmediateContext->VSSetConstantBuffers(0, 1, &m_cbGroundBuffer);
-
-	//Send our skymap resource view to pixel shader
-	m_d3dImmediateContext->PSSetShaderResources(0, 1, &m_skyBox.shaderResView);
-	m_d3dImmediateContext->PSSetSamplers(0, 1, &m_baseTexSamplerState);
-
 	//Set the proper VS and PS shaders, and layout
 	m_d3dImmediateContext->VSSetShader(m_skyBox.vertexShader, 0, 0);
 	m_d3dImmediateContext->PSSetShader(m_skyBox.pixelShader, 0, 0);
 	m_d3dImmediateContext->IASetInputLayout(m_skyBox.inputLayout);
+	//Set the spheres index buffer
+	m_d3dImmediateContext->IASetIndexBuffer(m_skyBox.indexBuffer, DXGI_FORMAT_R32_UINT, 0);
+	//Set the spheres vertex buffer
+	m_d3dImmediateContext->IASetVertexBuffers(0, 1, &m_skyBox.vertBuffer, &m_skyBox.stride, &m_skyBox.offset);
+	//Set the WVP matrix and send it to the constant buffer in shader file
+	m_skyBox.cBuffer.WVP = XMMatrixTranspose(m_skyBox.worldMat * m_camView * m_camProjection);
+	m_d3dImmediateContext->UpdateSubresource(m_skyBox.constBuffer, 0, NULL, &m_skyBox.cBuffer, 0, 0);
+	m_d3dImmediateContext->VSSetConstantBuffers(0, 1, &m_skyBox.constBuffer);
+	//Send our skymap resource view to pixel shader
+	m_d3dImmediateContext->PSSetShaderResources(0, 1, &m_skyBox.shaderResView);
+	m_d3dImmediateContext->PSSetSamplers(0, 1, &m_skyBox.texSamplerState);
 	//Set the new depth/stencil and RS states
 	m_d3dImmediateContext->OMSetDepthStencilState(m_skyBox.DSLessEqual, 0);
 	m_d3dImmediateContext->RSSetState(m_skyBox.rasterState);
-
 	m_d3dImmediateContext->DrawIndexed(m_skyBox.numFaces * 3, 0, 0);
 
 	//Present the backbuffer to the screen
