@@ -1,41 +1,12 @@
 #include "GuineaPig.h"
 
-GuineaPig::GuineaPig(HINSTANCE hinst) : D3DApp(hinst),
-m_inputLayout(nullptr),
-m_vertexShader(nullptr),
-m_pixelShader(nullptr) 
-{
-}
+GuineaPig::GuineaPig(HINSTANCE hinst) : D3DApp(hinst){ }
 
 GuineaPig::~GuineaPig() {
-
-	// release geometries ptr
-
-	// release shader ptr
-	SafeRelease(m_vertexShader);
-	SafeRelease(m_pixelShader);
-
-	// release layout ptr
-	SafeRelease(m_inputLayout);
-
-	// release constant buffer ptr
-	SafeRelease(m_cbMeshBuffer);
 	SafeRelease(m_cbPerFrameBuffer);
 
 	// release lighting ptr
 	SafeRelease(m_perFrameBuffer);
-
-	// release render state ptr
-	SafeRelease(m_blendTransparency);
-	SafeRelease(m_cwCullingMode);
-	SafeRelease(m_ccwCullingMode);
-
-	// obj loader
-	SafeRelease(m_meshVertBuff);
-	SafeRelease(m_meshIndexBuff);
-	for ( size_t i = 0; i < m_meshShaderResView.size(); i++ ) {
-		SafeRelease(m_meshShaderResView[i]);
-	}
 }
 
 bool GuineaPig::Init() {
@@ -59,19 +30,8 @@ void GuineaPig::OnResize() {
 void GuineaPig::BuildConstBuffer() {
 	m_skyBox.Init(m_d3dDevice);
 
-	// objects
-	D3D11_BUFFER_DESC cbbd;
-	ZeroMemory(&cbbd, sizeof(D3D11_BUFFER_DESC));
-
-	cbbd.Usage = D3D11_USAGE_DEFAULT;
-	cbbd.ByteWidth = sizeof(ConstPerObject);
-	cbbd.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
-	cbbd.CPUAccessFlags = 0;
-	cbbd.MiscFlags = 0;
-
-	HR(m_d3dDevice->CreateBuffer(&cbbd, NULL, &m_cbMeshBuffer));
-
 	// lightings
+	D3D11_BUFFER_DESC cbbd;
 	ZeroMemory(&cbbd, sizeof(D3D11_BUFFER_DESC));
 	cbbd.Usage = D3D11_USAGE_DEFAULT;
 	cbbd.ByteWidth = sizeof(ConstPerFrame);
@@ -103,21 +63,6 @@ void GuineaPig::BuildGeometry() {
 	//	true,
 	//	false);
 
-
-	//// Describe the Sample State
-	//D3D11_SAMPLER_DESC sampDesc;
-	//ZeroMemory(&sampDesc, sizeof(sampDesc));
-
-	//sampDesc.Filter = D3D11_FILTER_MIN_MAG_MIP_LINEAR;
-	//sampDesc.AddressU = D3D11_TEXTURE_ADDRESS_WRAP;
-	//sampDesc.AddressV = D3D11_TEXTURE_ADDRESS_WRAP;
-	//sampDesc.AddressW = D3D11_TEXTURE_ADDRESS_WRAP;
-	//sampDesc.ComparisonFunc = D3D11_COMPARISON_NEVER;
-	//sampDesc.MinLOD = 0;
-	//sampDesc.MaxLOD = D3D11_FLOAT32_MAX;
-
-	//// Create the Sample State
-	//HR(m_d3dDevice->CreateSamplerState(&sampDesc, &m_baseTexSamplerState));
 }
 
 void GuineaPig::BuildLighting() {
@@ -144,15 +89,8 @@ void GuineaPig::BuildLighting() {
 }
 
 void GuineaPig::BuildShaderAndLayout() {
-	// normal shader
-	D3D11_INPUT_ELEMENT_DESC vertLayout[] = {
-		{ "POSITION",	0, DXGI_FORMAT_R32G32B32_FLOAT,		0, D3D11_APPEND_ALIGNED_ELEMENT,	D3D11_INPUT_PER_VERTEX_DATA, 0 },
-		{ "TEXCOORD",	0, DXGI_FORMAT_R32G32_FLOAT,		0, D3D11_APPEND_ALIGNED_ELEMENT,	D3D11_INPUT_PER_VERTEX_DATA, 0 },
-		{ "NORMAL",		0, DXGI_FORMAT_R32G32B32_FLOAT,		0, D3D11_APPEND_ALIGNED_ELEMENT,	D3D11_INPUT_PER_VERTEX_DATA, 0 },
-		{ "TANGENT",	0, DXGI_FORMAT_R32G32B32_FLOAT,		0, D3D11_APPEND_ALIGNED_ELEMENT,	D3D11_INPUT_PER_VERTEX_DATA, 0 }
-	};
 
-	HR(D3DUtils::CreateShaderAndLayoutFromFile(m_d3dDevice, L"Shaders/Base/Base.hlsl", vertLayout, 4, &m_vertexShader, &m_pixelShader, &m_inputLayout));
+	//HR(D3DUtils::CreateShaderAndLayoutFromFile(m_d3dDevice, L"Shaders/Base/Base.hlsl", vertLayout, 4, &m_vertexShader, &m_pixelShader, &m_inputLayout));
 
 	HR(D3DUtils::CreateShaderAndLayoutFromFile(m_d3dDevice, L"Shaders/Skybox/Skybox.hlsl", m_skyBox.vertexLayout, 2, &m_skyBox.vertexShader, &m_skyBox.pixelShader, &m_skyBox.inputLayout));
 
@@ -161,64 +99,7 @@ void GuineaPig::BuildShaderAndLayout() {
 
 void GuineaPig::BuildRenderStates() {
 
-	// Raster Description	
-	//D3D11_RASTERIZER_DESC rasterDesc;
-	//ZeroMemory(&rasterDesc, sizeof(D3D11_RASTERIZER_DESC));
-
-	//rasterDesc.FillMode = D3D11_FILL_SOLID;
-	//rasterDesc.CullMode = D3D11_CULL_NONE;
-	//rasterDesc.AntialiasedLineEnable = true;
-
-	//HR(m_d3dDevice->CreateRasterizerState(&rasterDesc, &m_antialiasedLine));
-
-	// create blending description
-	D3D11_BLEND_DESC blendDesc;
-	ZeroMemory(&blendDesc, sizeof(blendDesc));
-
-	D3D11_RENDER_TARGET_BLEND_DESC renderTargetBlendDesc;
-	ZeroMemory(&renderTargetBlendDesc, sizeof(renderTargetBlendDesc));
-
-	renderTargetBlendDesc.BlendEnable = true;
-	renderTargetBlendDesc.SrcBlend = D3D11_BLEND_SRC_COLOR;
-	renderTargetBlendDesc.DestBlend = D3D11_BLEND_BLEND_FACTOR;
-	renderTargetBlendDesc.BlendOp = D3D11_BLEND_OP_ADD;
-	renderTargetBlendDesc.SrcBlendAlpha = D3D11_BLEND_ONE;
-	renderTargetBlendDesc.DestBlendAlpha = D3D11_BLEND_ZERO;
-	renderTargetBlendDesc.BlendOpAlpha = D3D11_BLEND_OP_ADD;
-	renderTargetBlendDesc.RenderTargetWriteMask = D3D10_COLOR_WRITE_ENABLE_ALL;
-
-	blendDesc.AlphaToCoverageEnable = false;
-	blendDesc.RenderTarget[0] = renderTargetBlendDesc;
-
-	HR(m_d3dDevice->CreateBlendState(&blendDesc, &m_blendTransparency));
-
-	// create counter-clockwise and clockwise description
-	D3D11_RASTERIZER_DESC cmdesc;
-	ZeroMemory(&cmdesc, sizeof(D3D11_RASTERIZER_DESC));
-
-	cmdesc.FillMode = D3D11_FILL_SOLID;
-	cmdesc.CullMode = D3D11_CULL_BACK;
-
-	cmdesc.FrontCounterClockwise = true;
-	HR(m_d3dDevice->CreateRasterizerState(&cmdesc, &m_ccwCullingMode));
-
-	cmdesc.FrontCounterClockwise = false;
-	HR(m_d3dDevice->CreateRasterizerState(&cmdesc, &m_cwCullingMode));
-
-	// skybox render state
-	ZeroMemory(&cmdesc, sizeof(D3D11_RASTERIZER_DESC));
-	cmdesc.FillMode = D3D11_FILL_SOLID;
-	cmdesc.CullMode = D3D11_CULL_NONE;
-
-	HR(m_d3dDevice->CreateRasterizerState(&cmdesc, &m_skyBox.rasterState));
-
-	D3D11_DEPTH_STENCIL_DESC dssDesc;
-	ZeroMemory(&dssDesc, sizeof(D3D11_DEPTH_STENCIL_DESC));
-	dssDesc.DepthEnable = true;
-	dssDesc.DepthWriteMask = D3D11_DEPTH_WRITE_MASK_ALL;
-	dssDesc.DepthFunc = D3D11_COMPARISON_LESS_EQUAL;
-
-	HR(m_d3dDevice->CreateDepthStencilState(&dssDesc, &m_skyBox.DSLessEqual));
+	
 }
 
 void GuineaPig::UpdateScene(double _dt) {
@@ -258,13 +139,13 @@ void GuineaPig::UpdateScene(double _dt) {
 
 	rot += (float)_dt;
 
-	m_meshWorld = XMMatrixIdentity();
+	//m_meshWorld = XMMatrixIdentity();
 
 	XMMATRIX Rotation = XMMatrixRotationY(XM_PI);
 	XMMATRIX Scale = XMMatrixScaling(1.0f, 1.0f, 1.0f);
 	XMMATRIX Translation = XMMatrixTranslation(0.0f, .1f, 50.0f);
 
-	m_meshWorld = Rotation * Scale * Translation;
+	//m_meshWorld = Rotation * Scale * Translation;
 }
 
 void GuineaPig::DrawScene() {
@@ -299,10 +180,10 @@ void GuineaPig::DrawScene() {
 	m_d3dImmediateContext->PSSetConstantBuffers(0, 1, &m_cbPerFrameBuffer);
 
 	// Set the default VS shader and depth/stencil state and layout
-	m_d3dImmediateContext->VSSetShader(m_vertexShader, NULL, 0);
-	m_d3dImmediateContext->PSSetShader(m_pixelShader, NULL, 0);
-	m_d3dImmediateContext->OMSetDepthStencilState(NULL, 0);
-	m_d3dImmediateContext->IASetInputLayout(m_inputLayout);
+	//m_d3dImmediateContext->VSSetShader(m_vertexShader, NULL, 0);
+	//m_d3dImmediateContext->PSSetShader(m_pixelShader, NULL, 0);
+	//m_d3dImmediateContext->OMSetDepthStencilState(NULL, 0);
+	//m_d3dImmediateContext->IASetInputLayout(m_inputLayout);
 
 	// Render opaque objects //
 

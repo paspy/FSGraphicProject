@@ -4,7 +4,6 @@
 #include <d3d11.h>
 #include <DirectXMath.h>
 #include <DirectXColors.h>
-#include <DirectXPackedVector.h>
 #include <D3Dcompiler.h>
 #include <vector>
 #include <sstream>
@@ -86,27 +85,6 @@ struct BaseLight {
 	XMFLOAT4 diffuse;
 };
 
-struct SurfaceMaterial {
-	SurfaceMaterial() : hasNormMap(false), hasTexture(false) {}
-	wstring matName;
-	XMFLOAT4 difColor;
-	int texArrayIndex;
-	int normMapTexArrayIndex;
-	bool hasNormMap;
-	bool hasTexture;
-	bool transparent;
-};
-
-
-struct ConstPerObject {
-	ConstPerObject() : hasTexture(false), hasNormal(false) {}
-	XMMATRIX WVP;
-	XMMATRIX World;
-	XMFLOAT4 difColor;
-	// need to 4 bytes
-	bool hasTexture;
-	bool hasNormal;
-};
 
 struct ConstPerFrame {
 	BaseLight baseLight;
@@ -149,7 +127,22 @@ public:
 		sampDesc.ComparisonFunc = D3D11_COMPARISON_NEVER;
 		sampDesc.MinLOD = 0;
 		sampDesc.MaxLOD = D3D11_FLOAT32_MAX;
-		_d3dDevice->CreateSamplerState(&sampDesc, &texSamplerState);
+		HR(_d3dDevice->CreateSamplerState(&sampDesc, &texSamplerState));
+
+		D3D11_RASTERIZER_DESC cmdesc;
+		ZeroMemory(&cmdesc, sizeof(D3D11_RASTERIZER_DESC));
+		cmdesc.FillMode = D3D11_FILL_SOLID;
+		cmdesc.CullMode = D3D11_CULL_NONE;
+
+		HR(_d3dDevice->CreateRasterizerState(&cmdesc, &rasterState));
+
+		D3D11_DEPTH_STENCIL_DESC dssDesc;
+		ZeroMemory(&dssDesc, sizeof(D3D11_DEPTH_STENCIL_DESC));
+		dssDesc.DepthEnable = true;
+		dssDesc.DepthWriteMask = D3D11_DEPTH_WRITE_MASK_ALL;
+		dssDesc.DepthFunc = D3D11_COMPARISON_LESS_EQUAL;
+
+		HR(_d3dDevice->CreateDepthStencilState(&dssDesc, &DSLessEqual));
 
 	}
 
@@ -177,27 +170,89 @@ public:
 	};
 };
 
+struct SurfaceMaterial {
+	SurfaceMaterial() : hasNormMap(false), hasTexture(false) {}
+	wstring matName;
+	XMFLOAT4 difColor;
+	int texArrayIndex;
+	int normMapTexArrayIndex;
+	bool hasNormMap;
+	bool hasTexture;
+	bool transparent;
+};
+
 class ObjMesh {
 public:
+	struct CBuffer {
+		CBuffer() : hasTexture(false), hasNormal(false) {}
+		XMMATRIX WVP;
+		XMMATRIX World;
+		XMFLOAT4 difColor;
+		// need to 4 bytes
+		BOOL hasTexture;
+		BOOL hasNormal;
+	};
+	
 	ObjMesh() {}
 	~ObjMesh() {
-
+		SafeRelease(inputLayout);
+		SafeRelease(indexBuffer);
+		SafeRelease(vertBuffer);
+		SafeRelease(constBuffer);
+		SafeRelease(vertexShader);
+		SafeRelease(pixelShader);
+		for (size_t i = 0; i < shaderResView.size(); i++) {
+			SafeRelease(shaderResView[i]);
+		}
+		SafeRelease(rasterState);
+		SafeRelease(texSamplerState);
 	}
-	void Init() {
+	void Init(ID3D11Device *_d3dDevice) {
+		D3D11_BUFFER_DESC cbbd;
+		ZeroMemory(&cbbd, sizeof(D3D11_BUFFER_DESC));
+		cbbd.Usage = D3D11_USAGE_DEFAULT;
+		cbbd.ByteWidth = sizeof(CBuffer);
+		cbbd.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
+		cbbd.CPUAccessFlags = 0;
+		cbbd.MiscFlags = 0;
+		HR(_d3dDevice->CreateBuffer(&cbbd, NULL, &constBuffer));
 
+		D3D11_SAMPLER_DESC sampDesc;
+		ZeroMemory(&sampDesc, sizeof(sampDesc));
+		sampDesc.Filter = D3D11_FILTER_MIN_MAG_MIP_LINEAR;
+		sampDesc.AddressU = D3D11_TEXTURE_ADDRESS_WRAP;
+		sampDesc.AddressV = D3D11_TEXTURE_ADDRESS_WRAP;
+		sampDesc.AddressW = D3D11_TEXTURE_ADDRESS_WRAP;
+		sampDesc.ComparisonFunc = D3D11_COMPARISON_NEVER;
+		sampDesc.MinLOD = 0;
+		sampDesc.MaxLOD = D3D11_FLOAT32_MAX;
+		_d3dDevice->CreateSamplerState(&sampDesc, &texSamplerState);
 	}
 
-	ConstPerObject						m_cbMeshObject;
+
+	CBuffer								cbBuffer;
+	ID3D11VertexShader					*vertexShader = nullptr;
+	ID3D11PixelShader					*pixelShader = nullptr;
+	vector<ID3D11ShaderResourceView*>	shaderResView;
 	ID3D11Buffer						*vertBuffer = nullptr;
 	ID3D11Buffer						*indexBuffer = nullptr;
 	ID3D11Buffer						*constBuffer = nullptr;
-	XMMATRIX							m_meshWorld;
-	int									m_meshSubsets = 0;
-	vector<int>							m_meshSubsetIndexStart;
-	vector<int>							m_meshSubsetTexture;
-	vector<SurfaceMaterial>				m_materials;
-	vector<ID3D11ShaderResourceView*>	m_meshShaderResView;
-	vector<wstring>						m_textureNameArray;
+	ID3D11InputLayout					*inputLayout = nullptr;
+	ID3D11RasterizerState				*rasterState = nullptr;
+	ID3D11SamplerState					*texSamplerState = nullptr;
+	XMMATRIX							worldMat = XMMatrixIdentity();
+	int									subsets = 0;
+	vector<int>							subsetIndexStart;
+	vector<int>							subsetTexture;
+	vector<SurfaceMaterial>				materials;
+	vector<wstring>						textureNameArray;
+	D3D11_INPUT_ELEMENT_DESC			vertexLayout[4] = 
+	{
+		{ "POSITION",	0, DXGI_FORMAT_R32G32B32_FLOAT,		0, D3D11_APPEND_ALIGNED_ELEMENT,	D3D11_INPUT_PER_VERTEX_DATA, 0 },
+		{ "TEXCOORD",	0, DXGI_FORMAT_R32G32_FLOAT,		0, D3D11_APPEND_ALIGNED_ELEMENT,	D3D11_INPUT_PER_VERTEX_DATA, 0 },
+		{ "NORMAL",		0, DXGI_FORMAT_R32G32B32_FLOAT,		0, D3D11_APPEND_ALIGNED_ELEMENT,	D3D11_INPUT_PER_VERTEX_DATA, 0 },
+		{ "TANGENT",	0, DXGI_FORMAT_R32G32B32_FLOAT,		0, D3D11_APPEND_ALIGNED_ELEMENT,	D3D11_INPUT_PER_VERTEX_DATA, 0 }
+	};
 };
 
 
