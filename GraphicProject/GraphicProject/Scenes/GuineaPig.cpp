@@ -21,7 +21,6 @@ GuineaPig::~GuineaPig() {
 
 	// release layout ptr
 	SafeRelease(m_inputLayout);
-	SafeRelease(m_skyboxInputLayout);
 
 	// release constant buffer ptr
 	SafeRelease(m_cbMeshBuffer);
@@ -43,15 +42,6 @@ GuineaPig::~GuineaPig() {
 	SafeRelease(m_blendTransparency);
 	SafeRelease(m_cwCullingMode);
 	SafeRelease(m_ccwCullingMode);
-
-	// release skybox ptr
-	SafeRelease(m_sphereIndexBuffer);
-	SafeRelease(m_sphereVertBuffer);
-	SafeRelease(m_skyboxVertexShader);
-	SafeRelease(m_skyboxPixelShader);
-	SafeRelease(m_skyboxShaderResView);
-	SafeRelease(m_skyboxDSLessEqual);
-	SafeRelease(m_skyboxRasterState);
 
 	// obj loader
 	SafeRelease(m_meshVertBuff);
@@ -107,9 +97,9 @@ void GuineaPig::BuildConstBuffer() {
 
 void GuineaPig::BuildGeometry() {
 
-	D3DUtils::BuildSphere(m_d3dDevice ,20, 20, &m_sphereVertBuffer, &m_sphereIndexBuffer, m_numSphereVertices, m_numSphereFaces);
+	D3DUtils::BuildSphere(m_d3dDevice ,20, 20, &m_skyBox.vertBuffer, &m_skyBox.indexBuffer, m_skyBox.numVertices, m_skyBox.numFaces);
 	// loading the texture - using dds loader
-	HR(CreateDDSTextureFromFile(m_d3dDevice, L"Resources/Skybox/skymap.dds", NULL, &m_skyboxShaderResView));
+	HR(CreateDDSTextureFromFile(m_d3dDevice, L"Resources/Skybox/skymap.dds", NULL, &m_skyBox.shaderResView));
 
 	//D3DUtils::CreateModelFromObjFile(
 	//	m_d3dDevice,
@@ -177,12 +167,7 @@ void GuineaPig::BuildShaderAndLayout() {
 
 	HR(D3DUtils::CreateShaderAndLayoutFromFile(m_d3dDevice, L"Shaders/Base/Base.hlsl", vertLayout, 4, &m_vertexShader, &m_pixelShader, &m_inputLayout));
 
-	D3D11_INPUT_ELEMENT_DESC skyboxVertLayout[] = {
-		{ "POSITION",	0, DXGI_FORMAT_R32G32B32_FLOAT,		0, D3D11_APPEND_ALIGNED_ELEMENT,	D3D11_INPUT_PER_VERTEX_DATA, 0 },
-		{ "TEXCOORD",	0, DXGI_FORMAT_R32G32_FLOAT,		0, D3D11_APPEND_ALIGNED_ELEMENT,	D3D11_INPUT_PER_VERTEX_DATA, 0 },
-	};
-
-	HR(D3DUtils::CreateShaderAndLayoutFromFile(m_d3dDevice, L"Shaders/Skybox/Skybox.hlsl", skyboxVertLayout, 2, &m_skyboxVertexShader, &m_skyboxPixelShader, &m_skyboxInputLayout));
+	HR(D3DUtils::CreateShaderAndLayoutFromFile(m_d3dDevice, L"Shaders/Skybox/Skybox.hlsl", m_skyBox.vertexLayout, 2, &m_skyBox.vertexShader, &m_skyBox.pixelShader, &m_skyBox.inputLayout));
 
 }
 
@@ -238,7 +223,7 @@ void GuineaPig::BuildRenderStates() {
 	cmdesc.FillMode = D3D11_FILL_SOLID;
 	cmdesc.CullMode = D3D11_CULL_NONE;
 
-	HR(m_d3dDevice->CreateRasterizerState(&cmdesc, &m_skyboxRasterState));
+	HR(m_d3dDevice->CreateRasterizerState(&cmdesc, &m_skyBox.rasterState));
 
 	D3D11_DEPTH_STENCIL_DESC dssDesc;
 	ZeroMemory(&dssDesc, sizeof(D3D11_DEPTH_STENCIL_DESC));
@@ -246,7 +231,7 @@ void GuineaPig::BuildRenderStates() {
 	dssDesc.DepthWriteMask = D3D11_DEPTH_WRITE_MASK_ALL;
 	dssDesc.DepthFunc = D3D11_COMPARISON_LESS_EQUAL;
 
-	HR(m_d3dDevice->CreateDepthStencilState(&dssDesc, &m_skyboxDSLessEqual));
+	HR(m_d3dDevice->CreateDepthStencilState(&dssDesc, &m_skyBox.DSLessEqual));
 }
 
 void GuineaPig::UpdateScene(double _dt) {
@@ -254,7 +239,7 @@ void GuineaPig::UpdateScene(double _dt) {
 	// Update skybox
 
 	//Reset sphereWorld
-	m_sphereWorld = XMMatrixIdentity();
+	m_skyBox.worldMat = XMMatrixIdentity();
 
 	//Define sphereWorld's world space matrix
 	XMMATRIX scale = XMMatrixScaling(5.0f, 5.0f, 5.0f);
@@ -262,7 +247,7 @@ void GuineaPig::UpdateScene(double _dt) {
 	XMMATRIX translation = XMMatrixTranslation(XMVectorGetX(m_camPosition), XMVectorGetY(m_camPosition), XMVectorGetZ(m_camPosition));
 
 	//Set sphereWorld's world space using the transformations
-	m_sphereWorld = scale * translation;
+	m_skyBox.worldMat = scale * translation;
 
 	// Update point light position
 
@@ -360,29 +345,29 @@ void GuineaPig::DrawScene() {
 	//}
 
 	//Set the spheres index buffer
-	m_d3dImmediateContext->IASetIndexBuffer(m_sphereIndexBuffer, DXGI_FORMAT_R32_UINT, 0);
+	m_d3dImmediateContext->IASetIndexBuffer(m_skyBox.indexBuffer, DXGI_FORMAT_R32_UINT, 0);
 	//Set the spheres vertex buffer
-	m_d3dImmediateContext->IASetVertexBuffers(0, 1, &m_sphereVertBuffer, &stride, &offset);
+	m_d3dImmediateContext->IASetVertexBuffers(0, 1, &m_skyBox.vertBuffer, &stride, &offset);
 
 	//Set the WVP matrix and send it to the constant buffer in effect file
-	m_cbGroundObject.WVP = XMMatrixTranspose(m_sphereWorld * m_camView * m_camProjection);
-	m_cbGroundObject.World = XMMatrixTranspose(m_sphereWorld);
+	m_cbGroundObject.WVP = XMMatrixTranspose(m_skyBox.worldMat * m_camView * m_camProjection);
+	m_cbGroundObject.World = XMMatrixTranspose(m_skyBox.worldMat);
 	m_d3dImmediateContext->UpdateSubresource(m_cbGroundBuffer, 0, NULL, &m_cbGroundObject, 0, 0);
 	m_d3dImmediateContext->VSSetConstantBuffers(0, 1, &m_cbGroundBuffer);
 
 	//Send our skymap resource view to pixel shader
-	m_d3dImmediateContext->PSSetShaderResources(0, 1, &m_skyboxShaderResView);
+	m_d3dImmediateContext->PSSetShaderResources(0, 1, &m_skyBox.shaderResView);
 	m_d3dImmediateContext->PSSetSamplers(0, 1, &m_baseTexSamplerState);
 
 	//Set the proper VS and PS shaders, and layout
-	m_d3dImmediateContext->VSSetShader(m_skyboxVertexShader, 0, 0);
-	m_d3dImmediateContext->PSSetShader(m_skyboxPixelShader, 0, 0);
-	m_d3dImmediateContext->IASetInputLayout(m_skyboxInputLayout);
+	m_d3dImmediateContext->VSSetShader(m_skyBox.vertexShader, 0, 0);
+	m_d3dImmediateContext->PSSetShader(m_skyBox.pixelShader, 0, 0);
+	m_d3dImmediateContext->IASetInputLayout(m_skyBox.inputLayout);
 	//Set the new depth/stencil and RS states
-	m_d3dImmediateContext->OMSetDepthStencilState(m_skyboxDSLessEqual, 0);
-	m_d3dImmediateContext->RSSetState(m_skyboxRasterState);
+	m_d3dImmediateContext->OMSetDepthStencilState(m_skyBox.DSLessEqual, 0);
+	m_d3dImmediateContext->RSSetState(m_skyBox.rasterState);
 
-	m_d3dImmediateContext->DrawIndexed(m_numSphereFaces * 3, 0, 0);
+	m_d3dImmediateContext->DrawIndexed(m_skyBox.numFaces * 3, 0, 0);
 
 	//Present the backbuffer to the screen
 	HR(m_swapChain->Present(0, 0));

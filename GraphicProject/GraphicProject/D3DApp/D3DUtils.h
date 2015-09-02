@@ -112,6 +112,37 @@ struct ConstPerFrame {
 	BaseLight baseLight;
 };
 
+class Skybox {
+public:
+	Skybox() {}
+	~Skybox() {
+		SafeRelease(inputLayout);
+		SafeRelease(indexBuffer);
+		SafeRelease(vertBuffer);
+		SafeRelease(vertexShader);
+		SafeRelease(pixelShader);
+		SafeRelease(shaderResView);
+		SafeRelease(DSLessEqual);
+		SafeRelease(rasterState);
+	}
+	ID3D11Buffer						*indexBuffer = nullptr;
+	ID3D11Buffer						*vertBuffer = nullptr;
+	ID3D11VertexShader					*vertexShader = nullptr;
+	ID3D11PixelShader					*pixelShader = nullptr;
+	ID3D11InputLayout					*inputLayout = nullptr;
+	ID3D11ShaderResourceView			*shaderResView = nullptr;
+	ID3D11DepthStencilState				*DSLessEqual = nullptr;
+	ID3D11RasterizerState				*rasterState = nullptr;
+	int									numVertices;
+	int									numFaces;
+	XMMATRIX							worldMat;
+	D3D11_INPUT_ELEMENT_DESC			vertexLayout[2] =
+	{
+		{ "POSITION",	0, DXGI_FORMAT_R32G32B32_FLOAT,		0, D3D11_APPEND_ALIGNED_ELEMENT,	D3D11_INPUT_PER_VERTEX_DATA, 0 },
+		{ "TEXCOORD",	0, DXGI_FORMAT_R32G32_FLOAT,		0, D3D11_APPEND_ALIGNED_ELEMENT,	D3D11_INPUT_PER_VERTEX_DATA, 0 },
+	};
+};
+
 
 class D3DUtils {
 
