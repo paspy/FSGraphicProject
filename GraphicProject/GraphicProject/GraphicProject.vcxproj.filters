@@ -81,16 +81,10 @@
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <FxCompile Include="Shaders\Base\Base_PS.hlsl">
+    <FxCompile Include="Shaders\Base\Base.hlsl">
       <Filter>Source Files\Scenes\Shaders\Base</Filter>
     </FxCompile>
-    <FxCompile Include="Shaders\Base\Base_VS.hlsl">
-      <Filter>Source Files\Scenes\Shaders\Base</Filter>
-    </FxCompile>
-    <FxCompile Include="Shaders\Skybox\Skybox_PS.hlsl">
-      <Filter>Source Files\Scenes\Shaders\Skybox</Filter>
-    </FxCompile>
-    <FxCompile Include="Shaders\Skybox\Skybox_VS.hlsl">
+    <FxCompile Include="Shaders\Skybox\Skybox.hlsl">
       <Filter>Source Files\Scenes\Shaders\Skybox</Filter>
     </FxCompile>
   </ItemGroup>

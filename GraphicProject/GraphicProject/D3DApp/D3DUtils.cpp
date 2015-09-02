@@ -1,5 +1,60 @@
 #include "D3DUtils.h"
 
+HRESULT D3DUtils::CreateShaderAndLayoutFromFile(
+	ID3D11Device *_d3dDevice,
+	const LPCWSTR _fileName,
+	const D3D11_INPUT_ELEMENT_DESC *_inputElemDesc,
+	const UINT _elemNum,
+	ID3D11VertexShader **_vertexShader,
+	ID3D11PixelShader ** _pixelShader,
+	ID3D11InputLayout **_inputLayout
+	) {
+
+	HRESULT hr;
+	ID3DBlob* vertexShaderBlob = nullptr;
+	ID3DBlob* pixelShaderBlob = nullptr;
+	ID3DBlob* errorBlob = nullptr;
+
+	UINT flags = D3DCOMPILE_ENABLE_STRICTNESS;
+#if defined( DEBUG ) || defined( _DEBUG )
+	flags |= D3DCOMPILE_DEBUG;
+#endif
+
+	hr = D3DCompileFromFile(_fileName, NULL, D3D_COMPILE_STANDARD_FILE_INCLUDE, "VSMain", "vs_5_0", flags, 0, &vertexShaderBlob, &errorBlob);
+
+	if (FAILED(hr)) {
+		if (errorBlob) {
+			OutputDebugStringA((char*)errorBlob->GetBufferPointer());
+			SafeRelease(errorBlob);
+		}
+
+		SafeRelease(vertexShaderBlob);
+		return hr;
+	}
+
+	hr = D3DCompileFromFile(_fileName, NULL, D3D_COMPILE_STANDARD_FILE_INCLUDE, "PSMain", "ps_5_0", flags, 0, &pixelShaderBlob, &errorBlob);
+
+	if (FAILED(hr)) {
+		if (errorBlob) {
+			OutputDebugStringA((char*)errorBlob->GetBufferPointer());
+			SafeRelease(errorBlob);
+		}
+
+		SafeRelease(pixelShaderBlob);
+		return hr;
+	}
+
+	// create vertex layout
+	HR(_d3dDevice->CreateInputLayout(_inputElemDesc, _elemNum, vertexShaderBlob->GetBufferPointer(), vertexShaderBlob->GetBufferSize(), _inputLayout));
+	// create vertex shader
+	HR(_d3dDevice->CreateVertexShader(vertexShaderBlob->GetBufferPointer(), vertexShaderBlob->GetBufferSize(), NULL, _vertexShader));
+	// create pixel shader
+	HR(_d3dDevice->CreatePixelShader(pixelShaderBlob->GetBufferPointer(), pixelShaderBlob->GetBufferSize(), NULL, _pixelShader));
+
+	return hr;
+}
+
+
 void D3DUtils::BuildSphere(
 	ID3D11Device *_d3dDevice,
 	int _latLines,
@@ -972,3 +1027,5 @@ bool D3DUtils::CreateModelFromObjFile(
 
 	return true;
 }
+
+

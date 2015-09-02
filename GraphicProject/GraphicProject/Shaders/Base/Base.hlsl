@@ -13,7 +13,6 @@ struct BaseLight {
 cbuffer ConstPerObject {
 	float4x4 WVP;
 	float4x4 World;
-
 	float4 difColor;
 	bool hasTexture;
 	bool hasNormMap;
@@ -23,8 +22,8 @@ cbuffer ConstPerFrame {
 	BaseLight baseLight;
 };
 
-Texture2D ObjNormMap;
 Texture2D ObjTexture;
+Texture2D ObjNormMap;
 SamplerState ObjSamplerState;
 
 struct VS_OUTPUT {
@@ -36,7 +35,22 @@ struct VS_OUTPUT {
 	float3 Tangent : TANGENT;
 };
 
-float4 main(VS_OUTPUT input) : SV_TARGET {
+
+VS_OUTPUT VSMain(float4 inPos : POSITION, float2 inTexCoord : TEXCOORD, float3 inNormal : NORMAL, float3 inTangent : TANGENT) {
+
+	VS_OUTPUT output;
+
+	output.Position = mul(inPos, WVP);
+	output.WorldPos = mul(inPos, World);
+	output.Normal = mul(inNormal, (float3x3)World); //output.Normal = mul(float4(inNormal, 0.0), World).rgb;
+	output.Tangent = mul(inTangent, (float3x3)World);
+
+	output.TexCoord = inTexCoord;
+
+	return output;
+}
+
+float4 PSMain(VS_OUTPUT input) : SV_TARGET {
 	input.Normal = normalize(input.Normal);
 
 	//float4 diffuse = ObjTexture.Sample(ObjSamplerState, input.TexCoord);
@@ -45,7 +59,7 @@ float4 main(VS_OUTPUT input) : SV_TARGET {
 	float4 diffuse = difColor;
 
 	//If material has a diffuse texture map, set it now
-	if (hasTexture == true)
+	//if (hasTexture == true)
 		diffuse = ObjTexture.Sample(ObjSamplerState, input.TexCoord);
 
 	//If material has a normal map, we can set it now
@@ -111,16 +125,6 @@ float4 main(VS_OUTPUT input) : SV_TARGET {
 
 	//finalColor = (diffuse * baseLight.ambient).rgb;
 	//finalColor += (saturate(dot(baseLight.direction, input.Normal) * baseLight.diffuse * diffuse)).rgb;
-
-	if (input.Color.x == 0 &&
-		input.Color.y == 0 &&
-		input.Color.z == 0 &&
-		input.Color.w == 1 ) {
-
-		//Return Final Color
-		return float4(finalColor, diffuse.a);
-	} else {
-		return input.Color;
-	}
+	return float4(finalColor, diffuse.a);
 
 }

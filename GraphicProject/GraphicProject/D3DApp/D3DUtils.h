@@ -5,6 +5,7 @@
 #include <DirectXMath.h>
 #include <DirectXColors.h>
 #include <DirectXPackedVector.h>
+#include <D3Dcompiler.h>
 #include <vector>
 #include <sstream>
 #include <iostream>
@@ -59,14 +60,10 @@ using namespace std;
 
 typedef struct Vertex3D {
 	Vertex3D() {}
-	Vertex3D(XMFLOAT3 _pos, XMFLOAT4 _color) : pos(_pos), color(_color) {}
-	Vertex3D(XMFLOAT3 _pos, XMFLOAT2 _tex) : pos(_pos), texCoord(_tex) { XMStoreFloat4(&color, Colors::Black); }
-	Vertex3D(XMFLOAT3 _pos, XMFLOAT2 _tex, XMFLOAT3 _norm) : pos(_pos), texCoord(_tex), normal(_norm) {
-		XMStoreFloat4(&color, Colors::Black);
-	}
+	Vertex3D(XMFLOAT3 _pos, XMFLOAT2 _tex) : pos(_pos), texCoord(_tex) { }
+	Vertex3D(XMFLOAT3 _pos, XMFLOAT2 _tex, XMFLOAT3 _norm) : pos(_pos), texCoord(_tex), normal(_norm) {}
 
 	XMFLOAT3 pos;
-	XMFLOAT4 color;
 	XMFLOAT2 texCoord;
 	XMFLOAT3 normal;
 	// bump normal mapping
@@ -143,8 +140,8 @@ public:
 		ID3D11Device *_d3dDevice,
 		IDXGISwapChain *_swapChain,
 		wstring _filename,											// .obj filename
-		ID3D11Buffer** _vertBuff,									// mesh vertex buffer
-		ID3D11Buffer** _indexBuff,									// mesh index buffer
+		ID3D11Buffer **_vertBuff,									// mesh vertex buffer
+		ID3D11Buffer **_indexBuff,									// mesh index buffer
 		vector<wstring> &_textureNameArray,							// texture names
 		vector<ID3D11ShaderResourceView*> &_meshShaderResView,		// mesh shader res view
 		vector<int>& _subsetIndexStart,								// start index of each subset
@@ -153,6 +150,16 @@ public:
 		int& _subsetCount,											// Number of subsets in mesh
 		bool _isRHCoordSys,											// true if model was created in right hand coord system
 		bool _computeNormals);										// true to compute the normals, false to use the files normals
+
+	static HRESULT CreateShaderAndLayoutFromFile(
+		ID3D11Device *_d3dDevice,
+		const LPCWSTR _fileName,
+		const D3D11_INPUT_ELEMENT_DESC *_inputElemDesc,
+		const UINT _elemNum,
+		ID3D11VertexShader **_vertexShader,
+		ID3D11PixelShader ** _pixelShader,
+		ID3D11InputLayout **_inputLayout
+		);
 
 };
 

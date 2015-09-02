@@ -1,18 +1,11 @@
 #include "GuineaPig.h"
-// shader byte code
-#include "../Base_VS.csh"
-#include "../Base_PS.csh"
-#include "../Skybox_VS.csh"
-#include "../Skybox_PS.csh"
 
 GuineaPig::GuineaPig(HINSTANCE hinst) : D3DApp(hinst),
 m_groundVertexBuffer(nullptr),
 m_inputLayout(nullptr),
 m_vertexShader(nullptr),
 m_pixelShader(nullptr) 
-
 {
-
 
 }
 
@@ -72,12 +65,10 @@ bool GuineaPig::Init() {
 	if ( !D3DApp::Init() )
 		return false;
 
-	BuildObjConstBuffer();
-	BuildGeometryBuffers();
-	BuildTextureAndState();
+	BuildConstBuffer();
+	BuildGeometry();
 	BuildLighting();
-	BuildVertexLayout();
-	BuildShader();
+	BuildShaderAndLayout();
 	BuildRenderStates();
 
 	return true;
@@ -88,7 +79,7 @@ void GuineaPig::OnResize() {
 
 }
 
-void GuineaPig::BuildObjConstBuffer() {
+void GuineaPig::BuildConstBuffer() {
 	// objects
 	D3D11_BUFFER_DESC cbbd;
 	ZeroMemory(&cbbd, sizeof(D3D11_BUFFER_DESC));
@@ -114,33 +105,18 @@ void GuineaPig::BuildObjConstBuffer() {
 
 }
 
-void GuineaPig::BuildGeometryBuffers() {
+void GuineaPig::BuildGeometry() {
 
-	D3DUtils::BuildSphere(m_d3dDevice ,10, 10, &m_sphereVertBuffer, &m_sphereIndexBuffer, m_numSphereVertices, m_numSphereFaces);
+	D3DUtils::BuildSphere(m_d3dDevice ,20, 20, &m_sphereVertBuffer, &m_sphereIndexBuffer, m_numSphereVertices, m_numSphereFaces);
+	// loading the texture - using dds loader
+	HR(CreateDDSTextureFromFile(m_d3dDevice, L"Resources/Skybox/skymap.dds", NULL, &m_skyboxShaderResView));
 
-	if (!D3DUtils::CreateModelFromObjFile(
-		m_d3dDevice,
-		m_swapChain,
-		L"Resources/Models/ground.obj",
-		&m_meshVertBuff,
-		&m_meshIndexBuff,
-		m_textureNameArray,
-		m_meshShaderResView,
-		m_meshSubsetIndexStart,
-		m_meshSubsetTexture,
-		m_materials,
-		m_meshSubsets,
-		true,
-		false)) {
-	}
-		int x = 0;
-
-	//if ( !D3DUtils::CreateModelFromObjFile(
+	//D3DUtils::CreateModelFromObjFile(
 	//	m_d3dDevice,
 	//	m_swapChain,
 	//	L"Resources/Models/ground.obj",
-	//	&m_groundVertexBuffer,
-	//	&m_groundIndexBuffer,
+	//	&m_meshVertBuff,
+	//	&m_meshIndexBuff,
 	//	m_textureNameArray,
 	//	m_meshShaderResView,
 	//	m_meshSubsetIndexStart,
@@ -148,16 +124,8 @@ void GuineaPig::BuildGeometryBuffers() {
 	//	m_materials,
 	//	m_meshSubsets,
 	//	true,
-	//	false) ) {
-	//	int x = 0;
-	//}
+	//	false);
 
-}
-
-
-void GuineaPig::BuildTextureAndState() {
-	// loading the texture - using dds loader
-	HR(CreateDDSTextureFromFile(m_d3dDevice, L"Resources/Skybox/skymap.dds", NULL, &m_skyboxShaderResView));
 
 	// Describe the Sample State
 	D3D11_SAMPLER_DESC sampDesc;
@@ -173,7 +141,6 @@ void GuineaPig::BuildTextureAndState() {
 
 	// Create the Sample State
 	HR(m_d3dDevice->CreateSamplerState(&sampDesc, &m_baseTexSamplerState));
-
 }
 
 void GuineaPig::BuildLighting() {
@@ -199,41 +166,26 @@ void GuineaPig::BuildLighting() {
 	m_baseLight.diffuse = XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f);
 }
 
-void GuineaPig::BuildShader() {
+void GuineaPig::BuildShaderAndLayout() {
 	// normal shader
-	HR(m_d3dDevice->CreateVertexShader(Base_VS, sizeof(Base_VS), NULL, &m_vertexShader));
-	HR(m_d3dDevice->CreatePixelShader(Base_PS, sizeof(Base_PS), NULL, &m_pixelShader));
-
-	// skybox shader
-	HR(m_d3dDevice->CreateVertexShader(Skybox_VS, sizeof(Skybox_VS), NULL, &m_skyboxVertexShader));
-	HR(m_d3dDevice->CreatePixelShader(Skybox_PS, sizeof(Skybox_PS), NULL, &m_skyboxPixelShader));
-
-	//m_d3dImmediateContext->VSSetShader(m_vertexShader, NULL, 0);
-	//m_d3dImmediateContext->PSSetShader(m_pixelShader, NULL, 0);
-}
-
-void GuineaPig::BuildVertexLayout() {
-
 	D3D11_INPUT_ELEMENT_DESC vertLayout[] = {
 		{ "POSITION",	0, DXGI_FORMAT_R32G32B32_FLOAT,		0, D3D11_APPEND_ALIGNED_ELEMENT,	D3D11_INPUT_PER_VERTEX_DATA, 0 },
-		{ "COLOR",		0, DXGI_FORMAT_R32G32B32A32_FLOAT,	0, D3D11_APPEND_ALIGNED_ELEMENT,	D3D11_INPUT_PER_VERTEX_DATA, 0 },
 		{ "TEXCOORD",	0, DXGI_FORMAT_R32G32_FLOAT,		0, D3D11_APPEND_ALIGNED_ELEMENT,	D3D11_INPUT_PER_VERTEX_DATA, 0 },
 		{ "NORMAL",		0, DXGI_FORMAT_R32G32B32_FLOAT,		0, D3D11_APPEND_ALIGNED_ELEMENT,	D3D11_INPUT_PER_VERTEX_DATA, 0 },
 		{ "TANGENT",	0, DXGI_FORMAT_R32G32B32_FLOAT,		0, D3D11_APPEND_ALIGNED_ELEMENT,	D3D11_INPUT_PER_VERTEX_DATA, 0 }
 	};
 
-	// Create the input layout
-	HR(m_d3dDevice->CreateInputLayout(vertLayout, 5, Base_VS, sizeof(Base_VS), &m_inputLayout));
+	HR(D3DUtils::CreateShaderAndLayoutFromFile(m_d3dDevice, L"Shaders/Base/Base.hlsl", vertLayout, 4, &m_vertexShader, &m_pixelShader, &m_inputLayout));
 
 	D3D11_INPUT_ELEMENT_DESC skyboxVertLayout[] = {
 		{ "POSITION",	0, DXGI_FORMAT_R32G32B32_FLOAT,		0, D3D11_APPEND_ALIGNED_ELEMENT,	D3D11_INPUT_PER_VERTEX_DATA, 0 },
 		{ "TEXCOORD",	0, DXGI_FORMAT_R32G32_FLOAT,		0, D3D11_APPEND_ALIGNED_ELEMENT,	D3D11_INPUT_PER_VERTEX_DATA, 0 },
 	};
 
-	// Create the input layout
-	HR(m_d3dDevice->CreateInputLayout(skyboxVertLayout, 2, Skybox_VS, sizeof(Skybox_VS), &m_skyboxInputLayout));
+	HR(D3DUtils::CreateShaderAndLayoutFromFile(m_d3dDevice, L"Shaders/Skybox/Skybox.hlsl", skyboxVertLayout, 2, &m_skyboxVertexShader, &m_skyboxPixelShader, &m_skyboxInputLayout));
 
 }
+
 
 void GuineaPig::BuildRenderStates() {
 
@@ -330,16 +282,9 @@ void GuineaPig::UpdateScene(double _dt) {
 	m_baseLight.spotLightDir.z = XMVectorGetZ(m_camTarget) - m_baseLight.position.z;
 
 	// Update objects
-	static double texIdx = 0;
 	static float rot = 0.00f;
 
 	rot += (float)_dt;
-
-	//m_cbGroundObject.hasNormal = false;
-	//m_cbGroundObject.hasTexture = false;
-
-	//m_groundWorldMat = XMMatrixIdentity();
-	//m_groundWorldMat = XMMatrixScaling(500.0f, 1.0f, 500.0f)*XMMatrixTranslation(0, 0.0f, 0);
 
 	m_meshWorld = XMMatrixIdentity();
 
@@ -387,50 +332,32 @@ void GuineaPig::DrawScene() {
 	m_d3dImmediateContext->OMSetDepthStencilState(NULL, 0);
 	m_d3dImmediateContext->IASetInputLayout(m_inputLayout);
 
-	//// Set Shader Resources and Samplers
-	//m_d3dImmediateContext->PSSetShaderResources(0, 1, &m_grassShaderResView);
-	//m_d3dImmediateContext->PSSetSamplers(0, 1, &m_baseTexSamplerState);
-
-	//// Draw Ground
-	//m_cbGroundObject.WVP = XMMatrixTranspose(m_groundWorldMat * m_camView * m_camProjection);
-	//m_cbGroundObject.World = XMMatrixTranspose(m_groundWorldMat);
-	//m_d3dImmediateContext->UpdateSubresource(m_cbGroundBuffer, 0, NULL, &m_cbGroundObject, 0, 0);
-	//m_d3dImmediateContext->VSSetConstantBuffers(0, 1, &m_cbGroundBuffer);
-	//// Set verts buffer
-	//m_d3dImmediateContext->IASetVertexBuffers(0, 1, &m_groundVertexBuffer, &stride, &offset);
-	//// Set indeces buffer
-	//m_d3dImmediateContext->IASetIndexBuffer(m_groundIndexBuffer, DXGI_FORMAT_R32_UINT, 0);
-	//m_d3dImmediateContext->RSSetState(m_antialiasedLine);
-	//m_d3dImmediateContext->DrawIndexed(6, 0, 0);
-
-	
-
 	// Render opaque objects //
 
-	for (int i = 0; i < m_meshSubsets; i++) {
-		//Set the grounds index buffer
-		m_d3dImmediateContext->IASetIndexBuffer(m_meshIndexBuff, DXGI_FORMAT_R32_UINT, 0);
-		//Set the grounds vertex buffer
-		m_d3dImmediateContext->IASetVertexBuffers(0, 1, &m_meshVertBuff, &stride, &offset);
+	//for (int i = 0; i < m_meshSubsets; i++) {
+	//	//Set the grounds index buffer
+	//	m_d3dImmediateContext->IASetIndexBuffer(m_meshIndexBuff, DXGI_FORMAT_R32_UINT, 0);
+	//	//Set the grounds vertex buffer
+	//	m_d3dImmediateContext->IASetVertexBuffers(0, 1, &m_meshVertBuff, &stride, &offset);
 
-		//Set the WVP matrix and send it to the constant buffer in effect file
-		m_cbMeshObject.WVP = XMMatrixTranspose(m_meshWorld * m_camView * m_camProjection);
-		m_cbMeshObject.World = XMMatrixTranspose(m_meshWorld);
-		m_cbMeshObject.difColor = m_materials[m_meshSubsetTexture[i]].difColor;
-		m_cbMeshObject.hasTexture = m_materials[m_meshSubsetTexture[i]].hasTexture;
-		m_d3dImmediateContext->UpdateSubresource(m_cbMeshBuffer, 0, NULL, &m_cbMeshObject, 0, 0);
-		m_d3dImmediateContext->VSSetConstantBuffers(0, 1, &m_cbMeshBuffer);
-		m_d3dImmediateContext->PSSetConstantBuffers(1, 1, &m_cbMeshBuffer);
-		if (m_materials[m_meshSubsetTexture[i]].hasTexture)
-			m_d3dImmediateContext->PSSetShaderResources(0, 1, &m_meshShaderResView[m_materials[m_meshSubsetTexture[i]].texArrayIndex]);
-		m_d3dImmediateContext->PSSetSamplers(0, 1, &m_baseTexSamplerState);
+	//	//Set the WVP matrix and send it to the constant buffer in effect file
+	//	m_cbMeshObject.WVP = XMMatrixTranspose(m_meshWorld * m_camView * m_camProjection);
+	//	m_cbMeshObject.World = XMMatrixTranspose(m_meshWorld);
+	//	m_cbMeshObject.difColor = m_materials[m_meshSubsetTexture[i]].difColor;
+	//	m_cbMeshObject.hasTexture = m_materials[m_meshSubsetTexture[i]].hasTexture;
+	//	m_d3dImmediateContext->UpdateSubresource(m_cbMeshBuffer, 0, NULL, &m_cbMeshObject, 0, 0);
+	//	m_d3dImmediateContext->VSSetConstantBuffers(0, 1, &m_cbMeshBuffer);
+	//	m_d3dImmediateContext->PSSetConstantBuffers(1, 1, &m_cbMeshBuffer);
+	//	if (m_materials[m_meshSubsetTexture[i]].hasTexture)
+	//		m_d3dImmediateContext->PSSetShaderResources(0, 1, &m_meshShaderResView[m_materials[m_meshSubsetTexture[i]].texArrayIndex]);
+	//	m_d3dImmediateContext->PSSetSamplers(0, 1, &m_baseTexSamplerState);
 
-		m_d3dImmediateContext->RSSetState(m_antialiasedLine);
-		int indexStart = m_meshSubsetIndexStart[i];
-		int indexDrawAmount = m_meshSubsetIndexStart[i + 1] - m_meshSubsetIndexStart[i];
-		if (!m_materials[m_meshSubsetTexture[i]].transparent)
-			m_d3dImmediateContext->DrawIndexed(indexDrawAmount, indexStart, 0);
-	}
+	//	m_d3dImmediateContext->RSSetState(m_antialiasedLine);
+	//	int indexStart = m_meshSubsetIndexStart[i];
+	//	int indexDrawAmount = m_meshSubsetIndexStart[i + 1] - m_meshSubsetIndexStart[i];
+	//	if (!m_materials[m_meshSubsetTexture[i]].transparent)
+	//		m_d3dImmediateContext->DrawIndexed(indexDrawAmount, indexStart, 0);
+	//}
 
 	//Set the spheres index buffer
 	m_d3dImmediateContext->IASetIndexBuffer(m_sphereIndexBuffer, DXGI_FORMAT_R32_UINT, 0);

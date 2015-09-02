@@ -18,12 +18,10 @@ public:
 	void OnMouseMove(WPARAM _btnState, int _x, int _y);
 
 private:
-	void BuildObjConstBuffer();
-	void BuildGeometryBuffers();
-	void BuildTextureAndState();
+	void BuildConstBuffer();
+	void BuildGeometry();
 	void BuildLighting();
-	void BuildShader();
-	void BuildVertexLayout();
+	void BuildShaderAndLayout();
 	void BuildRenderStates();
 
 private:
