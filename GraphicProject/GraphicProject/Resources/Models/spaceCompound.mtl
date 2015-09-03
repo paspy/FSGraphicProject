@@ -23,6 +23,6 @@ newmtl MetalPanels
 	Kd 0.5882 0.5882 0.5882
 	Ks 0.0000 0.0000 0.0000
 	Ke 0.0000 0.0000 0.0000
-	map_Ka metalpanel.dds
-	map_Kd metalpanel.dds
-	map_bump metalpanelnormals.dds
+	map_Ka metalpanel_diffuse.dds
+	map_Kd metalpanel_diffuse.dds
+	map_bump metalpanel_normal.dds

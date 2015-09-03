@@ -1,5 +1,99 @@
 #include "D3DUtils.h"
 
+bool D3DUtils::loadOBJ(
+	string _filePath,
+	vector<Vertex3D> & _verts ) {
+
+	vector<unsigned int> vertexIndices, uvIndices, normalIndices;
+	vector<XMFLOAT3> temp_vertices;
+	vector<XMFLOAT2> temp_uvs;
+	vector<XMFLOAT3> temp_normals;
+	vector<XMFLOAT3> vertices;
+	vector<XMFLOAT2> uvs;
+	vector<XMFLOAT3> normals;
+	
+	FILE * file; 
+	fopen_s(&file, _filePath.c_str(), "r");
+	if ( file == NULL ) {
+		MessageBox(0, L"Impossible to open the file!", L"Error", MB_OK);
+		return false;
+	}
+
+	while ( 1 ) {
+		char lineHeader[128]; 
+		// read the first word of the line
+		int res = fscanf(file, "%s", lineHeader);
+		if ( res == EOF )
+			break; // EOF = End Of File. Quit the loop.
+
+				   // else : parse lineHeader
+
+		if ( strcmp(lineHeader, "v") == 0 ) {
+			XMFLOAT3 vertex;
+			fscanf_s(file, "%f %f %f\n", &vertex.x, &vertex.y, &vertex.z);
+			temp_vertices.push_back(vertex);
+		} else if ( strcmp(lineHeader, "vt") == 0 ) {
+			XMFLOAT2 uv;
+			fscanf_s(file, "%f %f\n", &uv.x, &uv.y);
+			uv.y = -uv.y; // Invert V coordinate since we will only use DDS texture, which are inverted. Remove if you want to use TGA or BMP loaders.
+			temp_uvs.push_back(uv);
+		} else if ( strcmp(lineHeader, "vn") == 0 ) {
+			XMFLOAT3 normal;
+			fscanf_s(file, "%f %f %f\n", &normal.x, &normal.y, &normal.z);
+			temp_normals.push_back(normal);
+		} else if ( strcmp(lineHeader, "f") == 0 ) {
+			string vertex1, vertex2, vertex3;
+			unsigned int vertexIndex[3], uvIndex[3], normalIndex[3];
+			int matches = fscanf_s(file, "%d/%d/%d %d/%d/%d %d/%d/%d\n", &vertexIndex[0], &uvIndex[0], &normalIndex[0], &vertexIndex[1], &uvIndex[1], &normalIndex[1], &vertexIndex[2], &uvIndex[2], &normalIndex[2]);
+			if ( matches != 9 ) {
+				MessageBox(0, L"File can't be read by our simple parser :-( Try exporting with other options\n", L"Error", MB_OK);
+				return false;
+			}
+			vertexIndices.push_back(vertexIndex[0]);
+			vertexIndices.push_back(vertexIndex[1]);
+			vertexIndices.push_back(vertexIndex[2]);
+			uvIndices.push_back(uvIndex[0]);
+			uvIndices.push_back(uvIndex[1]);
+			uvIndices.push_back(uvIndex[2]);
+			normalIndices.push_back(normalIndex[0]);
+			normalIndices.push_back(normalIndex[1]);
+			normalIndices.push_back(normalIndex[2]);
+		} else {
+			// Probably a comment, eat up the rest of the line
+			char stupidBuffer[1000];
+			fgets(stupidBuffer, 1000, file);
+		}
+
+	}
+
+	// For each vertex of each triangle
+	for ( unsigned int i = 0; i<vertexIndices.size(); i++ ) {
+
+		// Get the indices of its attributes
+		unsigned int vertexIndex = vertexIndices[i];
+		unsigned int uvIndex = uvIndices[i];
+		unsigned int normalIndex = normalIndices[i];
+
+		// Get the attributes thanks to the index
+		XMFLOAT3 vertex = temp_vertices[vertexIndex - 1];
+		XMFLOAT2 uv = temp_uvs[uvIndex - 1];
+		XMFLOAT3 normal = temp_normals[normalIndex - 1];
+
+		// Put the attributes in buffers
+		Vertex3D currVert;
+		currVert.pos = vertex;
+		currVert.texCoord = uv;
+		currVert.normal = normal;
+		_verts.push_back(currVert);
+
+		//vertices.push_back(vertex);
+		//uvs.push_back(uv);
+		//normals.push_back(normal);
+
+	}
+	return true;
+}
+
 HRESULT D3DUtils::CreateShaderAndLayoutFromFile(
 	ID3D11Device *_d3dDevice,
 	const LPCWSTR _fileName,
@@ -24,7 +118,10 @@ HRESULT D3DUtils::CreateShaderAndLayoutFromFile(
 
 	if (FAILED(hr)) {
 		if (errorBlob) {
-			OutputDebugStringA((char*)errorBlob->GetBufferPointer());
+			string err = (char*)errorBlob->GetBufferPointer();
+			wstring werr(err.begin(), err.end());
+			MessageBox(0, werr.c_str(), L"Error", MB_OK);
+			//OutputDebugStringA((char*)errorBlob->GetBufferPointer());
 			SafeRelease(errorBlob);
 		}
 
@@ -36,7 +133,10 @@ HRESULT D3DUtils::CreateShaderAndLayoutFromFile(
 
 	if (FAILED(hr)) {
 		if (errorBlob) {
-			OutputDebugStringA((char*)errorBlob->GetBufferPointer());
+			string err = (char*)errorBlob->GetBufferPointer();
+			wstring werr(err.begin(), err.end());
+			MessageBox(0, werr.c_str(), L"Error", MB_OK);
+			//OutputDebugStringA((char*)errorBlob->GetBufferPointer());
 			SafeRelease(errorBlob);
 		}
 
@@ -200,7 +300,7 @@ bool D3DUtils::CreateModelFromObjFile(
 	wifstream fileIn(_filename.c_str());	//Open file
 	wstring meshMatLib;						//String to hold our obj material library _filename
 
-											//Arrays to store our model's information
+	//Arrays to store our model's information
 	vector<DWORD> indices;
 	vector<XMFLOAT3> vertPos;
 	vector<XMFLOAT2> vertTexCoord;
@@ -217,13 +317,13 @@ bool D3DUtils::CreateModelFromObjFile(
 	bool hasNorm = false;
 
 	//Temp variables to store into vectors
-	std::wstring meshMaterialsTemp;
+	wstring meshMaterialsTemp;
 	int vertPosIndexTemp;
 	int vertNormIndexTemp;
 	int vertTCIndexTemp;
 
 	wchar_t checkChar;		//The variable we will use to store one char from file at a time
-	std::wstring face;		//Holds the string containing our face vertices
+	wstring face;		//Holds the string containing our face vertices
 	int vIndex = 0;			//Keep track of our vertex index count
 	int triangleCount = 0;	//Total Triangles
 	int totalVerts = 0;
@@ -294,7 +394,7 @@ bool D3DUtils::CreateModelFromObjFile(
 				checkChar = fileIn.get();
 				if (checkChar == ' ') {
 					face = L"";
-					std::wstring VertDef;	//Holds one vertex definition at a time
+					wstring VertDef;	//Holds one vertex definition at a time
 					triangleCount = 0;
 
 					checkChar = fileIn.get();
@@ -311,7 +411,7 @@ bool D3DUtils::CreateModelFromObjFile(
 
 					triangleCount -= 1;		//Ever vertex in the face AFTER the first two are new faces
 
-					std::wstringstream ss(face);
+					wstringstream ss(face);
 
 					if (face.length() > 0) {
 						int firstVIndex, lastVIndex;	//Holds the first and last vertice's index
@@ -320,7 +420,7 @@ bool D3DUtils::CreateModelFromObjFile(
 						{
 							ss >> VertDef;	//Get vertex definition (vPos/vTexCoord/vNorm)
 
-							std::wstring vertPart;
+							wstring vertPart;
 							int whichPart = 0;		//(vPos, vTexCoord, or vNorm)
 
 													//Parse this string
@@ -330,7 +430,7 @@ bool D3DUtils::CreateModelFromObjFile(
 
 								//If the current char is a divider "/", or its the last character in the string
 								if (VertDef[j] == '/' || j == VertDef.length() - 1) {
-									std::wistringstream wstringToInt(vertPart);	//Used to convert wstring to int
+									wistringstream wstringToInt(vertPart);	//Used to convert wstring to int
 
 									if (whichPart == 0)	//If vPos
 									{
@@ -360,7 +460,7 @@ bool D3DUtils::CreateModelFromObjFile(
 
 									} else if (whichPart == 2)	//If vNorm
 									{
-										std::wistringstream wstringToInt(vertPart);
+										wistringstream wstringToInt(vertPart);
 
 										wstringToInt >> vertNormIndexTemp;
 										vertNormIndexTemp -= 1;		//subtract one since c++ arrays start with 0, and obj start with 1
@@ -439,7 +539,7 @@ bool D3DUtils::CreateModelFromObjFile(
 							//Get the third vertex for this triangle
 							ss >> VertDef;
 
-							std::wstring vertPart;
+							wstring vertPart;
 							int whichPart = 0;
 
 							//Parse this string (same as above)
@@ -447,7 +547,7 @@ bool D3DUtils::CreateModelFromObjFile(
 								if (VertDef[j] != '/')
 									vertPart += VertDef[j];
 								if (VertDef[j] == '/' || j == VertDef.length() - 1) {
-									std::wistringstream wstringToInt(vertPart);
+									wistringstream wstringToInt(vertPart);
 
 									if (whichPart == 0) {
 										wstringToInt >> vertPosIndexTemp;
@@ -468,7 +568,7 @@ bool D3DUtils::CreateModelFromObjFile(
 											vertNormIndexTemp = 0;
 
 									} else if (whichPart == 2) {
-										std::wistringstream wstringToInt(vertPart);
+										wistringstream wstringToInt(vertPart);
 
 										wstringToInt >> vertNormIndexTemp;
 										vertNormIndexTemp -= 1;
@@ -565,24 +665,20 @@ bool D3DUtils::CreateModelFromObjFile(
 				break;
 			}
 		}
-	} else	//If we could not open the file
-	{
+	} else {//If we could not open the file
+	
 		_swapChain->SetFullscreenState(false, NULL);	//Make sure we are out of fullscreen
-
-														//create message
-		std::wstring message = L"Could not open: ";
+		//create message
+		wstring message = L"Could not open: ";
 		message += _filename;
 
-		MessageBox(0, message.c_str(),	//display message
-			L"Error", MB_OK);
-
+		MessageBox(0, message.c_str(), L"Error", MB_OK);//display message
 		return false;
 	}
 
 	_subsetIndexStart.push_back(vIndex); //There won't be another index start after our last subset, so set it here
-
-										 //sometimes "g" is defined at the very top of the file, then again before the first group of faces.
-										 //This makes sure the first subset does not conatain "0" indices.
+	//sometimes "g" is defined at the very top of the file, then again before the first group of faces.
+	//This makes sure the first subset does not conatain "0" indices.
 	if (_subsetIndexStart[1] == 0) {
 		_subsetIndexStart.erase(_subsetIndexStart.begin() + 1);
 		_subsetCount--;
@@ -601,10 +697,10 @@ bool D3DUtils::CreateModelFromObjFile(
 	mtlFileName += meshMatLib.c_str();
 	fileIn.open(mtlFileName);
 
-	std::wstring lastStringRead;
+	wstring lastStringRead;
 	size_t matCount = _materials.size();	//total materials
-											//kdset - If our diffuse color was not set, we can use the ambient color (which is usually the same)
-											//If the diffuse color WAS set, then we don't need to set our diffuse color to ambient
+	//kdset - If our diffuse color was not set, we can use the ambient color (which is usually the same)
+	//If the diffuse color WAS set, then we don't need to set our diffuse color to ambient
 	bool kdset = false;
 
 	if (fileIn) {
@@ -655,7 +751,7 @@ bool D3DUtils::CreateModelFromObjFile(
 					_materials[matCount - 1].difColor.w = Transparency;
 
 					if (Transparency > 0.0f)
-						_materials[matCount - 1].transparent = true;
+						_materials[matCount - 1].transparent = 1.0f;
 				}
 				break;
 
@@ -672,7 +768,7 @@ bool D3DUtils::CreateModelFromObjFile(
 					_materials[matCount - 1].difColor.w = Transparency;
 
 					if (Transparency > 0.0f)
-						_materials[matCount - 1].transparent = true;
+						_materials[matCount - 1].transparent = 1.0f;
 				}
 				break;
 
@@ -689,7 +785,7 @@ bool D3DUtils::CreateModelFromObjFile(
 							if (checkChar == 'K') {
 								checkChar = fileIn.get();
 								if (checkChar == 'd') {
-									std::wstring fileNamePath;
+									wstring fileNamePath;
 
 									fileIn.get();	//Remove whitespace between map_Kd and file
 
@@ -716,7 +812,7 @@ bool D3DUtils::CreateModelFromObjFile(
 										if (fileNamePath == _textureNameArray[i]) {
 											alreadyLoaded = true;
 											_materials[matCount - 1].texArrayIndex = i;
-											_materials[matCount - 1].hasTexture = true;
+											_materials[matCount - 1].hasTexture = 1.0f;
 										}
 									}
 
@@ -732,7 +828,7 @@ bool D3DUtils::CreateModelFromObjFile(
 											_textureNameArray.push_back(fileNamePath.c_str());
 											_materials[matCount - 1].texArrayIndex = (int)_meshShaderResView.size();
 											_meshShaderResView.push_back(tempMeshSRV);
-											_materials[matCount - 1].hasTexture = true;
+											_materials[matCount - 1].hasTexture = 1.0f;
 										}
 									}
 								}
@@ -743,7 +839,7 @@ bool D3DUtils::CreateModelFromObjFile(
 								//So we will assume that for now by only enabling
 								//transparency for this material, as we will already
 								//be using the alpha channel in the diffuse map
-								_materials[matCount - 1].transparent = true;
+								_materials[matCount - 1].transparent = 1.0f;
 							}
 							//map_bump - bump map (we're usinga normal map though)
 							else if (checkChar == 'b') {
@@ -753,7 +849,7 @@ bool D3DUtils::CreateModelFromObjFile(
 									if (checkChar == 'm') {
 										checkChar = fileIn.get();
 										if (checkChar == 'p') {
-											std::wstring fileNamePath;
+											wstring fileNamePath;
 
 											fileIn.get();	//Remove whitespace between map_bump and file
 
@@ -780,7 +876,7 @@ bool D3DUtils::CreateModelFromObjFile(
 												if (fileNamePath == _textureNameArray[i]) {
 													alreadyLoaded = true;
 													_materials[matCount - 1].normMapTexArrayIndex = i;
-													_materials[matCount - 1].hasNormMap = true;
+													_materials[matCount - 1].hasNormMap = 1.0f;
 												}
 											}
 
@@ -796,7 +892,7 @@ bool D3DUtils::CreateModelFromObjFile(
 													_textureNameArray.push_back(fileNamePath.c_str());
 													_materials[matCount - 1].normMapTexArrayIndex = (int)_meshShaderResView.size();
 													_meshShaderResView.push_back(tempMeshSRV);
-													_materials[matCount - 1].hasNormMap = true;
+													_materials[matCount - 1].hasNormMap = 1.0f;
 												}
 											}
 										}
@@ -825,9 +921,9 @@ bool D3DUtils::CreateModelFromObjFile(
 										SurfaceMaterial tempMat;
 										_materials.push_back(tempMat);
 										fileIn >> _materials[matCount].matName;
-										_materials[matCount].transparent = false;
-										_materials[matCount].hasTexture = false;
-										_materials[matCount].hasNormMap = false;
+										_materials[matCount].transparent = 0.0f;
+										_materials[matCount].hasTexture = 0.0f;
+										_materials[matCount].hasNormMap = 0.0f;
 										_materials[matCount].normMapTexArrayIndex = 0;
 										_materials[matCount].texArrayIndex = 0;
 										matCount++;
@@ -847,12 +943,10 @@ bool D3DUtils::CreateModelFromObjFile(
 	} else {
 		_swapChain->SetFullscreenState(false, NULL);	//Make sure we are out of fullscreen
 
-		std::wstring message = L"Could not open: ";
+		wstring message = L"Could not open: ";
 		message += meshMatLib;
 
-		MessageBox(0, message.c_str(),
-			L"Error", MB_OK);
-
+		MessageBox(0, message.c_str(), L"Error", MB_OK);
 		return false;
 	}
 
@@ -912,17 +1006,17 @@ bool D3DUtils::CreateModelFromObjFile(
 			vecZ = vertices[indices[(i * 3)]].pos.z - vertices[indices[(i * 3) + 2]].pos.z;
 			edge1 = XMVectorSet(vecX, vecY, vecZ, 0.0f);	//Create our first edge
 
-															//Get the vector describing another edge of our triangle (edge 2,1)
+			//Get the vector describing another edge of our triangle (edge 2,1)
 			vecX = vertices[indices[(i * 3) + 2]].pos.x - vertices[indices[(i * 3) + 1]].pos.x;
 			vecY = vertices[indices[(i * 3) + 2]].pos.y - vertices[indices[(i * 3) + 1]].pos.y;
 			vecZ = vertices[indices[(i * 3) + 2]].pos.z - vertices[indices[(i * 3) + 1]].pos.z;
 			edge2 = XMVectorSet(vecX, vecY, vecZ, 0.0f);	//Create our second edge
 
-															//Cross multiply the two edge vectors to get the un-normalized face normal
+			//Cross multiply the two edge vectors to get the un-normalized face normal
 			XMStoreFloat3(&unnormalized, XMVector3Cross(edge1, edge2));
 			tempNormal.push_back(unnormalized);			//Save unormalized normal (for normal averaging)
 
-														//Find first texture coordinate edge 2d vector
+			//Find first texture coordinate edge 2d vector
 			tcU1 = vertices[indices[(i * 3)]].texCoord.x - vertices[indices[(i * 3) + 2]].texCoord.x;
 			tcV1 = vertices[indices[(i * 3)]].texCoord.y - vertices[indices[(i * 3) + 2]].texCoord.y;
 
@@ -959,7 +1053,7 @@ bool D3DUtils::CreateModelFromObjFile(
 
 					normalSum = XMVectorSet(tX, tY, tZ, 0.0f);	//If a face is using the vertex, add the unormalized face normal to the normalSum
 
-																//We can reuse tX, tY, tZ to sum up tangents
+					//We can reuse tX, tY, tZ to sum up tangents
 					tX = XMVectorGetX(tangentSum) + tempTangent[j].x;
 					tY = XMVectorGetY(tangentSum) + tempTangent[j].y;
 					tZ = XMVectorGetZ(tangentSum) + tempTangent[j].z;

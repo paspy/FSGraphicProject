@@ -58,7 +58,13 @@ using namespace std;
 // d3d structures
 
 typedef struct Vertex3D {
-	Vertex3D() {}
+	Vertex3D() { 
+		pos = XMFLOAT3(0, 0, 0); 
+		normal = XMFLOAT3(0, 0, 0);
+		tangent = XMFLOAT3(0, 0, 0);
+		biTangent = XMFLOAT3(0, 0, 0);
+		texCoord = XMFLOAT2(0, 0);
+	}
 	Vertex3D(XMFLOAT3 _pos, XMFLOAT2 _tex) : pos(_pos), texCoord(_tex) { }
 	Vertex3D(XMFLOAT3 _pos, XMFLOAT2 _tex, XMFLOAT3 _norm) : pos(_pos), texCoord(_tex), normal(_norm) {}
 
@@ -74,13 +80,7 @@ typedef struct Vertex3D {
 struct BaseLight {
 	BaseLight() { ZeroMemory(this, sizeof(BaseLight)); }
 	XMFLOAT3 direction;
-	float paddding_1;
-	XMFLOAT3 position;
-	float range;
-	XMFLOAT3 spotLightDir;
-	float cone;
-	XMFLOAT3 attenuation;
-	float paddding_2;
+	float pad_1;
 	XMFLOAT4 ambient;
 	XMFLOAT4 diffuse;
 };
@@ -171,26 +171,26 @@ public:
 };
 
 struct SurfaceMaterial {
-	SurfaceMaterial() : hasNormMap(false), hasTexture(false) {}
+	SurfaceMaterial() : hasNormMap(0.0f), hasTexture(0.0f) {}
 	wstring matName;
 	XMFLOAT4 difColor;
 	int texArrayIndex;
 	int normMapTexArrayIndex;
-	bool hasNormMap;
-	bool hasTexture;
-	bool transparent;
+	float hasNormMap;
+	float hasTexture;
+	float transparent;
 };
 
 class ObjMesh {
 public:
 	struct CBuffer {
-		CBuffer() : hasTexture(false), hasNormal(false) {}
+		CBuffer() {}
 		XMMATRIX WVP;
 		XMMATRIX World;
 		XMFLOAT4 difColor;
 		// need to 4 bytes
-		BOOL hasTexture;
-		BOOL hasNormal;
+		float hasTexture;
+		float hasNormal;
 	};
 	
 	ObjMesh() {}
@@ -217,6 +217,13 @@ public:
 		cbbd.MiscFlags = 0;
 		HR(_d3dDevice->CreateBuffer(&cbbd, NULL, &constBuffer));
 
+		D3D11_RASTERIZER_DESC cmdesc;
+		ZeroMemory(&cmdesc, sizeof(D3D11_RASTERIZER_DESC));
+		cmdesc.FillMode = D3D11_FILL_SOLID;
+		cmdesc.CullMode = D3D11_CULL_NONE;
+
+		HR(_d3dDevice->CreateRasterizerState(&cmdesc, &rasterState));
+
 		D3D11_SAMPLER_DESC sampDesc;
 		ZeroMemory(&sampDesc, sizeof(sampDesc));
 		sampDesc.Filter = D3D11_FILTER_MIN_MAG_MIP_LINEAR;
@@ -233,14 +240,16 @@ public:
 	CBuffer								cbBuffer;
 	ID3D11VertexShader					*vertexShader = nullptr;
 	ID3D11PixelShader					*pixelShader = nullptr;
+	ID3D11InputLayout					*inputLayout = nullptr;
 	vector<ID3D11ShaderResourceView*>	shaderResView;
 	ID3D11Buffer						*vertBuffer = nullptr;
 	ID3D11Buffer						*indexBuffer = nullptr;
 	ID3D11Buffer						*constBuffer = nullptr;
-	ID3D11InputLayout					*inputLayout = nullptr;
 	ID3D11RasterizerState				*rasterState = nullptr;
 	ID3D11SamplerState					*texSamplerState = nullptr;
 	XMMATRIX							worldMat = XMMatrixIdentity();
+	UINT								stride = sizeof(Vertex3D);
+	UINT								offset = 0;
 	int									subsets = 0;
 	vector<int>							subsetIndexStart;
 	vector<int>							subsetTexture;
@@ -269,6 +278,9 @@ public:
 	static float DegreesToradians(float _degree) {
 		return (_degree * XM_PI / 180.0f);
 	}
+
+
+	static bool loadOBJ( string _filePath, vector<Vertex3D> & _verts);
 
 	static void BuildSphere(
 		ID3D11Device *_d3dDevice,

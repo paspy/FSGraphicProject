@@ -21,11 +21,12 @@ private:
 	void BuildConstBuffer();
 	void BuildGeometry();
 	void BuildLighting();
-	void BuildShaderAndLayout();
-	void BuildRenderStates();
 
 private:
 	Skybox								m_skyBox;
+	ObjMesh								m_objMesh;
+	ObjMesh								m_building;
+	ObjMesh								m_barrel;
 
 	// Lighting
 	ID3D11Buffer						*m_perFrameBuffer = nullptr;

@@ -319,9 +319,6 @@ void D3DApp::OnResize() {
 	HR(m_d3dDevice->CreateTexture2D(&depthStencilDesc, 0, &m_depthStencilBuffer));
 	HR(m_d3dDevice->CreateDepthStencilView(m_depthStencilBuffer, 0, &m_depthStencilView));
 
-	// Bind the render target view and depth/stencil view to the pipeline.
-	m_d3dImmediateContext->OMSetRenderTargets(1, &m_renderTargetView, m_depthStencilView);
-
 	// Set the viewport transform.
 	m_screenViewport.TopLeftX = 0;
 	m_screenViewport.TopLeftY = 0;
