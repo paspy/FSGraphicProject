@@ -124,9 +124,9 @@ void GuineaPig::BuildGeometry() {
 
 void GuineaPig::BuildLighting() {
 	// Direction light setting
-	m_baseLight.direction = XMFLOAT3(0.0f, 1.0f, 0.0f);
+	m_baseLight.direction = XMFLOAT3(1.0f, -0.5f, -0.5f);
 	m_baseLight.ambient = XMFLOAT4(0.2f, 0.2f, 0.2f, 1.0f);
-	m_baseLight.diffuse = XMFLOAT4(1.2f, 1.2f, 1.2f, 1.2f);
+	m_baseLight.diffuse = XMFLOAT4(1.5f, 1.5f, 1.5f, 1.0f);
 
 	// Point light setting
 	//m_baseLight.position = XMFLOAT3(0.0f, 0.0f, 0.0f);

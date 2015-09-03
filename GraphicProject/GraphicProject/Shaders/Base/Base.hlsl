@@ -63,7 +63,7 @@ float4 PSMain(VS_OUTPUT input) : SV_TARGET {
 		normalMap = (2.0f*normalMap) - 1.0f;
 
 		//Make sure tangent is completely orthogonal to normal
-		//input.Tangent = normalize(input.Tangent - dot(input.Tangent, input.Normal)*input.Normal);
+		input.Tangent = normalize(input.Tangent - dot(input.Tangent, input.Normal)*input.Normal);
 
 		//Create the biTangent
 		float3 biTangent = cross(input.Normal, input.Tangent);
@@ -77,9 +77,12 @@ float4 PSMain(VS_OUTPUT input) : SV_TARGET {
 
 	float3 finalColor = float3(0.0f, 0.0f, 0.0f);
 
-	finalColor = (diffuse * baseLight.ambient).rgb;
-	finalColor += (saturate(dot(baseLight.direction, input.Normal) * baseLight.diffuse * diffuse)).rgb;
-	//finalColor = input.Tangent;
+	float3 lightDir = -normalize(baseLight.direction);
+	float3 wnrm = normalize(input.Normal);
+	finalColor = (saturate(dot(lightDir, wnrm) * diffuse * baseLight.diffuse)).rgb + (diffuse * baseLight.ambient).rgb;
+
+	//finalColor = (diffuse * baseLight.ambient).rgb;
+	//finalColor += (saturate(dot(-baseLight.direction, input.Normal) * diffuse * baseLight.diffuse)).rgb;
 	return float4(finalColor, diffuse.a);
 
 }
