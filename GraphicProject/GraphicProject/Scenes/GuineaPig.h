@@ -30,7 +30,7 @@ private:
 
 	// Lighting
 	ID3D11Buffer						*m_perFrameBuffer = nullptr;
-	BaseLight							m_baseLight;
+	DirectionLight						m_directionLight;
 
 	ConstPerFrame						m_cbPerFrame;
 	ID3D11Buffer						*m_cbPerFrameBuffer = nullptr;

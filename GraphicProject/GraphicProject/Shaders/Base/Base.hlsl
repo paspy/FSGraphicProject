@@ -1,5 +1,5 @@
 
-struct BaseLight {
+struct DirectionLight {
 	float3 direction;
 	float4 ambient;
 	float4 diffuse;
@@ -9,12 +9,12 @@ cbuffer CBuffer {
 	float4x4 WVP;
 	float4x4 World;
 	float4 difColor;
-	int hasTexture;
-	int hasNormMap;
+	//int hasTexture;
+	//int hasNormMap;
 };
 
 cbuffer ConstPerFrame {
-	BaseLight baseLight;
+	DirectionLight directionLight;
 };
 
 Texture2D ObjTexture;
@@ -77,12 +77,12 @@ float4 PSMain(VS_OUTPUT input) : SV_TARGET {
 
 	float3 finalColor = float3(0.0f, 0.0f, 0.0f);
 
-	float3 lightDir = -normalize(baseLight.direction);
+	float3 lightDir = -normalize(directionLight.direction);
 	float3 wnrm = normalize(input.Normal);
-	finalColor = (saturate(dot(lightDir, wnrm) * diffuse * baseLight.diffuse)).rgb + (diffuse * baseLight.ambient).rgb;
+	finalColor = (saturate(dot(lightDir, wnrm) * diffuse * directionLight.diffuse)).rgb + (diffuse * directionLight.ambient).rgb;
 
-	//finalColor = (diffuse * baseLight.ambient).rgb;
-	//finalColor += (saturate(dot(-baseLight.direction, input.Normal) * diffuse * baseLight.diffuse)).rgb;
+	//finalColor = (diffuse * directionLight.ambient).rgb;
+	//finalColor += (saturate(dot(-directionLight.direction, input.Normal) * diffuse * directionLight.diffuse)).rgb;
 	return float4(finalColor, diffuse.a);
 
 }

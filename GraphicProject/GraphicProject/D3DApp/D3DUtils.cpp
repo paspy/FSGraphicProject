@@ -280,6 +280,7 @@ void D3DUtils::BuildSphere(
 }
 
 
+// source: http://www.braynzarsoft.net/index.php?p=D3D11OBJMODEL
 bool D3DUtils::CreateModelFromObjFile(
 	ID3D11Device *_d3dDevice,
 	IDXGISwapChain *_swapChain,
@@ -750,8 +751,7 @@ bool D3DUtils::CreateModelFromObjFile(
 
 					_materials[matCount - 1].difColor.w = Transparency;
 
-					if (Transparency > 0.0f)
-						_materials[matCount - 1].transparent = 1.0f;
+					//if (Transparency > 0.0f) _materials[matCount - 1].transparent = 1.0f;
 				}
 				break;
 
@@ -767,8 +767,7 @@ bool D3DUtils::CreateModelFromObjFile(
 
 					_materials[matCount - 1].difColor.w = Transparency;
 
-					if (Transparency > 0.0f)
-						_materials[matCount - 1].transparent = 1.0f;
+					//if (Transparency > 0.0f) _materials[matCount - 1].transparent = 1.0f;
 				}
 				break;
 
@@ -812,7 +811,7 @@ bool D3DUtils::CreateModelFromObjFile(
 										if (fileNamePath == _textureNameArray[i]) {
 											alreadyLoaded = true;
 											_materials[matCount - 1].texArrayIndex = i;
-											_materials[matCount - 1].hasTexture = 1.0f;
+											//_materials[matCount - 1].hasTexture = 1.0f;
 										}
 									}
 
@@ -828,7 +827,7 @@ bool D3DUtils::CreateModelFromObjFile(
 											_textureNameArray.push_back(fileNamePath.c_str());
 											_materials[matCount - 1].texArrayIndex = (int)_meshShaderResView.size();
 											_meshShaderResView.push_back(tempMeshSRV);
-											_materials[matCount - 1].hasTexture = 1.0f;
+											//_materials[matCount - 1].hasTexture = 1.0f;
 										}
 									}
 								}
@@ -839,7 +838,7 @@ bool D3DUtils::CreateModelFromObjFile(
 								//So we will assume that for now by only enabling
 								//transparency for this material, as we will already
 								//be using the alpha channel in the diffuse map
-								_materials[matCount - 1].transparent = 1.0f;
+								//_materials[matCount - 1].transparent = 1.0f;
 							}
 							//map_bump - bump map (we're usinga normal map though)
 							else if (checkChar == 'b') {
@@ -876,7 +875,7 @@ bool D3DUtils::CreateModelFromObjFile(
 												if (fileNamePath == _textureNameArray[i]) {
 													alreadyLoaded = true;
 													_materials[matCount - 1].normMapTexArrayIndex = i;
-													_materials[matCount - 1].hasNormMap = 1.0f;
+													//_materials[matCount - 1].hasNormMap = 1.0f;
 												}
 											}
 
@@ -892,7 +891,7 @@ bool D3DUtils::CreateModelFromObjFile(
 													_textureNameArray.push_back(fileNamePath.c_str());
 													_materials[matCount - 1].normMapTexArrayIndex = (int)_meshShaderResView.size();
 													_meshShaderResView.push_back(tempMeshSRV);
-													_materials[matCount - 1].hasNormMap = 1.0f;
+													//_materials[matCount - 1].hasNormMap = 1.0f;
 												}
 											}
 										}
@@ -921,9 +920,9 @@ bool D3DUtils::CreateModelFromObjFile(
 										SurfaceMaterial tempMat;
 										_materials.push_back(tempMat);
 										fileIn >> _materials[matCount].matName;
-										_materials[matCount].transparent = 0.0f;
-										_materials[matCount].hasTexture = 0.0f;
-										_materials[matCount].hasNormMap = 0.0f;
+										//_materials[matCount].transparent = 0.0f;
+										//_materials[matCount].hasTexture = 0.0f;
+										//_materials[matCount].hasNormMap = 0.0f;
 										_materials[matCount].normMapTexArrayIndex = 0;
 										_materials[matCount].texArrayIndex = 0;
 										matCount++;

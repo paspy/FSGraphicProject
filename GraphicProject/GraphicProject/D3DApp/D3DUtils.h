@@ -77,8 +77,8 @@ typedef struct Vertex3D {
 }*Vertex3D_ptr;
 
 // constant buffer structures
-struct BaseLight {
-	BaseLight() { ZeroMemory(this, sizeof(BaseLight)); }
+struct DirectionLight {
+	DirectionLight() { ZeroMemory(this, sizeof(DirectionLight)); }
 	XMFLOAT3 direction;
 	float pad_1;
 	XMFLOAT4 ambient;
@@ -87,7 +87,7 @@ struct BaseLight {
 
 
 struct ConstPerFrame {
-	BaseLight baseLight;
+	DirectionLight directionLight;
 };
 
 class Skybox {
@@ -171,14 +171,14 @@ public:
 };
 
 struct SurfaceMaterial {
-	SurfaceMaterial() : hasNormMap(0.0f), hasTexture(0.0f) {}
+	SurfaceMaterial() /*: hasNormMap(0.0f), hasTexture(0.0f)*/ {}
 	wstring matName;
 	XMFLOAT4 difColor;
 	int texArrayIndex;
 	int normMapTexArrayIndex;
-	float hasNormMap;
-	float hasTexture;
-	float transparent;
+	//float hasNormMap;
+	//float hasTexture;
+	//float transparent;
 };
 
 class ObjMesh {
@@ -188,9 +188,8 @@ public:
 		XMMATRIX WVP;
 		XMMATRIX World;
 		XMFLOAT4 difColor;
-		// need to 4 bytes
-		float hasTexture;
-		float hasNormal;
+		//float hasTexture;
+		//float hasNormal;
 	};
 	
 	ObjMesh() {}

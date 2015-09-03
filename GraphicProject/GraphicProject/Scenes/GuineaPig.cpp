@@ -124,25 +124,25 @@ void GuineaPig::BuildGeometry() {
 
 void GuineaPig::BuildLighting() {
 	// Direction light setting
-	m_baseLight.direction = XMFLOAT3(1.0f, -0.5f, -0.5f);
-	m_baseLight.ambient = XMFLOAT4(0.2f, 0.2f, 0.2f, 1.0f);
-	m_baseLight.diffuse = XMFLOAT4(1.5f, 1.5f, 1.5f, 1.0f);
+	m_directionLight.direction = XMFLOAT3(1.0f, -0.5f, -0.5f);
+	m_directionLight.ambient = XMFLOAT4(0.2f, 0.2f, 0.2f, 1.0f);
+	m_directionLight.diffuse = XMFLOAT4(1.5f, 1.5f, 1.5f, 1.0f);
 
 	// Point light setting
-	//m_baseLight.position = XMFLOAT3(0.0f, 0.0f, 0.0f);
-	//m_baseLight.range = 50.0f;
-	//m_baseLight.attenuation = XMFLOAT3(0.0f, 0.1f, 0.0f);
-	//m_baseLight.ambient = XMFLOAT4(0.5f, 0.5f, 0.5f, 1.0f);
-	//m_baseLight.diffuse = XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f);
+	//m_directionLight.position = XMFLOAT3(0.0f, 0.0f, 0.0f);
+	//m_directionLight.range = 50.0f;
+	//m_directionLight.attenuation = XMFLOAT3(0.0f, 0.1f, 0.0f);
+	//m_directionLight.ambient = XMFLOAT4(0.5f, 0.5f, 0.5f, 1.0f);
+	//m_directionLight.diffuse = XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f);
 
 	// Point light setting
-	//m_baseLight.position = XMFLOAT3(0.0f, 1.0f, 0.0f);
-	//m_baseLight.spotLightDir = XMFLOAT3(0.0f, 0.0f, 1.0f);
-	//m_baseLight.range = 1000.0f;
-	//m_baseLight.cone = 20.0f;
-	//m_baseLight.attenuation = XMFLOAT3(0.4f, 0.02f, 0.0f);
-	//m_baseLight.ambient = XMFLOAT4(0.2f, 0.2f, 0.2f, 1.0f);
-	//m_baseLight.diffuse = XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f);
+	//m_directionLight.position = XMFLOAT3(0.0f, 1.0f, 0.0f);
+	//m_directionLight.spotLightDir = XMFLOAT3(0.0f, 0.0f, 1.0f);
+	//m_directionLight.range = 1000.0f;
+	//m_directionLight.cone = 20.0f;
+	//m_directionLight.attenuation = XMFLOAT3(0.4f, 0.02f, 0.0f);
+	//m_directionLight.ambient = XMFLOAT4(0.2f, 0.2f, 0.2f, 1.0f);
+	//m_directionLight.diffuse = XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f);
 }
 
 void GuineaPig::UpdateScene(double _dt) {
@@ -165,17 +165,17 @@ void GuineaPig::UpdateScene(double _dt) {
 	//Reset Lights Position
 	//XMVECTOR lightVector = XMVectorSet(0.0f, 0.0f, 0.0f, 0.0f);
 	//lightVector = XMVector3TransformCoord(lightVector, cubeWorldMat * XMMatrixTranslation(0, 5.0f, 0));
-	//m_baseLight.position.x = XMVectorGetX(lightVector);
-	//m_baseLight.position.y = XMVectorGetY(lightVector);
-	//m_baseLight.position.z = XMVectorGetZ(lightVector);
+	//m_directionLight.position.x = XMVectorGetX(lightVector);
+	//m_directionLight.position.y = XMVectorGetY(lightVector);
+	//m_directionLight.position.z = XMVectorGetZ(lightVector);
 
-	//m_baseLight.position.x = XMVectorGetX(m_camPosition);
-	//m_baseLight.position.y = XMVectorGetY(m_camPosition);
-	//m_baseLight.position.z = XMVectorGetZ(m_camPosition);
+	//m_directionLight.position.x = XMVectorGetX(m_camPosition);
+	//m_directionLight.position.y = XMVectorGetY(m_camPosition);
+	//m_directionLight.position.z = XMVectorGetZ(m_camPosition);
 
-	//m_baseLight.spotLightDir.x = XMVectorGetX(m_camTarget) - m_baseLight.position.x;
-	//m_baseLight.spotLightDir.y = XMVectorGetY(m_camTarget) - m_baseLight.position.y;
-	//m_baseLight.spotLightDir.z = XMVectorGetZ(m_camTarget) - m_baseLight.position.z;
+	//m_directionLight.spotLightDir.x = XMVectorGetX(m_camTarget) - m_directionLight.position.x;
+	//m_directionLight.spotLightDir.y = XMVectorGetY(m_camTarget) - m_directionLight.position.y;
+	//m_directionLight.spotLightDir.z = XMVectorGetZ(m_camTarget) - m_directionLight.position.z;
 
 	// Update objects
 	static float rot = 0.00f;
@@ -221,7 +221,7 @@ void GuineaPig::DrawScene() {
 	// opaque objects drawing
 
 	// apply lighting
-	m_cbPerFrame.baseLight = m_baseLight;
+	m_cbPerFrame.directionLight = m_directionLight;
 	m_d3dImmediateContext->UpdateSubresource(m_cbPerFrameBuffer, 0, NULL, &m_cbPerFrame, 0, 0);
 	m_d3dImmediateContext->PSSetConstantBuffers(0, 1, &m_cbPerFrameBuffer);
 
@@ -249,8 +249,8 @@ void GuineaPig::DrawScene() {
 		m_objMesh.cbBuffer.WVP = XMMatrixTranspose(m_objMesh.worldMat * m_camView * m_camProjection);
 		m_objMesh.cbBuffer.World = XMMatrixTranspose(m_objMesh.worldMat);
 		m_objMesh.cbBuffer.difColor = m_objMesh.materials[m_objMesh.subsetTexture[i]].difColor;
-		m_objMesh.cbBuffer.hasTexture = m_objMesh.materials[m_objMesh.subsetTexture[i]].hasTexture;
-		m_objMesh.cbBuffer.hasNormal = m_objMesh.materials[m_objMesh.subsetTexture[i]].hasNormMap;
+		//m_objMesh.cbBuffer.hasTexture = m_objMesh.materials[m_objMesh.subsetTexture[i]].hasTexture;
+		//m_objMesh.cbBuffer.hasNormal = m_objMesh.materials[m_objMesh.subsetTexture[i]].hasNormMap;
 		m_d3dImmediateContext->UpdateSubresource(m_objMesh.constBuffer, 0, NULL, &m_objMesh.cbBuffer, 0, 0);
 		m_d3dImmediateContext->VSSetConstantBuffers(0, 1, &m_objMesh.constBuffer);
 		m_d3dImmediateContext->PSSetConstantBuffers(1, 1, &m_objMesh.constBuffer);
@@ -282,14 +282,14 @@ void GuineaPig::DrawScene() {
 		m_building.cbBuffer.WVP = XMMatrixTranspose(m_building.worldMat * m_camView * m_camProjection);
 		m_building.cbBuffer.World = XMMatrixTranspose(m_building.worldMat);
 		m_building.cbBuffer.difColor = m_building.materials[m_building.subsetTexture[i]].difColor;
-		m_building.cbBuffer.hasTexture = m_building.materials[m_building.subsetTexture[i]].hasTexture;
-		m_building.cbBuffer.hasNormal = m_building.materials[m_building.subsetTexture[i]].hasNormMap;
+		//m_building.cbBuffer.hasTexture = m_building.materials[m_building.subsetTexture[i]].hasTexture;
+		//m_building.cbBuffer.hasNormal = m_building.materials[m_building.subsetTexture[i]].hasNormMap;
 		m_d3dImmediateContext->UpdateSubresource(m_building.constBuffer, 0, NULL, &m_building.cbBuffer, 0, 0);
 		m_d3dImmediateContext->VSSetConstantBuffers(0, 1, &m_building.constBuffer);
 		m_d3dImmediateContext->PSSetConstantBuffers(1, 1, &m_building.constBuffer);
-		if ( m_building.materials[m_building.subsetTexture[i]].hasTexture > 0.5f)
+		//if ( m_building.materials[m_building.subsetTexture[i]].hasTexture > 0.5f)
 			m_d3dImmediateContext->PSSetShaderResources(0, 1, &m_building.shaderResView[m_building.materials[m_building.subsetTexture[i]].texArrayIndex]);
-		if ( m_building.materials[m_building.subsetTexture[i]].hasNormMap > 0.5f)
+		//if ( m_building.materials[m_building.subsetTexture[i]].hasNormMap > 0.5f)
 			m_d3dImmediateContext->PSSetShaderResources(1, 1, &m_building.shaderResView[m_building.materials[m_building.subsetTexture[i]].normMapTexArrayIndex]);
 		m_d3dImmediateContext->PSSetSamplers(0, 1, &m_building.texSamplerState);
 
@@ -315,21 +315,21 @@ void GuineaPig::DrawScene() {
 		m_barrel.cbBuffer.WVP = XMMatrixTranspose(m_barrel.worldMat * m_camView * m_camProjection);
 		m_barrel.cbBuffer.World = XMMatrixTranspose(m_barrel.worldMat);
 		m_barrel.cbBuffer.difColor = m_barrel.materials[m_barrel.subsetTexture[i]].difColor;
-		m_barrel.cbBuffer.hasTexture = m_barrel.materials[m_barrel.subsetTexture[i]].hasTexture;
-		m_barrel.cbBuffer.hasNormal = m_barrel.materials[m_barrel.subsetTexture[i]].hasNormMap;
+		//m_barrel.cbBuffer.hasTexture = m_barrel.materials[m_barrel.subsetTexture[i]].hasTexture;
+		//m_barrel.cbBuffer.hasNormal = m_barrel.materials[m_barrel.subsetTexture[i]].hasNormMap;
 		m_d3dImmediateContext->UpdateSubresource(m_barrel.constBuffer, 0, NULL, &m_barrel.cbBuffer, 0, 0);
 		m_d3dImmediateContext->VSSetConstantBuffers(0, 1, &m_barrel.constBuffer);
 		m_d3dImmediateContext->PSSetConstantBuffers(1, 1, &m_barrel.constBuffer);
-		if ( m_barrel.materials[m_barrel.subsetTexture[i]].hasTexture > 0.5f )
+		//if ( m_barrel.materials[m_barrel.subsetTexture[i]].hasTexture > 0.5f )
 			m_d3dImmediateContext->PSSetShaderResources(0, 1, &m_barrel.shaderResView[m_barrel.materials[m_barrel.subsetTexture[i]].texArrayIndex]);
-		if ( m_barrel.materials[m_barrel.subsetTexture[i]].hasNormMap > 0.5f )
+		//if ( m_barrel.materials[m_barrel.subsetTexture[i]].hasNormMap > 0.5f )
 			m_d3dImmediateContext->PSSetShaderResources(1, 1, &m_barrel.shaderResView[m_barrel.materials[m_barrel.subsetTexture[i]].normMapTexArrayIndex]);
 		m_d3dImmediateContext->PSSetSamplers(0, 1, &m_barrel.texSamplerState);
 
 		m_d3dImmediateContext->RSSetState(m_barrel.rasterState);
 		int indexStart = m_barrel.subsetIndexStart[i];
 		int indexDrawAmount = m_barrel.subsetIndexStart[i + 1] - m_barrel.subsetIndexStart[i];
-		if ( m_barrel.materials[m_barrel.subsetIndexStart[i]].transparent < 0.5f)
+		//if ( m_barrel.materials[m_barrel.subsetIndexStart[i]].transparent < 0.5f)
 			m_d3dImmediateContext->DrawIndexed(indexDrawAmount, indexStart, 0);
 	}
 
