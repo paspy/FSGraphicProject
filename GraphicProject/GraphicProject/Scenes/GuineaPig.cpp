@@ -100,7 +100,7 @@ void GuineaPig::BuildLighting() {
 	// Direction light setting
 	m_directionLight.direction = XMFLOAT3(1.0f, -0.5f, -1.0f);
 	m_directionLight.ambient = XMFLOAT4(0.1f, 0.1f, 0.1f, 1.0f);
-	m_directionLight.diffuse = XMFLOAT4(0.8f, 0.8f, 0.8f, 1.0f);
+	m_directionLight.diffuse = XMFLOAT4(0.5f, 0.5f, 0.5f, 1.0f);
 
 	// Point light setting
 	m_pointLight.position = XMFLOAT3(0.0f, 2.0f, 22.5f);
@@ -109,10 +109,10 @@ void GuineaPig::BuildLighting() {
 	m_pointLight.diffuse = XMFLOAT4(0.8f, 0.8f, 0.8f, 1.2f);
 
 	// Spot light setting
-	m_spotLight.position = XMFLOAT3(0.0f, 1.0f, 0.0f);
-	m_spotLight.direction = XMFLOAT3(0.0f, 0.0f, 1.0f);
-	m_spotLight.range = 1000.0f;
-	m_spotLight.cone = 20.0f;
+	m_spotLight.position = XMFLOAT3(0.0f, 5.0f, 1.0f);
+	m_spotLight.direction = XMFLOAT3(0.0f, -1.0f, 0.0f);
+	m_spotLight.range = 100.0f;
+	m_spotLight.cone = 30.0f;
 	m_spotLight.attenuation = XMFLOAT3(0.4f, 0.02f, 0.0f);
 	m_spotLight.diffuse = XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f);
 }
@@ -133,13 +133,13 @@ void GuineaPig::UpdateScene(double _dt) {
 	m_skyBox.worldMat = scale * translation;
 
 	// Update spot light position
-	m_spotLight.position.x = XMVectorGetX(m_camPosition);
-	m_spotLight.position.y = XMVectorGetY(m_camPosition);
-	m_spotLight.position.z = XMVectorGetZ(m_camPosition);
+	//m_spotLight.position.x = XMVectorGetX(m_camPosition);
+	//m_spotLight.position.y = XMVectorGetY(m_camPosition);
+	//m_spotLight.position.z = XMVectorGetZ(m_camPosition);
 
-	m_spotLight.direction.x = XMVectorGetX(m_camTarget) - m_spotLight.position.x;
-	m_spotLight.direction.y = XMVectorGetY(m_camTarget) - m_spotLight.position.y;
-	m_spotLight.direction.z = XMVectorGetZ(m_camTarget) - m_spotLight.position.z;
+	//m_spotLight.direction.x = XMVectorGetX(m_camTarget) - m_spotLight.position.x;
+	//m_spotLight.direction.y = XMVectorGetY(m_camTarget) - m_spotLight.position.y;
+	//m_spotLight.direction.z = XMVectorGetZ(m_camTarget) - m_spotLight.position.z;
 
 	// Update objects
 	static float rot = 0.00f;

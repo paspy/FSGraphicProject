@@ -106,17 +106,19 @@ struct PointLight {
 	PointLight() { ZeroMemory(this, sizeof(PointLight)); }
 	XMFLOAT3 position;
 	float range;
-	XMFLOAT3 attenuation; float pad;
+	XMFLOAT3 attenuation;
+	float pad;
 	XMFLOAT4 diffuse;
 };
 
 struct SpotLight {
 	SpotLight() { ZeroMemory(this, sizeof(SpotLight)); }
-	XMFLOAT3 direction; float pad;
+	XMFLOAT3 direction;
+	float pad;
 	XMFLOAT3 position;
 	float range;
-	float cone;
 	XMFLOAT3 attenuation;
+	float cone;
 	XMFLOAT4 diffuse;
 };
 

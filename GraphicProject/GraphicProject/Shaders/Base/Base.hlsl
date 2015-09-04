@@ -1,6 +1,7 @@
 
 struct DirectionLight {
 	float3 direction;
+	float pad;
 	float4 ambient;
 	float4 diffuse;
 };
@@ -9,6 +10,7 @@ struct PointLight {
 	float3 position;
 	float  range;
 	float3 attenuation;
+	float pad;
 	float4 diffuse;
 };
 
@@ -18,6 +20,7 @@ struct SpotLight {
 	float3 direction;
 	float  cone;
 	float3 attenuation;
+	float pad;
 	float4 diffuse;
 };
 
@@ -109,19 +112,16 @@ float4 PSMain(VS_OUTPUT input) : SV_TARGET {
 		//pointLightColor += 1.0f - saturate(length(pointLight.position - input.WorldPos) / pointLight.range);
 		pointLightColor /= pointLight.attenuation[0] + (pointLight.attenuation[1] * pointDis) + (pointLight.attenuation[2] * (pointDis*pointDis));
 	}
-	
 	//****calculating point light****//
-
-
 
 	//****calculating spot light****//
 	float3 spotLightColor = float3(0.0f, 0.0f, 0.0f);
-	float3 spotLightDir = normalize(spotLight.position - input.WorldPos);
+	float3 spotLightDir = spotLight.position - input.WorldPos;
 	float spotDis = length(spotLight.position - input.WorldPos);
 	if (spotDis > spotLight.range) {
 		spotLightColor = float3(0.0f, 0.0f, 0.0f);
 	} else {
-		//spotLightDir /= spotDis;
+		spotLightDir /= spotDis;
 		float spotLightAmount = dot(spotLightDir, input.Normal);
 		spotLightColor += spotLightAmount * diffuse * spotLight.diffuse;
 		spotLightColor /= spotLight.attenuation[0] + (spotLight.attenuation[1] * spotDis) + (spotLight.attenuation[2] * (spotDis*spotDis));
@@ -130,7 +130,7 @@ float4 PSMain(VS_OUTPUT input) : SV_TARGET {
 		//spotLightColor = saturate(spotLightColor);
 	}
 	//****calculating spot light****//
-	finalColor = spotLightColor + pointLightColor + directionLightColor;
+	finalColor = saturate(spotLightColor + pointLightColor + directionLightColor);
 
 	return float4(finalColor, diffuse.a);
 
