@@ -10,6 +10,6 @@ newmtl Ground
 	Kd 0.5882 0.5882 0.5882
 	Ks 0.0000 0.0000 0.0000
 	Ke 0.0000 0.0000 0.0000
-	map_Ka grass_diffuse.dds
-	map_Kd grass_diffuse.dds
-	map_bump grass_normal.dds
+	map_Ka ground_diffuse.dds
+	map_Kd ground_diffuse.dds
+	map_bump ground_normal.dds

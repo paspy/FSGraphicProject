@@ -24,7 +24,7 @@ private:
 
 private:
 	Skybox			m_skyBox;
-	ObjMesh			m_objMesh;
+	ObjMesh			m_ground;
 	ObjMesh			m_barrel;
 
 	// Lighting

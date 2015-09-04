@@ -67,7 +67,6 @@ float4 PSMain(VS_OUTPUT psInput) : SV_TARGET {
 	currMat.Diffuse = textColor;
 	currMat.Specular = gMaterial.Specular;
 
-
 	//Load normal from normal map
 	float4 normalMap = ObjNormMap.Sample(ObjSamplerState, psInput.TexCoord);
 
@@ -80,7 +79,7 @@ float4 PSMain(VS_OUTPUT psInput) : SV_TARGET {
 	//Create the biTangent
 	float3 biTangent = cross(psInput.NormalW, psInput.TangentW);
 
-	//Create the "Texture Space"
+	//Create the "Texture Space" - T B N - Yeah!
 	float3x3 texSpace = float3x3(psInput.TangentW, biTangent, psInput.NormalW);
 
 	//Convert normal from normal map to texture space and store in psInput.normal
@@ -97,13 +96,25 @@ float4 PSMain(VS_OUTPUT psInput) : SV_TARGET {
 
 	float3 toCameraW = normalize(gCameraPos.xyz - psInput.PositionW);
 
+	// comput the directional light A D S
 	ComputeDirectionalLight(currMat, gDirLight, psInput.NormalW, toCameraW, A, D, S);
 	ambient  += A;
 	diffuse  += D;
 	specular += S;
 
+	// comput the point light A D S
+	ComputePointLight(currMat, gPointLight, psInput.PositionW, psInput.NormalW, toCameraW, A, D, S);
+	ambient += A;
+	diffuse += D;
+	specular += S;
+
+	// comput the spot light A D S
+	ComputeSpotLight(currMat, gSpotLight, psInput.PositionW, psInput.NormalW, toCameraW, A, D, S);
+	ambient += A;
+	diffuse += D;
+	specular += S;
+
 	float4 finalColor = ambient + diffuse + specular;
 	return float4(finalColor.rgb, gMaterial.Diffuse.a);
-
 
 }

@@ -110,7 +110,7 @@ struct PointLight {
 	XMFLOAT4 Diffuse;
 	XMFLOAT4 Specular;
 
-	XMFLOAT3 Postition;
+	XMFLOAT3 Position;
 	float Range;
 
 	XMFLOAT3 Att;
@@ -123,7 +123,7 @@ struct SpotLight {
 	XMFLOAT4 Diffuse;
 	XMFLOAT4 Specular;
 
-	XMFLOAT3 Postition;
+	XMFLOAT3 Position;
 	float Range;
 	
 	XMFLOAT3 Direction;
@@ -265,7 +265,6 @@ public:
 		XMMATRIX World;
 		XMMATRIX InvWorld;
 		XMMATRIX WorldViewProj;
-		//XMFLOAT4 difColor;
 		Material material;
 	};
 	
@@ -328,11 +327,10 @@ public:
 			_d3dImmediateContext->IASetIndexBuffer(indexBuffer, DXGI_FORMAT_R32_UINT, 0);
 			//Set the grounds vertex buffer
 			_d3dImmediateContext->IASetVertexBuffers(0, 1, &vertBuffer, &stride, &offset);
-			//Set the WorldViewProj matrix and send it to the constant buffer in effect file
+			//Set the stuff to the constant buffer to the hlsl file
 			cbBuffer.World = worldMat;
 			cbBuffer.InvWorld = XMMatrixTranspose(worldMat);
 			cbBuffer.WorldViewProj = XMMatrixTranspose(worldMat * _camView * _camProj);
-			//cbBuffer.difColor = materials[subsetTexture[i]].difColor;
 			
 			_d3dImmediateContext->UpdateSubresource(constBuffer, 0, NULL, &cbBuffer, 0, 0);
 			_d3dImmediateContext->VSSetConstantBuffers(0, 1, &constBuffer);
@@ -388,9 +386,6 @@ public:
 	static float DegreesToradians(float _degree) {
 		return (_degree * XM_PI / 180.0f);
 	}
-
-
-	static bool loadOBJ( string _filePath, vector<Vertex3D> & _verts);
 
 	static void BuildSphere(
 		ID3D11Device *_d3dDevice,

@@ -41,7 +41,7 @@ struct Material {
 };
 
 void ComputeDirectionalLight(
-	in Material mat, in DirectionalLight light, in float3 normal, in float3 toCam,
+	in Material mat, in DirectionalLight light, in float3 normal, in float3 toCamera,
 	out float4 ambient, out float4 diffuse, out float4 specular) {
 	// Initialize outputs.
 	ambient = float4(0.0f, 0.0f, 0.0f, 0.0f);
@@ -54,14 +54,11 @@ void ComputeDirectionalLight(
 	// Add ambient term.
 	ambient = mat.Ambient * light.Ambient;
 
-	// Add diffuse and specular term, provided the surface is in 
-	// the line of site of the light.
-
 	float diffuseRatio = saturate(dot(lightVec, normal));
 
 	if (diffuseRatio > 0.0f) {
 		float3 v = reflect(-lightVec, normal);
-		float specFactor = pow(max(dot(v, toCam), 0.0f), mat.Specular.w);
+		float specFactor = pow(max(dot(v, toCamera), 0.0f), mat.Specular.w);
 
 		diffuse = diffuseRatio * mat.Diffuse * light.Diffuse;
 		specular = specFactor * mat.Specular * light.Specular;
@@ -69,7 +66,7 @@ void ComputeDirectionalLight(
 }
 
 void ComputePointLight(
-	in Material mat, in PointLight light, in float3 pos, in float3 normal, in float3 toCam,
+	in Material mat, in PointLight light, in float3 position, in float3 normal, in float3 toCamera,
 	out float4 ambient, out float4 diffuse, out float4 specular) {
 	// Initialize outputs.
 	ambient = float4(0.0f, 0.0f, 0.0f, 0.0f);
@@ -77,14 +74,13 @@ void ComputePointLight(
 	specular = float4(0.0f, 0.0f, 0.0f, 0.0f);
 
 	// The vector from the surface to the light.
-	float3 lightVec = light.Position - pos;
+	float3 lightVec = light.Position - position;
 
 	// The distance from surface to light.
 	float d = length(lightVec);
 
 	// Range test.
-	if (d > light.Range)
-		return;
+	if (d > light.Range) return;
 
 	// Normalize the light vector.
 	lightVec /= d;
@@ -99,7 +95,7 @@ void ComputePointLight(
 
 	if (diffuseRatio > 0.0f) {
 		float3 v = reflect(-lightVec, normal);
-		float specFactor = pow(max(dot(v, toCam), 0.0f), mat.Specular.w);
+		float specFactor = pow(max(dot(v, toCamera), 0.0f), mat.Specular.w);
 
 		diffuse = diffuseRatio * mat.Diffuse * light.Diffuse;
 		specular = specFactor * mat.Specular * light.Specular;
@@ -113,7 +109,7 @@ void ComputePointLight(
 }
 
 void ComputeSpotLight(
-	in Material mat, in SpotLight light, in float3 pos, in float3 normal, in float3 toCam,
+	in Material mat, in SpotLight light, in float3 position, in float3 normal, in float3 toCamera,
 	out float4 ambient, out float4 diffuse, out float4 specular) {
 	// Initialize outputs.
 	ambient = float4(0.0f, 0.0f, 0.0f, 0.0f);
@@ -121,14 +117,13 @@ void ComputeSpotLight(
 	specular = float4(0.0f, 0.0f, 0.0f, 0.0f);
 
 	// The vector from the surface to the light.
-	float3 lightVec = light.Position - pos;
+	float3 lightVec = light.Position - position;
 
 	// The distance from surface to light.
 	float d = length(lightVec);
 
 	// Range test.
-	if (d > light.Range)
-		return;
+	if (d > light.Range) return;
 
 	// Normalize the light vector.
 	lightVec /= d;
@@ -143,7 +138,7 @@ void ComputeSpotLight(
 
 	if (diffuseRatio > 0.0f) {
 		float3 v = reflect(-lightVec, normal);
-		float specFactor = pow(max(dot(v, toCam), 0.0f), mat.Specular.w);
+		float specFactor = pow(max(dot(v, toCamera), 0.0f), mat.Specular.w);
 
 		diffuse = diffuseRatio * mat.Diffuse * light.Diffuse;
 		specular = specFactor * mat.Specular * light.Specular;

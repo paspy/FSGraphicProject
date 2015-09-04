@@ -1,8 +1,11 @@
 #
 newmtl barrel:lambert2SG
-	illum 4
-	Kd 0.00 0.00 0.00
+	
 	Ka 0.00 0.00 0.00
+	Kd 0.00 0.00 0.00
 	Tf 1.00 1.00 1.00
+	illum 4
+	map_Ka barrel_diffuse.dds
 	map_Kd barrel_diffuse.dds
+	map_bump barrel_normal.dds
 	Ni 1.00
