@@ -50,6 +50,23 @@ using namespace std;
 #define BACKBUFFER_WIDTH	1366
 #define BACKBUFFER_HEIGHT	768
 
+#define IDR_MENU1                       101
+#define IDD_DIALOG1                     102
+#define IDR_ACCELERATOR1                105
+#define IDI_ICON1                       106
+#define IDC_RENDER_WINDOW               1001
+#define IDC_TAB1                        1006
+#define IDC_SYSLINK1                    1007
+#define IDC_TOOL_DIVIDER                1009
+#define IDC_BUTTON2                     1011
+#define IDC_BUTTON1                     1012
+#define IDC_BUTTON3                     1014
+#define IDC_LIST1                       1016
+#define IDC_STATIC_FPS                  1017
+#define ID_FILE_OPEN_MENU               40001
+#define ID_FILE_EXIT                    40002
+#define ID_ACCELERATOR_OPEN             40005
+
 #define VK_LW 0x57
 #define VK_LS 0x53
 #define VK_LA 0x41
@@ -80,14 +97,33 @@ typedef struct Vertex3D {
 struct DirectionLight {
 	DirectionLight() { ZeroMemory(this, sizeof(DirectionLight)); }
 	XMFLOAT3 direction;
-	float pad_1;
+	float pad;
 	XMFLOAT4 ambient;
 	XMFLOAT4 diffuse;
 };
 
+struct PointLight {
+	PointLight() { ZeroMemory(this, sizeof(PointLight)); }
+	XMFLOAT3 position;
+	float range;
+	XMFLOAT3 attenuation; float pad;
+	XMFLOAT4 diffuse;
+};
+
+struct SpotLight {
+	SpotLight() { ZeroMemory(this, sizeof(SpotLight)); }
+	XMFLOAT3 direction; float pad;
+	XMFLOAT3 position;
+	float range;
+	float cone;
+	XMFLOAT3 attenuation;
+	XMFLOAT4 diffuse;
+};
 
 struct ConstPerFrame {
 	DirectionLight directionLight;
+	PointLight pointLight;
+	SpotLight spotLight;
 };
 
 class Skybox {
@@ -145,6 +181,27 @@ public:
 		HR(_d3dDevice->CreateDepthStencilState(&dssDesc, &DSLessEqual));
 
 	}
+	void Render(ID3D11DeviceContext *_d3dImmediateContext, XMMATRIX _camView, XMMATRIX _camProj) {
+		//Set the proper VS and PS shaders, and layout
+		_d3dImmediateContext->VSSetShader(vertexShader, 0, 0);
+		_d3dImmediateContext->PSSetShader(pixelShader, 0, 0);
+		_d3dImmediateContext->IASetInputLayout(inputLayout);
+		//Set the spheres index buffer
+		_d3dImmediateContext->IASetIndexBuffer(indexBuffer, DXGI_FORMAT_R32_UINT, 0);
+		//Set the spheres vertex buffer
+		_d3dImmediateContext->IASetVertexBuffers(0, 1, &vertBuffer, &stride, &offset);
+		//Set the WVP matrix and send it to the constant buffer in shader file
+		cBuffer.WVP = XMMatrixTranspose(worldMat * _camView * _camProj);
+		_d3dImmediateContext->UpdateSubresource(constBuffer, 0, NULL, &cBuffer, 0, 0);
+		_d3dImmediateContext->VSSetConstantBuffers(0, 1, &constBuffer);
+		//Send our skymap resource view to pixel shader
+		_d3dImmediateContext->PSSetShaderResources(0, 1, &shaderResView);
+		_d3dImmediateContext->PSSetSamplers(0, 1, &texSamplerState);
+		//Set the new depth/stencil and RS states
+		_d3dImmediateContext->OMSetDepthStencilState(DSLessEqual, 0);
+		_d3dImmediateContext->RSSetState(rasterState);
+		_d3dImmediateContext->DrawIndexed(numFaces * 3, 0, 0);
+	}
 
 	CBuffer								cBuffer;
 	ID3D11VertexShader					*vertexShader = nullptr;
@@ -171,14 +228,11 @@ public:
 };
 
 struct SurfaceMaterial {
-	SurfaceMaterial() /*: hasNormMap(0.0f), hasTexture(0.0f)*/ {}
+	SurfaceMaterial() {}
 	wstring matName;
 	XMFLOAT4 difColor;
 	int texArrayIndex;
 	int normMapTexArrayIndex;
-	//float hasNormMap;
-	//float hasTexture;
-	//float transparent;
 };
 
 class ObjMesh {
@@ -188,8 +242,6 @@ public:
 		XMMATRIX WVP;
 		XMMATRIX World;
 		XMFLOAT4 difColor;
-		//float hasTexture;
-		//float hasNormal;
 	};
 	
 	ObjMesh() {}
@@ -234,7 +286,34 @@ public:
 		sampDesc.MaxLOD = D3D11_FLOAT32_MAX;
 		_d3dDevice->CreateSamplerState(&sampDesc, &texSamplerState);
 	}
+	void Render(ID3D11DeviceContext *_d3dImmediateContext, XMMATRIX _camView, XMMATRIX _camProj) {
+		// Set the default VS shader and depth/stencil state and layout
+		_d3dImmediateContext->VSSetShader(vertexShader, NULL, 0);
+		_d3dImmediateContext->PSSetShader(pixelShader, NULL, 0);
+		_d3dImmediateContext->IASetInputLayout(inputLayout);
+		_d3dImmediateContext->OMSetDepthStencilState(NULL, 0);
 
+		for (int i = 0; i < subsets; i++) {
+			//Set the grounds index buffer
+			_d3dImmediateContext->IASetIndexBuffer(indexBuffer, DXGI_FORMAT_R32_UINT, 0);
+			//Set the grounds vertex buffer
+			_d3dImmediateContext->IASetVertexBuffers(0, 1, &vertBuffer, &stride, &offset);
+			//Set the WVP matrix and send it to the constant buffer in effect file
+			cbBuffer.WVP = XMMatrixTranspose(worldMat * _camView * _camProj);
+			cbBuffer.World = XMMatrixTranspose(worldMat);
+			cbBuffer.difColor = materials[subsetTexture[i]].difColor;
+			_d3dImmediateContext->UpdateSubresource(constBuffer, 0, NULL, &cbBuffer, 0, 0);
+			_d3dImmediateContext->VSSetConstantBuffers(0, 1, &constBuffer);
+			_d3dImmediateContext->PSSetConstantBuffers(1, 1, &constBuffer);
+			_d3dImmediateContext->PSSetShaderResources(0, 1, &shaderResView[materials[subsetTexture[i]].texArrayIndex]);
+			_d3dImmediateContext->PSSetShaderResources(1, 1, &shaderResView[materials[subsetTexture[i]].normMapTexArrayIndex]);
+			_d3dImmediateContext->PSSetSamplers(0, 1, &texSamplerState);
+			_d3dImmediateContext->RSSetState(rasterState);
+			int indexStart = subsetIndexStart[i];
+			int indexDrawAmount = subsetIndexStart[i + 1] - subsetIndexStart[i];
+			_d3dImmediateContext->DrawIndexed(indexDrawAmount, indexStart, 0);
+		}
+	}
 
 	CBuffer								cbBuffer;
 	ID3D11VertexShader					*vertexShader = nullptr;
@@ -316,8 +395,3 @@ public:
 		);
 
 };
-
-
-
-
-

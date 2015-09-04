@@ -372,6 +372,7 @@ bool D3DApp::Run() {
 }
 
 LRESULT D3DApp::MsgProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam) {
+	int wmId = 0;
 	switch ( msg ) {
 	case WM_ACTIVATE:
 		if ( LOWORD(wParam) == WA_INACTIVE ) {
@@ -382,7 +383,19 @@ LRESULT D3DApp::MsgProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam) {
 			m_timerStop = false;
 		}
 		return 0;
-		// WM_SIZE is sent when the user resizes the m_hWindow.  
+		// WM_SIZE is sent when the user resizes the m_hWindow. 
+	case WM_COMMAND: {
+		wmId = LOWORD(wParam);
+		switch (wmId) {
+			case ID_FILE_OPEN_MENU:
+
+				break;
+			case ID_FILE_EXIT:
+
+				break;
+			}
+		return 0;
+	}
 	case WM_SIZE:
 		// Save the new client area dimensions.
 		m_clientWidth = LOWORD(lParam);

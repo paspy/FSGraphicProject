@@ -41,7 +41,6 @@ void GuineaPig::BuildConstBuffer() {
 void GuineaPig::BuildGeometry() {
 	m_skyBox.Init(m_d3dDevice);
 	m_objMesh.Init(m_d3dDevice);
-	m_building.Init(m_d3dDevice);
 	m_barrel.Init(m_d3dDevice);
 
 	D3DUtils::BuildSphere(m_d3dDevice ,10, 10, &m_skyBox.vertBuffer, &m_skyBox.indexBuffer, m_skyBox.numVertices, m_skyBox.numFaces);
@@ -52,10 +51,6 @@ void GuineaPig::BuildGeometry() {
 		m_d3dDevice,
 		L"Shaders/Skybox/Skybox.hlsl",
 		m_skyBox.vertexLayout, 2, &m_skyBox.vertexShader, &m_skyBox.pixelShader, &m_skyBox.inputLayout));
-
-	vector<Vertex3D> verts;
-	D3DUtils::loadOBJ("Resources/Models/ground.obj", verts);
-	verts;
 
 
 	D3DUtils::CreateModelFromObjFile(
@@ -77,27 +72,6 @@ void GuineaPig::BuildGeometry() {
 		m_d3dDevice,
 		L"Shaders/Base/Base.hlsl",
 		m_objMesh.vertexLayout, 4, &m_objMesh.vertexShader, &m_objMesh.pixelShader, &m_objMesh.inputLayout));
-
-	D3DUtils::CreateModelFromObjFile(
-		m_d3dDevice,
-		m_swapChain,
-		L"Resources/Models/spaceCompound.obj",
-		&m_building.vertBuffer,
-		&m_building.indexBuffer,
-		m_building.textureNameArray,
-		m_building.shaderResView,
-		m_building.subsetIndexStart,
-		m_building.subsetTexture,
-		m_building.materials,
-		m_building.subsets,
-		true,
-		true);
-
-
-	HR(D3DUtils::CreateShaderAndLayoutFromFile(
-		m_d3dDevice,
-		L"Shaders/Base/Base.hlsl",
-		m_building.vertexLayout, 4, &m_building.vertexShader, &m_building.pixelShader, &m_building.inputLayout));
 
 	D3DUtils::CreateModelFromObjFile(
 		m_d3dDevice,
@@ -124,25 +98,23 @@ void GuineaPig::BuildGeometry() {
 
 void GuineaPig::BuildLighting() {
 	// Direction light setting
-	m_directionLight.direction = XMFLOAT3(1.0f, -0.5f, -0.5f);
-	m_directionLight.ambient = XMFLOAT4(0.2f, 0.2f, 0.2f, 1.0f);
-	m_directionLight.diffuse = XMFLOAT4(1.5f, 1.5f, 1.5f, 1.0f);
+	m_directionLight.direction = XMFLOAT3(1.0f, -0.5f, -1.0f);
+	m_directionLight.ambient = XMFLOAT4(0.1f, 0.1f, 0.1f, 1.0f);
+	m_directionLight.diffuse = XMFLOAT4(0.8f, 0.8f, 0.8f, 1.0f);
 
 	// Point light setting
-	//m_directionLight.position = XMFLOAT3(0.0f, 0.0f, 0.0f);
-	//m_directionLight.range = 50.0f;
-	//m_directionLight.attenuation = XMFLOAT3(0.0f, 0.1f, 0.0f);
-	//m_directionLight.ambient = XMFLOAT4(0.5f, 0.5f, 0.5f, 1.0f);
-	//m_directionLight.diffuse = XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f);
+	m_pointLight.position = XMFLOAT3(0.0f, 2.0f, 22.5f);
+	m_pointLight.range = 25.0f;
+	m_pointLight.attenuation = XMFLOAT3(0.0f, 0.2f, 0.0f);
+	m_pointLight.diffuse = XMFLOAT4(0.8f, 0.8f, 0.8f, 1.2f);
 
-	// Point light setting
-	//m_directionLight.position = XMFLOAT3(0.0f, 1.0f, 0.0f);
-	//m_directionLight.spotLightDir = XMFLOAT3(0.0f, 0.0f, 1.0f);
-	//m_directionLight.range = 1000.0f;
-	//m_directionLight.cone = 20.0f;
-	//m_directionLight.attenuation = XMFLOAT3(0.4f, 0.02f, 0.0f);
-	//m_directionLight.ambient = XMFLOAT4(0.2f, 0.2f, 0.2f, 1.0f);
-	//m_directionLight.diffuse = XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f);
+	// Spot light setting
+	m_spotLight.position = XMFLOAT3(0.0f, 1.0f, 0.0f);
+	m_spotLight.direction = XMFLOAT3(0.0f, 0.0f, 1.0f);
+	m_spotLight.range = 1000.0f;
+	m_spotLight.cone = 20.0f;
+	m_spotLight.attenuation = XMFLOAT3(0.4f, 0.02f, 0.0f);
+	m_spotLight.diffuse = XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f);
 }
 
 void GuineaPig::UpdateScene(double _dt) {
@@ -160,22 +132,14 @@ void GuineaPig::UpdateScene(double _dt) {
 	//Set sphereWorld's world space using the transformations
 	m_skyBox.worldMat = scale * translation;
 
-	// Update point light position
+	// Update spot light position
+	m_spotLight.position.x = XMVectorGetX(m_camPosition);
+	m_spotLight.position.y = XMVectorGetY(m_camPosition);
+	m_spotLight.position.z = XMVectorGetZ(m_camPosition);
 
-	//Reset Lights Position
-	//XMVECTOR lightVector = XMVectorSet(0.0f, 0.0f, 0.0f, 0.0f);
-	//lightVector = XMVector3TransformCoord(lightVector, cubeWorldMat * XMMatrixTranslation(0, 5.0f, 0));
-	//m_directionLight.position.x = XMVectorGetX(lightVector);
-	//m_directionLight.position.y = XMVectorGetY(lightVector);
-	//m_directionLight.position.z = XMVectorGetZ(lightVector);
-
-	//m_directionLight.position.x = XMVectorGetX(m_camPosition);
-	//m_directionLight.position.y = XMVectorGetY(m_camPosition);
-	//m_directionLight.position.z = XMVectorGetZ(m_camPosition);
-
-	//m_directionLight.spotLightDir.x = XMVectorGetX(m_camTarget) - m_directionLight.position.x;
-	//m_directionLight.spotLightDir.y = XMVectorGetY(m_camTarget) - m_directionLight.position.y;
-	//m_directionLight.spotLightDir.z = XMVectorGetZ(m_camTarget) - m_directionLight.position.z;
+	m_spotLight.direction.x = XMVectorGetX(m_camTarget) - m_spotLight.position.x;
+	m_spotLight.direction.y = XMVectorGetY(m_camTarget) - m_spotLight.position.y;
+	m_spotLight.direction.z = XMVectorGetZ(m_camTarget) - m_spotLight.position.z;
 
 	// Update objects
 	static float rot = 0.00f;
@@ -190,19 +154,12 @@ void GuineaPig::UpdateScene(double _dt) {
 
 	m_objMesh.worldMat = Rotation * Scale * Translation;
 
-	m_building.worldMat = XMMatrixIdentity();
-
-	 Rotation = XMMatrixRotationY(XM_PI);
-	 Scale = XMMatrixScaling(1.0f, 1.0f, 1.0f);
-	 Translation = XMMatrixTranslation(0.0f, 0.11f, 50.0f);
-
-	m_building.worldMat = Rotation * Scale * Translation;
 
 	m_barrel.worldMat = XMMatrixIdentity();
 
 	Rotation = XMMatrixRotationY(XM_PI);
 	Scale = XMMatrixScaling(1.0f, 1.0f, 1.0f);
-	Translation = XMMatrixTranslation(0.0f, 0.11f, -50.0f);
+	Translation = XMMatrixTranslation(0.0f, 0.11f, 25.0f);
 
 	m_barrel.worldMat = Rotation * Scale * Translation;
 }
@@ -222,6 +179,8 @@ void GuineaPig::DrawScene() {
 
 	// apply lighting
 	m_cbPerFrame.directionLight = m_directionLight;
+	m_cbPerFrame.pointLight = m_pointLight;
+	m_cbPerFrame.spotLight = m_spotLight;
 	m_d3dImmediateContext->UpdateSubresource(m_cbPerFrameBuffer, 0, NULL, &m_cbPerFrame, 0, 0);
 	m_d3dImmediateContext->PSSetConstantBuffers(0, 1, &m_cbPerFrameBuffer);
 
@@ -232,128 +191,12 @@ void GuineaPig::DrawScene() {
 	m_d3dImmediateContext->OMSetBlendState(0, 0, 0xffffffff);
 
 	// Render opaque objects //
-
-	// Set the default VS shader and depth/stencil state and layout
-	m_d3dImmediateContext->VSSetShader(m_objMesh.vertexShader, NULL, 0);
-	m_d3dImmediateContext->PSSetShader(m_objMesh.pixelShader, NULL, 0);
-	m_d3dImmediateContext->IASetInputLayout(m_objMesh.inputLayout);
-	m_d3dImmediateContext->OMSetDepthStencilState(NULL, 0);
-
-	for (int i = 0; i < m_objMesh.subsets; i++) {
-		//Set the grounds index buffer
-		m_d3dImmediateContext->IASetIndexBuffer(m_objMesh.indexBuffer, DXGI_FORMAT_R32_UINT, 0);
-		//Set the grounds vertex buffer
-		m_d3dImmediateContext->IASetVertexBuffers(0, 1, &m_objMesh.vertBuffer, &m_objMesh.stride, &m_objMesh.offset);
-
-		//Set the WVP matrix and send it to the constant buffer in effect file
-		m_objMesh.cbBuffer.WVP = XMMatrixTranspose(m_objMesh.worldMat * m_camView * m_camProjection);
-		m_objMesh.cbBuffer.World = XMMatrixTranspose(m_objMesh.worldMat);
-		m_objMesh.cbBuffer.difColor = m_objMesh.materials[m_objMesh.subsetTexture[i]].difColor;
-		//m_objMesh.cbBuffer.hasTexture = m_objMesh.materials[m_objMesh.subsetTexture[i]].hasTexture;
-		//m_objMesh.cbBuffer.hasNormal = m_objMesh.materials[m_objMesh.subsetTexture[i]].hasNormMap;
-		m_d3dImmediateContext->UpdateSubresource(m_objMesh.constBuffer, 0, NULL, &m_objMesh.cbBuffer, 0, 0);
-		m_d3dImmediateContext->VSSetConstantBuffers(0, 1, &m_objMesh.constBuffer);
-		m_d3dImmediateContext->PSSetConstantBuffers(1, 1, &m_objMesh.constBuffer);
-		//if ( m_objMesh.materials[m_objMesh.subsetTexture[i]].hasTexture > 0.5f)
-			m_d3dImmediateContext->PSSetShaderResources(0, 1, &m_objMesh.shaderResView[m_objMesh.materials[m_objMesh.subsetTexture[i]].texArrayIndex]);
-		//if ( m_objMesh.materials[m_objMesh.subsetTexture[i]].hasNormMap > 0.5f)
-			m_d3dImmediateContext->PSSetShaderResources(1, 1, &m_objMesh.shaderResView[m_objMesh.materials[m_objMesh.subsetTexture[i]].normMapTexArrayIndex]);
-		m_d3dImmediateContext->PSSetSamplers(0, 1, &m_objMesh.texSamplerState);
-
-		m_d3dImmediateContext->RSSetState(m_objMesh.rasterState);
-		int indexStart = m_objMesh.subsetIndexStart[i];
-		int indexDrawAmount = m_objMesh.subsetIndexStart[i + 1] - m_objMesh.subsetIndexStart[i];
-		//if (m_objMesh.materials[m_objMesh.subsetIndexStart[i]].transparent < 0.5f)
-			m_d3dImmediateContext->DrawIndexed(indexDrawAmount, indexStart, 0);
-	}
-
-	m_d3dImmediateContext->VSSetShader(m_building.vertexShader, NULL, 0);
-	m_d3dImmediateContext->PSSetShader(m_building.pixelShader, NULL, 0);
-	m_d3dImmediateContext->IASetInputLayout(m_building.inputLayout);
-	m_d3dImmediateContext->OMSetDepthStencilState(NULL, 0);
-
-	for ( int i = 0; i < m_building.subsets; i++ ) {
-		//Set the grounds index buffer
-		m_d3dImmediateContext->IASetIndexBuffer(m_building.indexBuffer, DXGI_FORMAT_R32_UINT, 0);
-		//Set the grounds vertex buffer
-		m_d3dImmediateContext->IASetVertexBuffers(0, 1, &m_building.vertBuffer, &m_building.stride, &m_building.offset);
-
-		//Set the WVP matrix and send it to the constant buffer in effect file
-		m_building.cbBuffer.WVP = XMMatrixTranspose(m_building.worldMat * m_camView * m_camProjection);
-		m_building.cbBuffer.World = XMMatrixTranspose(m_building.worldMat);
-		m_building.cbBuffer.difColor = m_building.materials[m_building.subsetTexture[i]].difColor;
-		//m_building.cbBuffer.hasTexture = m_building.materials[m_building.subsetTexture[i]].hasTexture;
-		//m_building.cbBuffer.hasNormal = m_building.materials[m_building.subsetTexture[i]].hasNormMap;
-		m_d3dImmediateContext->UpdateSubresource(m_building.constBuffer, 0, NULL, &m_building.cbBuffer, 0, 0);
-		m_d3dImmediateContext->VSSetConstantBuffers(0, 1, &m_building.constBuffer);
-		m_d3dImmediateContext->PSSetConstantBuffers(1, 1, &m_building.constBuffer);
-		//if ( m_building.materials[m_building.subsetTexture[i]].hasTexture > 0.5f)
-			m_d3dImmediateContext->PSSetShaderResources(0, 1, &m_building.shaderResView[m_building.materials[m_building.subsetTexture[i]].texArrayIndex]);
-		//if ( m_building.materials[m_building.subsetTexture[i]].hasNormMap > 0.5f)
-			m_d3dImmediateContext->PSSetShaderResources(1, 1, &m_building.shaderResView[m_building.materials[m_building.subsetTexture[i]].normMapTexArrayIndex]);
-		m_d3dImmediateContext->PSSetSamplers(0, 1, &m_building.texSamplerState);
-
-		m_d3dImmediateContext->RSSetState(m_building.rasterState);
-		int indexStart = m_building.subsetIndexStart[i];
-		int indexDrawAmount = m_building.subsetIndexStart[i + 1] - m_building.subsetIndexStart[i];
-		//if ( m_building.materials[m_building.subsetIndexStart[i]].transparent > 0.5f)
-			m_d3dImmediateContext->DrawIndexed(indexDrawAmount, indexStart, 0);
-	}
-
-	m_d3dImmediateContext->VSSetShader(m_barrel.vertexShader, NULL, 0);
-	m_d3dImmediateContext->PSSetShader(m_barrel.pixelShader, NULL, 0);
-	m_d3dImmediateContext->IASetInputLayout(m_barrel.inputLayout);
-	m_d3dImmediateContext->OMSetDepthStencilState(NULL, 0);
-
-	for ( int i = 0; i < m_barrel.subsets; i++ ) {
-		//Set the grounds index buffer
-		m_d3dImmediateContext->IASetIndexBuffer(m_barrel.indexBuffer, DXGI_FORMAT_R32_UINT, 0);
-		//Set the grounds vertex buffer
-		m_d3dImmediateContext->IASetVertexBuffers(0, 1, &m_barrel.vertBuffer, &m_barrel.stride, &m_barrel.offset);
-
-		//Set the WVP matrix and send it to the constant buffer in effect file
-		m_barrel.cbBuffer.WVP = XMMatrixTranspose(m_barrel.worldMat * m_camView * m_camProjection);
-		m_barrel.cbBuffer.World = XMMatrixTranspose(m_barrel.worldMat);
-		m_barrel.cbBuffer.difColor = m_barrel.materials[m_barrel.subsetTexture[i]].difColor;
-		//m_barrel.cbBuffer.hasTexture = m_barrel.materials[m_barrel.subsetTexture[i]].hasTexture;
-		//m_barrel.cbBuffer.hasNormal = m_barrel.materials[m_barrel.subsetTexture[i]].hasNormMap;
-		m_d3dImmediateContext->UpdateSubresource(m_barrel.constBuffer, 0, NULL, &m_barrel.cbBuffer, 0, 0);
-		m_d3dImmediateContext->VSSetConstantBuffers(0, 1, &m_barrel.constBuffer);
-		m_d3dImmediateContext->PSSetConstantBuffers(1, 1, &m_barrel.constBuffer);
-		//if ( m_barrel.materials[m_barrel.subsetTexture[i]].hasTexture > 0.5f )
-			m_d3dImmediateContext->PSSetShaderResources(0, 1, &m_barrel.shaderResView[m_barrel.materials[m_barrel.subsetTexture[i]].texArrayIndex]);
-		//if ( m_barrel.materials[m_barrel.subsetTexture[i]].hasNormMap > 0.5f )
-			m_d3dImmediateContext->PSSetShaderResources(1, 1, &m_barrel.shaderResView[m_barrel.materials[m_barrel.subsetTexture[i]].normMapTexArrayIndex]);
-		m_d3dImmediateContext->PSSetSamplers(0, 1, &m_barrel.texSamplerState);
-
-		m_d3dImmediateContext->RSSetState(m_barrel.rasterState);
-		int indexStart = m_barrel.subsetIndexStart[i];
-		int indexDrawAmount = m_barrel.subsetIndexStart[i + 1] - m_barrel.subsetIndexStart[i];
-		//if ( m_barrel.materials[m_barrel.subsetIndexStart[i]].transparent < 0.5f)
-			m_d3dImmediateContext->DrawIndexed(indexDrawAmount, indexStart, 0);
-	}
+	// obj meshs
+	m_barrel.Render(m_d3dImmediateContext, m_camView, m_camProjection);
+	m_objMesh.Render(m_d3dImmediateContext, m_camView, m_camProjection);
 
 	// Skybox
-	//Set the proper VS and PS shaders, and layout
-	m_d3dImmediateContext->VSSetShader(m_skyBox.vertexShader, 0, 0);
-	m_d3dImmediateContext->PSSetShader(m_skyBox.pixelShader, 0, 0);
-	m_d3dImmediateContext->IASetInputLayout(m_skyBox.inputLayout);
-	//Set the spheres index buffer
-	m_d3dImmediateContext->IASetIndexBuffer(m_skyBox.indexBuffer, DXGI_FORMAT_R32_UINT, 0);
-	//Set the spheres vertex buffer
-	m_d3dImmediateContext->IASetVertexBuffers(0, 1, &m_skyBox.vertBuffer, &m_skyBox.stride, &m_skyBox.offset);
-	//Set the WVP matrix and send it to the constant buffer in shader file
-	m_skyBox.cBuffer.WVP = XMMatrixTranspose(m_skyBox.worldMat * m_camView * m_camProjection);
-	m_d3dImmediateContext->UpdateSubresource(m_skyBox.constBuffer, 0, NULL, &m_skyBox.cBuffer, 0, 0);
-	m_d3dImmediateContext->VSSetConstantBuffers(0, 1, &m_skyBox.constBuffer);
-	//Send our skymap resource view to pixel shader
-	m_d3dImmediateContext->PSSetShaderResources(0, 1, &m_skyBox.shaderResView);
-	m_d3dImmediateContext->PSSetSamplers(0, 1, &m_skyBox.texSamplerState);
-	//Set the new depth/stencil and RS states
-	m_d3dImmediateContext->OMSetDepthStencilState(m_skyBox.DSLessEqual, 0);
-	m_d3dImmediateContext->RSSetState(m_skyBox.rasterState);
-	m_d3dImmediateContext->DrawIndexed(m_skyBox.numFaces * 3, 0, 0);
-	// skybox -- end
+	m_skyBox.Render(m_d3dImmediateContext, m_camView, m_camProjection);
 
 	//Present the backbuffer to the screen
 	HR(m_swapChain->Present(0, 0));

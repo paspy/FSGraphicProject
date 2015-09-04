@@ -23,16 +23,17 @@ private:
 	void BuildLighting();
 
 private:
-	Skybox								m_skyBox;
-	ObjMesh								m_objMesh;
-	ObjMesh								m_building;
-	ObjMesh								m_barrel;
+	Skybox			m_skyBox;
+	ObjMesh			m_objMesh;
+	ObjMesh			m_barrel;
 
 	// Lighting
-	ID3D11Buffer						*m_perFrameBuffer = nullptr;
-	DirectionLight						m_directionLight;
+	ID3D11Buffer	*m_perFrameBuffer = nullptr;
+	DirectionLight	m_directionLight;
+	PointLight		m_pointLight;
+	SpotLight		m_spotLight;
 
-	ConstPerFrame						m_cbPerFrame;
-	ID3D11Buffer						*m_cbPerFrameBuffer = nullptr;
+	ConstPerFrame	m_cbPerFrame;
+	ID3D11Buffer	*m_cbPerFrameBuffer = nullptr;
 };
 
