@@ -28,12 +28,12 @@ private:
 	ObjMesh			m_barrel;
 
 	// Lighting
-	ID3D11Buffer	*m_perFrameBuffer = nullptr;
-	DirectionLight	m_directionLight;
-	PointLight		m_pointLight;
-	SpotLight		m_spotLight;
+	ID3D11Buffer		*m_perFrameBuffer = nullptr;
+	DirectionalLight	m_directionalLight;
+	PointLight			m_pointLight;
+	SpotLight			m_spotLight;
 
-	ConstPerFrame	m_cbPerFrame;
+	cbPerFrame	m_cbPerFrame;
 	ID3D11Buffer	*m_cbPerFrameBuffer = nullptr;
 };
 

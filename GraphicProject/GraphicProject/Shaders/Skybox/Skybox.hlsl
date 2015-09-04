@@ -1,6 +1,6 @@
 
 cbuffer ConstPerObject {
-	float4x4 WVP;
+	float4x4 WorldViewProj;
 	float4x4 World;
 };
 
@@ -17,7 +17,7 @@ VS_OUTPUT VSMain(float3 inPos : POSITION, float2 inTexCoord : TEXCOORD) {
 	VS_OUTPUT output = (VS_OUTPUT)0;
 
 	//Set Pos to xyww instead of xyzw, so that z will always be 1 (furthest from camera)
-	output.Position = mul(float4(inPos, 1.0f), WVP).xyww;
+	output.Position = mul(float4(inPos, 1.0f), WorldViewProj).xyww;
 
 	output.texCoord = inPos;
 

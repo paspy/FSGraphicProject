@@ -87,5 +87,8 @@
     <FxCompile Include="Shaders\Skybox\Skybox.hlsl">
       <Filter>Source Files\Scenes\Shaders\Skybox</Filter>
     </FxCompile>
+    <FxCompile Include="Shaders\Base\Lighting.hlsl">
+      <Filter>Source Files\Scenes\Shaders\Base</Filter>
+    </FxCompile>
   </ItemGroup>
 </Project>

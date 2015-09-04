@@ -30,7 +30,7 @@ void GuineaPig::BuildConstBuffer() {
 	D3D11_BUFFER_DESC cbbd;
 	ZeroMemory(&cbbd, sizeof(D3D11_BUFFER_DESC));
 	cbbd.Usage = D3D11_USAGE_DEFAULT;
-	cbbd.ByteWidth = sizeof(ConstPerFrame);
+	cbbd.ByteWidth = sizeof(cbPerFrame);
 	cbbd.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
 	cbbd.CPUAccessFlags = 0;
 	cbbd.MiscFlags = 0;
@@ -98,23 +98,25 @@ void GuineaPig::BuildGeometry() {
 
 void GuineaPig::BuildLighting() {
 	// Direction light setting
-	m_directionLight.direction = XMFLOAT3(1.0f, -0.5f, -1.0f);
-	m_directionLight.ambient = XMFLOAT4(0.1f, 0.1f, 0.1f, 1.0f);
-	m_directionLight.diffuse = XMFLOAT4(0.5f, 0.5f, 0.5f, 1.0f);
+	m_directionalLight.Ambient = XMFLOAT4(0.2f, 0.2f, 0.2f, 1.0f);
+	m_directionalLight.Diffuse = XMFLOAT4(0.8f, 0.8f, 0.8f, 1.0f);
+	m_directionalLight.Specular = XMFLOAT4(0.5f, 0.5f, 0.5f, 1.0f);
+	m_directionalLight.Direction = XMFLOAT3(0.57735f, -0.57735f, 0.57735f);
+	//m_directionalLight.Direction = XMFLOAT3(0.0f, -0.57735f, 0.0f);
 
-	// Point light setting
-	m_pointLight.position = XMFLOAT3(0.0f, 2.0f, 22.5f);
-	m_pointLight.range = 25.0f;
-	m_pointLight.attenuation = XMFLOAT3(0.0f, 0.2f, 0.0f);
-	m_pointLight.diffuse = XMFLOAT4(0.8f, 0.8f, 0.8f, 1.2f);
+	//// Point light setting
+	//m_pointLight.position = XMFLOAT3(0.0f, 2.0f, 22.5f);
+	//m_pointLight.range = 25.0f;
+	//m_pointLight.attenuation = XMFLOAT3(0.0f, 0.2f, 0.0f);
+	//m_pointLight.diffuse = XMFLOAT4(0.8f, 0.8f, 0.8f, 1.2f);
 
-	// Spot light setting
-	m_spotLight.position = XMFLOAT3(0.0f, 5.0f, 1.0f);
-	m_spotLight.direction = XMFLOAT3(0.0f, -1.0f, 0.0f);
-	m_spotLight.range = 100.0f;
-	m_spotLight.cone = 30.0f;
-	m_spotLight.attenuation = XMFLOAT3(0.4f, 0.02f, 0.0f);
-	m_spotLight.diffuse = XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f);
+	//// Spot light setting
+	//m_spotLight.position = XMFLOAT3(0.0f, 5.0f, 1.0f);
+	//m_spotLight.direction = XMFLOAT3(0.0f, -1.0f, 0.0f);
+	//m_spotLight.range = 100.0f;
+	//m_spotLight.cone = 30.0f;
+	//m_spotLight.attenuation = XMFLOAT3(0.4f, 0.02f, 0.0f);
+	//m_spotLight.diffuse = XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f);
 }
 
 void GuineaPig::UpdateScene(double _dt) {
@@ -152,14 +154,14 @@ void GuineaPig::UpdateScene(double _dt) {
 	XMMATRIX Scale = XMMatrixScaling(1.0f, 1.0f, 1.0f);
 	XMMATRIX Translation = XMMatrixTranslation(0.0f, .1f, 0.0f);
 
-	m_objMesh.worldMat = Rotation * Scale * Translation;
+	//m_objMesh.worldMat = Rotation * Scale * Translation;
 
 
 	m_barrel.worldMat = XMMatrixIdentity();
 
-	Rotation = XMMatrixRotationY(XM_PI);
+	Rotation = XMMatrixRotationX(XM_PIDIV2);
 	Scale = XMMatrixScaling(1.0f, 1.0f, 1.0f);
-	Translation = XMMatrixTranslation(0.0f, 0.11f, 25.0f);
+	Translation = XMMatrixTranslation(0.0f, 1.5f, 25.0f);
 
 	m_barrel.worldMat = Rotation * Scale * Translation;
 }
@@ -178,9 +180,12 @@ void GuineaPig::DrawScene() {
 	// opaque objects drawing
 
 	// apply lighting
-	m_cbPerFrame.directionLight = m_directionLight;
-	m_cbPerFrame.pointLight = m_pointLight;
-	m_cbPerFrame.spotLight = m_spotLight;
+	m_cbPerFrame.directionalLight = m_directionalLight;
+	//m_cbPerFrame.pointLight = m_pointLight;
+	//m_cbPerFrame.spotLight = m_spotLight;
+	XMFLOAT4 curCamPos;
+	XMStoreFloat4(&curCamPos, m_camPosition);
+	m_cbPerFrame.cameraPos = curCamPos;
 	m_d3dImmediateContext->UpdateSubresource(m_cbPerFrameBuffer, 0, NULL, &m_cbPerFrame, 0, 0);
 	m_d3dImmediateContext->PSSetConstantBuffers(0, 1, &m_cbPerFrameBuffer);
 
@@ -192,8 +197,8 @@ void GuineaPig::DrawScene() {
 
 	// Render opaque objects //
 	// obj meshs
-	m_barrel.Render(m_d3dImmediateContext, m_camView, m_camProjection);
-	m_objMesh.Render(m_d3dImmediateContext, m_camView, m_camProjection);
+	m_barrel.Render(m_d3dImmediateContext, m_camPosition, m_camView, m_camProjection);
+	m_objMesh.Render(m_d3dImmediateContext, m_camPosition, m_camView, m_camProjection);
 
 	// Skybox
 	m_skyBox.Render(m_d3dImmediateContext, m_camView, m_camProjection);

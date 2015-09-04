@@ -1,137 +1,109 @@
+#include <Lighting.hlsl>
 
-struct DirectionLight {
-	float3 direction;
-	float pad;
-	float4 ambient;
-	float4 diffuse;
-};
-
-struct PointLight {
-	float3 position;
-	float  range;
-	float3 attenuation;
-	float pad;
-	float4 diffuse;
-};
-
-struct SpotLight {
-	float3 position;
-	float  range;
-	float3 direction;
-	float  cone;
-	float3 attenuation;
-	float pad;
-	float4 diffuse;
-};
-
-cbuffer ConstPerFrame {
-	DirectionLight directionLight;
-	PointLight pointLight;
-	SpotLight spotLight;
+cbuffer cbPerFrame {
+	DirectionalLight gDirLight;
+	PointLight gPointLight;
+	SpotLight gSpotLight;
+	float4 gCameraPos;
 };
 
 cbuffer CBuffer {
-	float4x4 WVP;
-	float4x4 World;
-	float4 difColor;
+	float4x4 gWorld;
+	float4x4 gInvWorld;
+	float4x4 gWorldViewProj;
+	Material gMaterial;
 };
-
 
 Texture2D ObjTexture;
 Texture2D ObjNormMap;
 SamplerState ObjSamplerState;
 
-struct VS_OUTPUT {
-	float4 Position : SV_POSITION;
-	float4 WorldPos : POSITION;
+struct VS_INPUT {
+	float3 PositionL : POSITION;
 	float2 TexCoord : TEXCOORD;
-	float3 Normal : NORMAL;
-	float3 Tangent : TANGENT;
+	float3 NormalL : NORMAL;
+	float3 TangentL : TANGENT;
+};
+
+struct VS_OUTPUT {
+	float4 PositionH : SV_POSITION;
+	float3 PositionW : POSITION;
+	float2 TexCoord : TEXCOORD;
+	float3 NormalW : NORMAL;
+	float3 TangentW : TANGENT;
 };
 
 
-VS_OUTPUT VSMain(float4 inPos : POSITION, float2 inTexCoord : TEXCOORD, float3 inNormal : NORMAL, float3 inTangent : TANGENT) {
+// Vertex Shader Entry Point
+VS_OUTPUT VSMain(VS_INPUT vsInput) {
 
-	VS_OUTPUT output;
+	VS_OUTPUT vsOutput;
 
-	output.Position = mul(inPos, WVP);
-	output.WorldPos = mul(inPos, World);
-	output.TexCoord = inTexCoord;
-	output.Normal   = mul(inNormal, (float3x3)World); //output.Normal = mul(float4(inNormal, 0.0), World).rgb;
-	output.Tangent  = mul(inTangent, (float3x3)World);
+	// Transform to homogeneous clip space.
+	vsOutput.PositionH = mul(float4(vsInput.PositionL, 1.0f), gWorldViewProj);
 
-	return output;
+	// Transform to world space space.
+	vsOutput.PositionW = mul(float4(vsInput.PositionL, 1.0f), gWorld).xyz;
+	vsOutput.NormalW   = mul(vsInput.NormalL, (float3x3)gInvWorld);
+	vsOutput.TangentW  = mul(vsInput.TangentL, (float3x3)gWorld);
+
+	vsOutput.TexCoord = vsInput.TexCoord;
+
+	return vsOutput;
 }
 
-float4 PSMain(VS_OUTPUT input) : SV_TARGET {
-	input.Normal = normalize(input.Normal);
 
-	//Set diffuse color of material
-	float4 diffuse = difColor;
+// Pixel Shader Entry Point
+float4 PSMain(VS_OUTPUT psInput) : SV_TARGET {
+	psInput.NormalW = normalize(psInput.NormalW);
 
-	diffuse = ObjTexture.Sample(ObjSamplerState, input.TexCoord);
+	//Set diffuse color of gMaterial
+	//float4 diffuse = difColor;
+
+	float4 textColor = ObjTexture.Sample(ObjSamplerState, psInput.TexCoord);
+	
+	Material currMat;
+	currMat.Ambient = gMaterial.Ambient;
+	currMat.Diffuse = textColor;
+	currMat.Specular = gMaterial.Specular;
+
 
 	//Load normal from normal map
-	float4 normalMap = ObjNormMap.Sample(ObjSamplerState, input.TexCoord);
+	float4 normalMap = ObjNormMap.Sample(ObjSamplerState, psInput.TexCoord);
 
 	//Change normal map range from [0, 1] to [-1, 1]
 	normalMap = (2.0f*normalMap) - 1.0f;
 
 	//Make sure tangent is completely orthogonal to normal
-	input.Tangent = normalize(input.Tangent - dot(input.Tangent, input.Normal)*input.Normal);
+	psInput.TangentW = normalize(psInput.TangentW - dot(psInput.TangentW, psInput.NormalW)*psInput.NormalW);
 
 	//Create the biTangent
-	float3 biTangent = cross(input.Normal, input.Tangent);
+	float3 biTangent = cross(psInput.NormalW, psInput.TangentW);
 
 	//Create the "Texture Space"
-	float3x3 texSpace = float3x3(input.Tangent, biTangent, input.Normal);
+	float3x3 texSpace = float3x3(psInput.TangentW, biTangent, psInput.NormalW);
 
-	//Convert normal from normal map to texture space and store in input.normal
-	input.Normal = (normalize(mul((float3)normalMap, texSpace)));
+	//Convert normal from normal map to texture space and store in psInput.normal
+	psInput.NormalW = normalize(mul((float3)normalMap, texSpace));
 
+	//******* Apply lighting *******//
 
-	float3 finalColor = float3(0.0f, 0.0f, 0.0f);
+	// Directional Light
+	float4 ambient  = float4(0.0f, 0.0f, 0.0f, 0.0f);
+	float4 diffuse  = float4(0.0f, 0.0f, 0.0f, 0.0f);
+	float4 specular = float4(0.0f, 0.0f, 0.0f, 0.0f);
 
-	//****calculating direction light****//
-	float3 directionLightColor = float3(0.0f, 0.0f, 0.0f);
-	float3 lightDir = -normalize(directionLight.direction);
-	float3 wnrm = normalize(input.Normal);
-	directionLightColor = (saturate(dot(lightDir, wnrm) * diffuse * directionLight.diffuse)).rgb + (diffuse * directionLight.ambient).rgb;
-	//****calculating direction light****//
+	float4 A, D, S;
 
+	float3 toCameraW = normalize(gCameraPos.xyz - psInput.PositionW);
 
-	//****calculating point light****//
-	float3 pointLightColor = float3(0.0f, 0.0f, 0.0f);
-	float3 pointLightDir = normalize(pointLight.position - input.WorldPos);
-	float pointDis = length(pointLight.position - input.WorldPos);
-	if (pointDis > pointLight.range) {
-		pointLightColor = float3(0.0f, 0.0f, 0.0f);
-	} else {
-		float pointLightRatio = saturate(dot(pointLightDir, input.Normal));
-		pointLightColor += pointLightRatio * pointLight.diffuse * diffuse;
-		//pointLightColor += 1.0f - saturate(length(pointLight.position - input.WorldPos) / pointLight.range);
-		pointLightColor /= pointLight.attenuation[0] + (pointLight.attenuation[1] * pointDis) + (pointLight.attenuation[2] * (pointDis*pointDis));
-	}
-	//****calculating point light****//
+	ComputeDirectionalLight(currMat, gDirLight, psInput.NormalW, toCameraW, A, D, S);
+	ambient  += A;
+	diffuse  += D;
+	specular += S;
 
-	//****calculating spot light****//
-	float3 spotLightColor = float3(0.0f, 0.0f, 0.0f);
-	float3 spotLightDir = spotLight.position - input.WorldPos;
-	float spotDis = length(spotLight.position - input.WorldPos);
-	if (spotDis > spotLight.range) {
-		spotLightColor = float3(0.0f, 0.0f, 0.0f);
-	} else {
-		spotLightDir /= spotDis;
-		float spotLightAmount = dot(spotLightDir, input.Normal);
-		spotLightColor += spotLightAmount * diffuse * spotLight.diffuse;
-		spotLightColor /= spotLight.attenuation[0] + (spotLight.attenuation[1] * spotDis) + (spotLight.attenuation[2] * (spotDis*spotDis));
-		spotLightColor *= pow(max(dot(-spotLightDir, spotLight.direction), 0.0f), spotLight.cone);
-		
-		//spotLightColor = saturate(spotLightColor);
-	}
-	//****calculating spot light****//
-	finalColor = saturate(spotLightColor + pointLightColor + directionLightColor);
+	float4 finalColor = ambient + diffuse + specular;
+	return float4(finalColor.rgb, gMaterial.Diffuse.a);
 
-	return float4(finalColor, diffuse.a);
 
 }

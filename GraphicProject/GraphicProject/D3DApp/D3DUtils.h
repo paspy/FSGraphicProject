@@ -94,44 +94,57 @@ typedef struct Vertex3D {
 }*Vertex3D_ptr;
 
 // constant buffer structures
-struct DirectionLight {
-	DirectionLight() { ZeroMemory(this, sizeof(DirectionLight)); }
-	XMFLOAT3 direction;
-	float pad;
-	XMFLOAT4 ambient;
-	XMFLOAT4 diffuse;
+struct DirectionalLight {
+	DirectionalLight() { ZeroMemory(this, sizeof(this)); }
+	XMFLOAT4 Ambient;
+	XMFLOAT4 Diffuse;
+	XMFLOAT4 Specular;
+
+	XMFLOAT3 Direction;
+	float Pad;
 };
 
 struct PointLight {
-	PointLight() { ZeroMemory(this, sizeof(PointLight)); }
-	XMFLOAT3 position;
-	float range;
-	XMFLOAT3 attenuation;
-	float pad;
-	XMFLOAT4 diffuse;
+	PointLight() { ZeroMemory(this, sizeof(this)); }
+	XMFLOAT4 Ambient;
+	XMFLOAT4 Diffuse;
+	XMFLOAT4 Specular;
+
+	XMFLOAT3 Postition;
+	float Range;
+
+	XMFLOAT3 Att;
+	float Pad;
 };
 
 struct SpotLight {
-	SpotLight() { ZeroMemory(this, sizeof(SpotLight)); }
-	XMFLOAT3 direction;
-	float pad;
-	XMFLOAT3 position;
-	float range;
-	XMFLOAT3 attenuation;
-	float cone;
-	XMFLOAT4 diffuse;
+	SpotLight() { ZeroMemory(this, sizeof(this)); }
+	XMFLOAT4 Ambient;
+	XMFLOAT4 Diffuse;
+	XMFLOAT4 Specular;
+
+	XMFLOAT3 Postition;
+	float Range;
+	
+	XMFLOAT3 Direction;
+	float Spot;
+	
+	XMFLOAT3 Att;
+	float Pad;
 };
 
-struct ConstPerFrame {
-	DirectionLight directionLight;
+struct cbPerFrame {
+	DirectionalLight directionalLight;
 	PointLight pointLight;
 	SpotLight spotLight;
+	XMFLOAT4 cameraPos;
+
 };
 
 class Skybox {
 public:
 	struct CBuffer {
-		XMMATRIX WVP;
+		XMMATRIX WorldViewProj;
 	};
 	Skybox() {}
 	~Skybox() {
@@ -192,8 +205,8 @@ public:
 		_d3dImmediateContext->IASetIndexBuffer(indexBuffer, DXGI_FORMAT_R32_UINT, 0);
 		//Set the spheres vertex buffer
 		_d3dImmediateContext->IASetVertexBuffers(0, 1, &vertBuffer, &stride, &offset);
-		//Set the WVP matrix and send it to the constant buffer in shader file
-		cBuffer.WVP = XMMatrixTranspose(worldMat * _camView * _camProj);
+		//Set the WorldViewProj matrix and send it to the constant buffer in shader file
+		cBuffer.WorldViewProj = XMMatrixTranspose(worldMat * _camView * _camProj);
 		_d3dImmediateContext->UpdateSubresource(constBuffer, 0, NULL, &cBuffer, 0, 0);
 		_d3dImmediateContext->VSSetConstantBuffers(0, 1, &constBuffer);
 		//Send our skymap resource view to pixel shader
@@ -239,11 +252,21 @@ struct SurfaceMaterial {
 
 class ObjMesh {
 public:
+	struct Material {
+		Material() { ZeroMemory(this, sizeof(this)); }
+		XMFLOAT4 Ambient;
+		XMFLOAT4 Diffuse;
+		XMFLOAT4 Specular; // w = Specular Power
+		XMFLOAT4 Reflect;
+	};
+
 	struct CBuffer {
 		CBuffer() {}
-		XMMATRIX WVP;
 		XMMATRIX World;
-		XMFLOAT4 difColor;
+		XMMATRIX InvWorld;
+		XMMATRIX WorldViewProj;
+		//XMFLOAT4 difColor;
+		Material material;
 	};
 	
 	ObjMesh() {}
@@ -287,8 +310,13 @@ public:
 		sampDesc.MinLOD = 0;
 		sampDesc.MaxLOD = D3D11_FLOAT32_MAX;
 		_d3dDevice->CreateSamplerState(&sampDesc, &texSamplerState);
+
+		// temp set default material setting
+		cbBuffer.material.Ambient = XMFLOAT4(0.0f, 0.0f, 0.0f, 0.0f);
+		cbBuffer.material.Specular = XMFLOAT4(0.5f, 0.5f, 0.5f, 16.0f);
 	}
-	void Render(ID3D11DeviceContext *_d3dImmediateContext, XMMATRIX _camView, XMMATRIX _camProj) {
+
+	void Render(ID3D11DeviceContext *_d3dImmediateContext, XMVECTOR _camPos, XMMATRIX _camView, XMMATRIX _camProj) {
 		// Set the default VS shader and depth/stencil state and layout
 		_d3dImmediateContext->VSSetShader(vertexShader, NULL, 0);
 		_d3dImmediateContext->PSSetShader(pixelShader, NULL, 0);
@@ -300,10 +328,12 @@ public:
 			_d3dImmediateContext->IASetIndexBuffer(indexBuffer, DXGI_FORMAT_R32_UINT, 0);
 			//Set the grounds vertex buffer
 			_d3dImmediateContext->IASetVertexBuffers(0, 1, &vertBuffer, &stride, &offset);
-			//Set the WVP matrix and send it to the constant buffer in effect file
-			cbBuffer.WVP = XMMatrixTranspose(worldMat * _camView * _camProj);
-			cbBuffer.World = XMMatrixTranspose(worldMat);
-			cbBuffer.difColor = materials[subsetTexture[i]].difColor;
+			//Set the WorldViewProj matrix and send it to the constant buffer in effect file
+			cbBuffer.World = worldMat;
+			cbBuffer.InvWorld = XMMatrixTranspose(worldMat);
+			cbBuffer.WorldViewProj = XMMatrixTranspose(worldMat * _camView * _camProj);
+			//cbBuffer.difColor = materials[subsetTexture[i]].difColor;
+			
 			_d3dImmediateContext->UpdateSubresource(constBuffer, 0, NULL, &cbBuffer, 0, 0);
 			_d3dImmediateContext->VSSetConstantBuffers(0, 1, &constBuffer);
 			_d3dImmediateContext->PSSetConstantBuffers(1, 1, &constBuffer);
