@@ -311,7 +311,7 @@ public:
 		sampDesc.MaxLOD = D3D11_FLOAT32_MAX;
 		_d3dDevice->CreateSamplerState(&sampDesc, &texSamplerState);
 
-		// temp set default material setting
+		// hard coded matrtial setting.
 		cbBuffer.material.Ambient = XMFLOAT4(0.0f, 0.0f, 0.0f, 0.0f);
 		cbBuffer.material.Specular = XMFLOAT4(0.5f, 0.5f, 0.5f, 16.0f);
 	}
