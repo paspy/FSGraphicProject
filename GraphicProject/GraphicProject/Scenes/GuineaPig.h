@@ -26,6 +26,8 @@ private:
 	Skybox			m_skyBox;
 	ObjMesh			m_ground;
 	ObjMesh			m_barrel;
+	ObjMesh			m_bed;
+
 
 	// Lighting
 	ID3D11Buffer		*m_perFrameBuffer = nullptr;
@@ -33,7 +35,7 @@ private:
 	PointLight			m_pointLight;
 	SpotLight			m_spotLight;
 
-	cbPerFrame	m_cbPerFrame;
-	ID3D11Buffer	*m_cbPerFrameBuffer = nullptr;
+	cbPerFrame			m_cbPerFrame;
+	ID3D11Buffer		*m_cbPerFrameBuffer = nullptr;
 };
 

@@ -42,6 +42,7 @@ void GuineaPig::BuildGeometry() {
 	m_skyBox.Init(m_d3dDevice);
 	m_ground.Init(m_d3dDevice);
 	m_barrel.Init(m_d3dDevice);
+	m_bed.Init(m_d3dDevice);
 
 	D3DUtils::BuildSphere(m_d3dDevice ,10, 10, &m_skyBox.vertBuffer, &m_skyBox.indexBuffer, m_skyBox.numVertices, m_skyBox.numFaces);
 	// loading the texture - using dds loader
@@ -88,21 +89,39 @@ void GuineaPig::BuildGeometry() {
 		true,
 		true);
 
-
 	HR(D3DUtils::CreateShaderAndLayoutFromFile(
 		m_d3dDevice,
 		L"Shaders/Base/Base.hlsl",
 		m_barrel.vertexLayout, 4, &m_barrel.vertexShader, &m_barrel.pixelShader, &m_barrel.inputLayout));
+
+	D3DUtils::CreateModelFromObjFile(
+		m_d3dDevice,
+		m_swapChain,
+		L"Resources/Models/Bed.obj",
+		&m_bed.vertBuffer,
+		&m_bed.indexBuffer,
+		m_bed.textureNameArray,
+		m_bed.shaderResView,
+		m_bed.subsetIndexStart,
+		m_bed.subsetTexture,
+		m_bed.materials,
+		m_bed.subsets,
+		true,
+		true);
+
+	HR(D3DUtils::CreateShaderAndLayoutFromFile(
+		m_d3dDevice,
+		L"Shaders/Base/Base.hlsl",
+		m_bed.vertexLayout, 4, &m_bed.vertexShader, &m_bed.pixelShader, &m_bed.inputLayout));
 
 }
 
 void GuineaPig::BuildLighting() {
 	// Direction light setting
 	m_directionalLight.Ambient = XMFLOAT4(0.2f, 0.2f, 0.2f, 1.0f);
-	m_directionalLight.Diffuse = XMFLOAT4(0.8f, 0.8f, 0.8f, 1.0f);
-	m_directionalLight.Specular = XMFLOAT4(0.5f, 0.5f, 0.5f, 1.0f);
-	m_directionalLight.Direction = XMFLOAT3(0.57735f, -0.57735f, 0.57735f);
-	//m_directionalLight.Direction = XMFLOAT3(0.0f, -0.57735f, 0.0f);
+	m_directionalLight.Diffuse = XMFLOAT4(0.3f, 0.3f, 0.3f, 1.0f);
+	m_directionalLight.Specular = XMFLOAT4(0.3f, 0.3f, 0.3f, 1.0f);
+	m_directionalLight.Direction = XMFLOAT3(0.58f, -0.58f, 0.58f);
 
 	// Point light setting
 	m_pointLight.Ambient = XMFLOAT4(0.3f, 0.3f, 0.3f, 1.0f);
@@ -118,7 +137,7 @@ void GuineaPig::BuildLighting() {
 	m_spotLight.Specular = XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f);
 	m_spotLight.Att = XMFLOAT3(1.0f, 0.0f, 0.0f);
 	m_spotLight.Spot = 100.0f;
-	m_spotLight.Range = 10000.0f;
+	m_spotLight.Range = 1000.0f;
 
 }
 
@@ -137,10 +156,16 @@ void GuineaPig::UpdateScene(double _dt) {
 	m_skyBox.worldMat = scale * translation;
 	// **Update Skybox **//
 
+	// **Update Directional Light **//
+	m_directionalLight.Direction.x = 0.85f * cosf(static_cast<float>(m_timer.TotalTime()));
+	m_directionalLight.Direction.z = 0.85f * sinf(static_cast<float>(m_timer.TotalTime()));
+	m_directionalLight.Direction.y = -0.58f;
+	// **Update Directional Light **//
+
 
 	// **Update Point Light **//
-	m_pointLight.Position.x = 10.0f*cosf(2.2f * static_cast<float>(m_timer.TotalTime()));
-	m_pointLight.Position.z = 10.0f*sinf(2.2f * static_cast<float>(m_timer.TotalTime()));
+	m_pointLight.Position.x = 5.0f*cosf(2.2f * static_cast<float>(m_timer.TotalTime()));
+	m_pointLight.Position.z = 5.0f*sinf(2.2f * static_cast<float>(m_timer.TotalTime()));
 	m_pointLight.Position.y = 2.5f;
 	// **Update Point Light **//
 
@@ -172,6 +197,14 @@ void GuineaPig::UpdateScene(double _dt) {
 	Translation = XMMatrixTranslation(0.0f, 5.0f, 25.0f);
 
 	m_barrel.worldMat = Rotation * Scale * Translation;
+
+	m_bed.worldMat = XMMatrixIdentity();
+
+	Rotation = XMMatrixRotationY(0);
+	Scale = XMMatrixScaling(1.0f, 1.0f, 1.0f);
+	Translation = XMMatrixTranslation(0.0f, 1.0f, -30.0f);
+
+	m_bed.worldMat = Rotation * Scale * Translation;
 }
 
 void GuineaPig::DrawScene() {
@@ -208,6 +241,7 @@ void GuineaPig::DrawScene() {
 
 	// obj meshs
 	m_barrel.Render(m_d3dImmediateContext, m_camPosition, m_camView, m_camProjection);
+	m_bed.Render(m_d3dImmediateContext, m_camPosition, m_camView, m_camProjection);
 	m_ground.Render(m_d3dImmediateContext, m_camPosition, m_camView, m_camProjection);
 
 	// Skybox

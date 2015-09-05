@@ -9,7 +9,6 @@ cbuffer cbPerFrame {
 
 cbuffer CBuffer {
 	float4x4 gWorld;
-	float4x4 gInvWorld;
 	float4x4 gWorldViewProj;
 	Material gMaterial;
 };
@@ -37,14 +36,14 @@ struct VS_OUTPUT {
 // Vertex Shader Entry Point
 VS_OUTPUT VSMain(VS_INPUT vsInput) {
 
-	VS_OUTPUT vsOutput;
+	VS_OUTPUT vsOutput = (VS_OUTPUT)0;;
 
 	// Transform to homogeneous clip space.
 	vsOutput.PositionH = mul(float4(vsInput.PositionL, 1.0f), gWorldViewProj);
 
 	// Transform to world space space.
 	vsOutput.PositionW = mul(float4(vsInput.PositionL, 1.0f), gWorld).xyz;
-	vsOutput.NormalW   = mul(vsInput.NormalL, (float3x3)gInvWorld);
+	vsOutput.NormalW   = normalize(mul(vsInput.NormalL, (float3x3)gWorld));
 	vsOutput.TangentW  = mul(vsInput.TangentL, (float3x3)gWorld);
 
 	vsOutput.TexCoord = vsInput.TexCoord;
@@ -92,7 +91,7 @@ float4 PSMain(VS_OUTPUT psInput) : SV_TARGET {
 	float4 diffuse  = float4(0.0f, 0.0f, 0.0f, 0.0f);
 	float4 specular = float4(0.0f, 0.0f, 0.0f, 0.0f);
 
-	float4 A, D, S;
+	float4 A, D, S; // temp Ambient, Diffuse, and Specular
 
 	float3 toCameraW = normalize(gCameraPos.xyz - psInput.PositionW);
 

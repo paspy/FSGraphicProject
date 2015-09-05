@@ -263,7 +263,6 @@ public:
 	struct CBuffer {
 		CBuffer() {}
 		XMMATRIX World;
-		XMMATRIX InvWorld;
 		XMMATRIX WorldViewProj;
 		Material material;
 	};
@@ -328,8 +327,7 @@ public:
 			//Set the grounds vertex buffer
 			_d3dImmediateContext->IASetVertexBuffers(0, 1, &vertBuffer, &stride, &offset);
 			//Set the stuff to the constant buffer to the hlsl file
-			cbBuffer.World = worldMat;
-			cbBuffer.InvWorld = XMMatrixTranspose(worldMat);
+			cbBuffer.World = XMMatrixTranspose(worldMat);
 			cbBuffer.WorldViewProj = XMMatrixTranspose(worldMat * _camView * _camProj);
 			
 			_d3dImmediateContext->UpdateSubresource(constBuffer, 0, NULL, &cbBuffer, 0, 0);
