@@ -56,9 +56,6 @@ VS_OUTPUT VSMain(VS_INPUT vsInput) {
 float4 PSMain(VS_OUTPUT psInput) : SV_TARGET {
 	psInput.NormalW = normalize(psInput.NormalW);
 
-	//Set diffuse color of gMaterial
-	//float4 diffuse = difColor;
-
 	float4 textColor = ObjTexture.Sample(ObjSamplerState, psInput.TexCoord);
 	
 	Material currMat;
