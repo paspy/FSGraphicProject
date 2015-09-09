@@ -1,10 +1,12 @@
+#
 newmtl blinn1SG
-illum 4
-Kd 0.00 0.00 0.00
-Ka 0.00 0.00 0.00
-Tf 1.00 1.00 1.00
-Ni 1.00
-Ks 0.50 0.50 0.50
-map_Ka Bed_diffuse.dds
-map_Kd Bed_diffuse.dds
-map_bump Bed_normal.dds
+	
+	Ka 0.00 0.00 0.00
+	Kd 0.00 0.00 0.00
+	Ks 0.50 0.50 0.50
+	Tf 1.00 1.00 1.00
+	illum 4
+	map_Ka Bed_diffuse.dds
+	map_Kd Bed_diffuse.dds
+	map_bump Bed_normal.dds
+	Ni 1.00

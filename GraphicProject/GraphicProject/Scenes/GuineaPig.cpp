@@ -114,6 +114,9 @@ void GuineaPig::BuildGeometry() {
 		L"Shaders/Base/Base.hlsl",
 		m_bed.vertexLayout, 4, &m_bed.vertexShader, &m_bed.pixelShader, &m_bed.inputLayout));
 
+
+
+	D3DUtils::CreateModelFromObjFileKaiNi(NULL, NULL, "Resources/Models/barrel.obj", NULL, NULL);
 }
 
 void GuineaPig::BuildLighting() {

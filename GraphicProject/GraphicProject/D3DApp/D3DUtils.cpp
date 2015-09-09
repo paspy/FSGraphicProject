@@ -185,6 +185,28 @@ void D3DUtils::BuildSphere(
 	HR(_d3dDevice->CreateBuffer(&indexBufferDesc, &iinitData, _indexBuffer));
 }
 
+bool D3DUtils::CreateModelFromObjFileKaiNi(ID3D11Device * _d3dDevice, IDXGISwapChain * _swapChain, string _filename, ID3D11Buffer ** _vertBuff, ID3D11Buffer ** _indexBuff) {
+
+	vector<shape_t> shapes;
+	vector<material_t> materials;
+
+	string err = tinyobj::LoadObj(shapes, materials, _filename.c_str(), "Resources/Models/");
+
+	if (!err.empty()) {
+		wstring werr(err.begin(), err.end());
+		MessageBox(0, werr.c_str(), L"Error", MB_OK);
+		return false;
+	}
+
+	std::cout << "# of shapes    : " << shapes.size() << std::endl;
+	std::cout << "# of materials : " << materials.size() << std::endl;
+
+
+
+
+	return false;
+}
+
 
 // source: http://www.braynzarsoft.net/index.php?p=D3D11OBJMODEL
 bool D3DUtils::CreateModelFromObjFile(

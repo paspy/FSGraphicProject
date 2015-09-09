@@ -27,6 +27,9 @@
     <Filter Include="Source Files\Scenes\Shaders\Base">
       <UniqueIdentifier>{98c06d2d-c9f2-4850-8af5-1e9213880910}</UniqueIdentifier>
     </Filter>
+    <Filter Include="D3DApp\TinyObjLoader">
+      <UniqueIdentifier>{cab35f1e-a037-48bc-b421-e83acc01fcbe}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Main.cpp">
@@ -49,6 +52,9 @@
     </ClCompile>
     <ClCompile Include="D3DApp\D3DUtils.cpp">
       <Filter>D3DApp</Filter>
+    </ClCompile>
+    <ClCompile Include="D3DApp\TinyObjLoader\tiny_obj_loader.cc">
+      <Filter>D3DApp\TinyObjLoader</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -78,6 +84,12 @@
     </ClInclude>
     <ClInclude Include="D3DApp\DirectXTK\PlatformHelpers.h">
       <Filter>D3DApp\DirectXTK</Filter>
+    </ClInclude>
+    <ClInclude Include="D3DApp\TinyObjLoader\tiny_obj_loader.h">
+      <Filter>D3DApp\TinyObjLoader</Filter>
+    </ClInclude>
+    <ClInclude Include="D3DApp\Defines.h">
+      <Filter>D3DApp</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

@@ -12,10 +12,10 @@ using namespace std;
 int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPTSTR lpCmdLine, int nCmdShow);
 LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wparam, LPARAM lparam);
 
-#if defined(_WINDOWS)
-int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE, LPTSTR, int)
-#else
+#if defined(DEBUG) | defined(_DEBUG)
 int main()
+#else
+int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE, LPTSTR, int)
 #endif
 {
 #if defined(DEBUG) | defined(_DEBUG)

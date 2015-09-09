@@ -44,7 +44,7 @@ VS_OUTPUT VSMain(VS_INPUT vsInput) {
 	// Transform to world space space.
 	vsOutput.PositionW = mul(float4(vsInput.PositionL, 1.0f), gWorld).xyz;
 	vsOutput.NormalW   = normalize(mul(vsInput.NormalL, (float3x3)gWorld));
-	vsOutput.TangentW  = mul(vsInput.TangentL, (float3x3)gWorld);
+	vsOutput.TangentW  = normalize(mul(vsInput.TangentL, (float3x3)gWorld));
 
 	vsOutput.TexCoord = vsInput.TexCoord;
 
@@ -69,8 +69,8 @@ float4 PSMain(VS_OUTPUT psInput) : SV_TARGET {
 	//Change normal map range from [0, 1] to [-1, 1]
 	normalMap = (2.0f*normalMap) - 1.0f;
 
-	//Make sure tangent is completely orthogonal to normal
-	psInput.TangentW = normalize(psInput.TangentW - dot(psInput.TangentW, psInput.NormalW)*psInput.NormalW);
+	//Make sure tangent is normalized after interpolation
+	psInput.TangentW = normalize(psInput.TangentW);
 
 	//Create the biTangent
 	float3 biTangent = cross(psInput.NormalW, psInput.TangentW);

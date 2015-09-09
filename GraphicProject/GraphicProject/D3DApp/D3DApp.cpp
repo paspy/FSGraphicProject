@@ -194,19 +194,20 @@ bool D3DApp::InitDirect3D() {
 
 	UINT bestAdapterIndex = 0;
 	size_t bestMemSize = 0;
-	DXGI_ADAPTER_DESC desc;
+	DXGI_ADAPTER_DESC adapterDesc;
+	ZeroMemory(&adapterDesc, sizeof(adapterDesc));
 
 	for ( UINT i = 0; factoryPtr->EnumAdapters(i, &adapterPtr) != DXGI_ERROR_NOT_FOUND; i++ ) {
 		adapters.push_back(adapterPtr);
-		adapterPtr->GetDesc(&desc);
+		adapterPtr->GetDesc(&adapterDesc);
 
-		if ( desc.DedicatedVideoMemory > bestMemSize ) {
+		if ( adapterDesc.DedicatedVideoMemory > bestMemSize ) {
 			bestAdapterIndex = i;
-			bestMemSize = desc.DedicatedVideoMemory;
+			bestMemSize = adapterDesc.DedicatedVideoMemory;
 		}
 	}
-	adapters[bestAdapterIndex]->GetDesc(&desc);
-	m_deviceName = desc.Description;
+	adapters[bestAdapterIndex]->GetDesc(&adapterDesc);
+	m_deviceName = adapterDesc.Description;
 	SafeRelease(factoryPtr);
 
 	HRESULT hr = D3D11CreateDeviceAndSwapChain(
