@@ -9,7 +9,7 @@ SamplerState ObjSamplerState;
 
 struct VS_OUTPUT {
 	float4 Position : SV_POSITION;
-	float3 texCoord : TEXCOORD;
+	float3 TexCoord : TEXCOORD;
 };
 
 
@@ -19,11 +19,11 @@ VS_OUTPUT VSMain(float3 inPos : POSITION, float2 inTexCoord : TEXCOORD) {
 	//Set Pos to xyww instead of xyzw, so that z will always be 1 (furthest from camera)
 	output.Position = mul(float4(inPos, 1.0f), WorldViewProj).xyww;
 
-	output.texCoord = inPos;
+	output.TexCoord = inPos;
 
 	return output;
 }
 
 float4 PSMain(VS_OUTPUT input) : SV_Target {
-	return SkyMap.Sample(ObjSamplerState, input.texCoord);
+	return SkyMap.Sample(ObjSamplerState, input.TexCoord);
 }

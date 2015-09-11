@@ -1,5 +1,7 @@
 #pragma once
 #include "../D3DApp/D3DApp.h"
+#include "../D3DApp/GeoGen.h"
+#include "../D3DApp/Waves.h"
 
 class GuineaPig : public D3DApp {
 public:
@@ -28,9 +30,10 @@ private:
 	ObjMesh			m_barrel;
 	ObjMesh			m_bed;
 
+	// Hill and Waves
+	GeoGen m_geoGen;
 
 	// Lighting
-	ID3D11Buffer		*m_perFrameBuffer = nullptr;
 	DirectionalLight	m_directionalLight;
 	PointLight			m_pointLight;
 	SpotLight			m_spotLight;

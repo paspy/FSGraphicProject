@@ -56,6 +56,12 @@
     <ClCompile Include="D3DApp\TinyObjLoader\tiny_obj_loader.cc">
       <Filter>D3DApp\TinyObjLoader</Filter>
     </ClCompile>
+    <ClCompile Include="D3DApp\GeoGen.cpp">
+      <Filter>D3DApp</Filter>
+    </ClCompile>
+    <ClCompile Include="D3DApp\Waves.cpp">
+      <Filter>D3DApp</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="D3DApp\D3DUtils.h">
@@ -89,6 +95,12 @@
       <Filter>D3DApp\TinyObjLoader</Filter>
     </ClInclude>
     <ClInclude Include="D3DApp\Defines.h">
+      <Filter>D3DApp</Filter>
+    </ClInclude>
+    <ClInclude Include="D3DApp\GeoGen.h">
+      <Filter>D3DApp</Filter>
+    </ClInclude>
+    <ClInclude Include="D3DApp\Waves.h">
       <Filter>D3DApp</Filter>
     </ClInclude>
   </ItemGroup>

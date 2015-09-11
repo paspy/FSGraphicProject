@@ -4,19 +4,26 @@
 
 typedef struct Vertex3D {
 	Vertex3D() { 
-		pos = XMFLOAT3(0, 0, 0); 
-		normal = XMFLOAT3(0, 0, 0);
-		tangent = XMFLOAT3(0, 0, 0);
-		texCoord = XMFLOAT2(0, 0);
+		Position = XMFLOAT3(0, 0, 0); 
+		Normal = XMFLOAT3(0, 0, 0);
+		TangentU = XMFLOAT3(0, 0, 0);
+		TexCoord = XMFLOAT2(0, 0);
 	}
-	Vertex3D(XMFLOAT3 _pos, XMFLOAT2 _tex) : pos(_pos), texCoord(_tex) { }
-	Vertex3D(XMFLOAT3 _pos, XMFLOAT2 _tex, XMFLOAT3 _norm) : pos(_pos), texCoord(_tex), normal(_norm) {}
+	Vertex3D(XMFLOAT3 _pos, XMFLOAT2 _tex) : Position(_pos), TexCoord(_tex) { }
+	Vertex3D(XMFLOAT3 _pos, XMFLOAT2 _tex, XMFLOAT3 _norm) : Position(_pos), TexCoord(_tex), Normal(_norm) {}
+	Vertex3D(const XMFLOAT3& p, const XMFLOAT3& n, const XMFLOAT3& t, const XMFLOAT2& uv) : Position(p), Normal(n), TangentU(t), TexCoord(uv) {}
+	Vertex3D(
+		float px, float py, float pz,
+		float nx, float ny, float nz,
+		float tx, float ty, float tz,
+		float u, float v
+	) : Position(px, py, pz), Normal(nx, ny, nz), TangentU(tx, ty, tz), TexCoord(u, v) {}
 
-	XMFLOAT3 pos;
-	XMFLOAT2 texCoord;
-	XMFLOAT3 normal;
-	// bump normal mapping
-	XMFLOAT3 tangent;
+	XMFLOAT3 Position;
+	XMFLOAT2 TexCoord;
+	XMFLOAT3 Normal;
+	// bump Normal mapping
+	XMFLOAT3 TangentU;
 }*Vertex3D_ptr;
 
 // constant buffer structures
@@ -305,6 +312,25 @@ public:
 	template<typename T>
 	static T Clamp(const T& _x, const T& _low, const T& _high) {
 		return _x < _low ? _low : (_x > _high ? _high : _x);
+	}
+
+	static float AngleFromXY(float x, float y) {
+		float theta = 0.0f;
+		// Quadrant I or IV
+		if ( x >= 0.0f ) {
+			// If x = 0, then atanf(y/x) = +pi/2 if y > 0
+			//                atanf(y/x) = -pi/2 if y < 0
+			theta = atanf(y / x); // in [-pi/2, +pi/2]
+
+			if ( theta < 0.0f )
+				theta += 2.0f*XM_PI; // in [0, 2*pi).
+		}
+
+		// Quadrant II or III
+		else
+			theta = atanf(y / x) + XM_PI; // in [0, 2*pi).
+
+		return theta;
 	}
 
 	static float DegreesToradians(float _degree) {

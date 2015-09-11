@@ -202,7 +202,7 @@ bool D3DApp::InitDirect3D() {
 		adapterPtr->GetDesc(&adapterDesc);
 
 		if ( adapterDesc.DedicatedVideoMemory > bestMemSize ) {
-			bestAdapterIndex = i;
+			bestAdapterIndex = 0;
 			bestMemSize = adapterDesc.DedicatedVideoMemory;
 		}
 	}
@@ -211,18 +211,18 @@ bool D3DApp::InitDirect3D() {
 	SafeRelease(factoryPtr);
 
 	HRESULT hr = D3D11CreateDeviceAndSwapChain(
-		adapters[0],				// Multiple adapters
-		D3D_DRIVER_TYPE_UNKNOWN,	// Driver Type If you specify the adapter, you cannot specify the driver type
-		NULL,						// Software
-		createDeviceFlags,			// Flags
-		&FeatureLevelsRequested,	// Feature Levels Requested Pointer
-		1,							// Number of Feature Levels
-		D3D11_SDK_VERSION,			// D3D11_SDK_VERSION
-		&swapChainDesc,				// Swap Chain Desciptions
-		&m_swapChain,				// Swap Chain Pointer
-		&m_d3dDevice,				// D3D Device
-		&FeatureLevelsSupported,	// Return supported levels
-		&m_d3dImmediateContext		// Device Context Pointer
+		adapters[bestAdapterIndex],				// Multiple adapters
+		D3D_DRIVER_TYPE_UNKNOWN,				// Driver Type If you specify the adapter, you cannot specify the driver type
+		NULL,									// Software
+		createDeviceFlags,						// Flags
+		&FeatureLevelsRequested,				// Feature Levels Requested Pointer
+		1,										// Number of Feature Levels
+		D3D11_SDK_VERSION,						// D3D11_SDK_VERSION
+		&swapChainDesc,							// Swap Chain Desciptions
+		&m_swapChain,							// Swap Chain Pointer
+		&m_d3dDevice,							// D3D Device
+		&FeatureLevelsSupported,				// Return supported levels
+		&m_d3dImmediateContext					// Device Context Pointer
 		);
 
 	if ( FAILED(hr) ) {

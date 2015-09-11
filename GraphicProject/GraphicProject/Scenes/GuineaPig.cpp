@@ -3,10 +3,9 @@
 GuineaPig::GuineaPig(HINSTANCE hinst) : D3DApp(hinst){ }
 
 GuineaPig::~GuineaPig() {
+	// release lighting ptr
 	SafeRelease(m_cbPerFrameBuffer);
 
-	// release lighting ptr
-	SafeRelease(m_perFrameBuffer);
 }
 
 bool GuineaPig::Init() {
@@ -113,8 +112,6 @@ void GuineaPig::BuildGeometry() {
 		m_d3dDevice,
 		L"Shaders/Base/Base.hlsl",
 		m_bed.vertexLayout, 4, &m_bed.vertexShader, &m_bed.pixelShader, &m_bed.inputLayout));
-
-
 
 	D3DUtils::CreateModelFromObjFileKaiNi(NULL, NULL, "Resources/Models/barrel.obj", NULL, NULL);
 }
@@ -255,23 +252,18 @@ void GuineaPig::DrawScene() {
 }
 
 void GuineaPig::UpdateKeyboardInput(double _dt) {
-
 	if ( GetAsyncKeyState(VK_LW) ) {
 		m_moveBackForward += (float)_dt * 10.0f;
 	}
-
 	if ( GetAsyncKeyState(VK_LS) ) {
 		m_moveBackForward -= (float)_dt * 10.0f;
 	}
-
 	if ( GetAsyncKeyState(VK_LA) ) {
 		m_moveLeftRight -= (float)_dt * 10.0f;
 	}
-
 	if ( GetAsyncKeyState(VK_LD) ) {
 		m_moveLeftRight += (float)_dt * 10.0f;
 	}
-
 }
 
 void GuineaPig::UpdateCamera() {

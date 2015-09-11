@@ -190,7 +190,9 @@
     <ClCompile Include="D3DApp\D3DUtils.cpp" />
     <ClCompile Include="D3DApp\DirectXTK\DDSTextureLoader.cpp" />
     <ClCompile Include="D3DApp\DirectXTK\pch.cpp" />
+    <ClCompile Include="D3DApp\GeoGen.cpp" />
     <ClCompile Include="D3DApp\TinyObjLoader\tiny_obj_loader.cc" />
+    <ClCompile Include="D3DApp\Waves.cpp" />
     <ClCompile Include="D3DApp\XTime.cpp" />
     <ClCompile Include="Main.cpp" />
     <ClCompile Include="Scenes\GuineaPig.cpp" />
@@ -204,7 +206,9 @@
     <ClInclude Include="D3DApp\DirectXTK\DirectXHelpers.h" />
     <ClInclude Include="D3DApp\DirectXTK\pch.h" />
     <ClInclude Include="D3DApp\DirectXTK\PlatformHelpers.h" />
+    <ClInclude Include="D3DApp\GeoGen.h" />
     <ClInclude Include="D3DApp\TinyObjLoader\tiny_obj_loader.h" />
+    <ClInclude Include="D3DApp\Waves.h" />
     <ClInclude Include="D3DApp\XTime.h" />
     <ClInclude Include="Scenes\GuineaPig.h" />
   </ItemGroup>

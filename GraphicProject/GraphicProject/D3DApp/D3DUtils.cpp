@@ -83,9 +83,9 @@ void D3DUtils::BuildSphere(
 
 	XMVECTOR currVertPos = XMVectorSet(0.0f, 0.0f, 1.0f, 0.0f);
 
-	vertices[0].pos.x = 0.0f;
-	vertices[0].pos.y = 0.0f;
-	vertices[0].pos.z = 1.0f;
+	vertices[0].Position.x = 0.0f;
+	vertices[0].Position.y = 0.0f;
+	vertices[0].Position.z = 1.0f;
 
 	for (int i = 0; i < _latLines - 2; i++) {
 		spherePitch = (i + 1) * (3.14f / (_latLines - 1));
@@ -95,15 +95,15 @@ void D3DUtils::BuildSphere(
 			RotationY = XMMatrixRotationZ(sphereYaw);
 			currVertPos = XMVector3TransformNormal(XMVectorSet(0.0f, 0.0f, 1.0f, 0.0f), (RotationX * RotationY));
 			currVertPos = XMVector3Normalize(currVertPos);
-			vertices[i*_longLines + j + 1].pos.x = XMVectorGetX(currVertPos);
-			vertices[i*_longLines + j + 1].pos.y = XMVectorGetY(currVertPos);
-			vertices[i*_longLines + j + 1].pos.z = XMVectorGetZ(currVertPos);
+			vertices[i*_longLines + j + 1].Position.x = XMVectorGetX(currVertPos);
+			vertices[i*_longLines + j + 1].Position.y = XMVectorGetY(currVertPos);
+			vertices[i*_longLines + j + 1].Position.z = XMVectorGetZ(currVertPos);
 		}
 	}
 
-	vertices[_numSphereVertices - 1].pos.x = 0.0f;
-	vertices[_numSphereVertices - 1].pos.y = 0.0f;
-	vertices[_numSphereVertices - 1].pos.z = -1.0f;
+	vertices[_numSphereVertices - 1].Position.x = 0.0f;
+	vertices[_numSphereVertices - 1].Position.y = 0.0f;
+	vertices[_numSphereVertices - 1].Position.z = -1.0f;
 
 	D3D11_BUFFER_DESC vertexBufferDesc;
 	ZeroMemory(&vertexBufferDesc, sizeof(vertexBufferDesc));
@@ -295,7 +295,7 @@ bool D3DUtils::CreateModelFromObjFile(
 				}
 				//Since we compute the normals later, we don't need to check for normals
 				//In the file, but i'll do it here anyway
-				if (checkChar == 'n')	//vn - vert normal
+				if (checkChar == 'n')	//vn - vert Normal
 				{
 					float vnx, vny, vnz;
 					fileIn >> vnx >> vny >> vnz;	//Store next three types
@@ -366,7 +366,7 @@ bool D3DUtils::CreateModelFromObjFile(
 										wstringToInt >> vertPosIndexTemp;
 										vertPosIndexTemp -= 1;		//subtract one since c++ arrays start with 0, and obj start with 1
 
-																	//Check to see if the vert pos was the only thing specified
+																	//Check to see if the vert Position was the only thing specified
 										if (j == VertDef.length() - 1) {
 											vertNormIndexTemp = 0;
 											vertTCIndexTemp = 0;
@@ -383,7 +383,7 @@ bool D3DUtils::CreateModelFromObjFile(
 											vertTCIndexTemp = 0;
 
 										//If the cur. char is the second to last in the string, then
-										//there must be no normal, so set a default normal
+										//there must be no Normal, so set a default Normal
 										if (j == VertDef.length() - 1)
 											vertNormIndexTemp = 0;
 
@@ -482,7 +482,7 @@ bool D3DUtils::CreateModelFromObjFile(
 										wstringToInt >> vertPosIndexTemp;
 										vertPosIndexTemp -= 1;
 
-										//Check to see if the vert pos was the only thing specified
+										//Check to see if the vert Position was the only thing specified
 										if (j == VertDef.length() - 1) {
 											vertTCIndexTemp = 0;
 											vertNormIndexTemp = 0;
@@ -613,7 +613,7 @@ bool D3DUtils::CreateModelFromObjFile(
 		_subsetCount--;
 	}
 
-	//Make sure we have a default for the tex coord and normal
+	//Make sure we have a default for the tex coord and Normal
 	//if one or both are not specified
 	if (!hasNorm)
 		vertNorm.push_back(XMFLOAT3(0.0f, 0.0f, 0.0f));
@@ -768,7 +768,7 @@ bool D3DUtils::CreateModelFromObjFile(
 								//be using the alpha channel in the diffuse map
 								//_materials[matCount - 1].transparent = 1.0f;
 							}
-							//map_bump - bump map (we're usinga normal map though)
+							//map_bump - bump map (we're usinga Normal map though)
 							else if (checkChar == 'b') {
 								checkChar = fileIn.get();
 								if (checkChar == 'u') {
@@ -897,9 +897,9 @@ bool D3DUtils::CreateModelFromObjFile(
 	//Create our vertices using the information we got 
 	//from the file and store them in a vector
 	for (int j = 0; j < totalVerts; ++j) {
-		tempVert.pos = vertPos[vertPosIndex[j]];
-		tempVert.normal = vertNorm[vertNormIndex[j]];
-		tempVert.texCoord = vertTexCoord[vertTCIndex[j]];
+		tempVert.Position = vertPos[vertPosIndex[j]];
+		tempVert.Normal = vertNorm[vertNormIndex[j]];
+		tempVert.TexCoord = vertTexCoord[vertTCIndex[j]];
 
 		vertices.push_back(tempVert);
 	}
@@ -913,9 +913,9 @@ bool D3DUtils::CreateModelFromObjFile(
 		//normalized and unnormalized normals
 		XMFLOAT3 unnormalized = XMFLOAT3(0.0f, 0.0f, 0.0f);
 
-		//tangent stuff
+		//TangentU stuff
 		vector<XMFLOAT3> tempTangent;
-		XMFLOAT3 tangent = XMFLOAT3(0.0f, 0.0f, 0.0f);
+		XMFLOAT3 TangentU = XMFLOAT3(0.0f, 0.0f, 0.0f);
 		float tcU1, tcV1, tcU2, tcV2;
 
 		//Used to get vectors (sides) from the position of the verts
@@ -928,38 +928,38 @@ bool D3DUtils::CreateModelFromObjFile(
 		//Compute face normals
 		for (int i = 0; i < meshTriangles; ++i) {
 			//Get the vector describing one edge of our triangle (edge 0,2)
-			vecX = vertices[indices[(i * 3)]].pos.x - vertices[indices[(i * 3) + 2]].pos.x;
-			vecY = vertices[indices[(i * 3)]].pos.y - vertices[indices[(i * 3) + 2]].pos.y;
-			vecZ = vertices[indices[(i * 3)]].pos.z - vertices[indices[(i * 3) + 2]].pos.z;
+			vecX = vertices[indices[(i * 3)]].Position.x - vertices[indices[(i * 3) + 2]].Position.x;
+			vecY = vertices[indices[(i * 3)]].Position.y - vertices[indices[(i * 3) + 2]].Position.y;
+			vecZ = vertices[indices[(i * 3)]].Position.z - vertices[indices[(i * 3) + 2]].Position.z;
 			edge1 = XMVectorSet(vecX, vecY, vecZ, 0.0f);	//Create our first edge
 
 			//Get the vector describing another edge of our triangle (edge 2,1)
-			vecX = vertices[indices[(i * 3) + 2]].pos.x - vertices[indices[(i * 3) + 1]].pos.x;
-			vecY = vertices[indices[(i * 3) + 2]].pos.y - vertices[indices[(i * 3) + 1]].pos.y;
-			vecZ = vertices[indices[(i * 3) + 2]].pos.z - vertices[indices[(i * 3) + 1]].pos.z;
+			vecX = vertices[indices[(i * 3) + 2]].Position.x - vertices[indices[(i * 3) + 1]].Position.x;
+			vecY = vertices[indices[(i * 3) + 2]].Position.y - vertices[indices[(i * 3) + 1]].Position.y;
+			vecZ = vertices[indices[(i * 3) + 2]].Position.z - vertices[indices[(i * 3) + 1]].Position.z;
 			edge2 = XMVectorSet(vecX, vecY, vecZ, 0.0f);	//Create our second edge
 
-			//Cross multiply the two edge vectors to get the un-normalized face normal
+			//Cross multiply the two edge vectors to get the un-normalized face Normal
 			XMStoreFloat3(&unnormalized, XMVector3Cross(edge1, edge2));
-			tempNormal.push_back(unnormalized);			//Save unormalized normal (for normal averaging)
+			tempNormal.push_back(unnormalized);			//Save unormalized Normal (for Normal averaging)
 
 			//Find first texture coordinate edge 2d vector
-			tcU1 = vertices[indices[(i * 3)]].texCoord.x - vertices[indices[(i * 3) + 2]].texCoord.x;
-			tcV1 = vertices[indices[(i * 3)]].texCoord.y - vertices[indices[(i * 3) + 2]].texCoord.y;
+			tcU1 = vertices[indices[(i * 3)]].TexCoord.x - vertices[indices[(i * 3) + 2]].TexCoord.x;
+			tcV1 = vertices[indices[(i * 3)]].TexCoord.y - vertices[indices[(i * 3) + 2]].TexCoord.y;
 
 			//Find second texture coordinate edge 2d vector
-			tcU2 = vertices[indices[(i * 3) + 2]].texCoord.x - vertices[indices[(i * 3) + 1]].texCoord.x;
-			tcV2 = vertices[indices[(i * 3) + 2]].texCoord.y - vertices[indices[(i * 3) + 1]].texCoord.y;
+			tcU2 = vertices[indices[(i * 3) + 2]].TexCoord.x - vertices[indices[(i * 3) + 1]].TexCoord.x;
+			tcV2 = vertices[indices[(i * 3) + 2]].TexCoord.y - vertices[indices[(i * 3) + 1]].TexCoord.y;
 
-			//Find tangent using both tex coord edges and position edges
-			tangent.x = (tcV1 * XMVectorGetX(edge1) - tcV2 * XMVectorGetX(edge2)) * (1.0f / (tcU1 * tcV2 - tcU2 * tcV1));
-			tangent.y = (tcV1 * XMVectorGetY(edge1) - tcV2 * XMVectorGetY(edge2)) * (1.0f / (tcU1 * tcV2 - tcU2 * tcV1));
-			tangent.z = (tcV1 * XMVectorGetZ(edge1) - tcV2 * XMVectorGetZ(edge2)) * (1.0f / (tcU1 * tcV2 - tcU2 * tcV1));
+			//Find TangentU using both tex coord edges and position edges
+			TangentU.x = (tcV1 * XMVectorGetX(edge1) - tcV2 * XMVectorGetX(edge2)) * (1.0f / (tcU1 * tcV2 - tcU2 * tcV1));
+			TangentU.y = (tcV1 * XMVectorGetY(edge1) - tcV2 * XMVectorGetY(edge2)) * (1.0f / (tcU1 * tcV2 - tcU2 * tcV1));
+			TangentU.z = (tcV1 * XMVectorGetZ(edge1) - tcV2 * XMVectorGetZ(edge2)) * (1.0f / (tcU1 * tcV2 - tcU2 * tcV1));
 
-			tempTangent.push_back(tangent);
+			tempTangent.push_back(TangentU);
 		}
 
-		//Compute vertex normals (normal Averaging)
+		//Compute vertex normals (Normal Averaging)
 		XMVECTOR normalSum = XMVectorSet(0.0f, 0.0f, 0.0f, 0.0f);
 		XMVECTOR tangentSum = XMVectorSet(0.0f, 0.0f, 0.0f, 0.0f);
 		int facesUsing = 0;
@@ -978,7 +978,7 @@ bool D3DUtils::CreateModelFromObjFile(
 					tY = XMVectorGetY(normalSum) + tempNormal[j].y;
 					tZ = XMVectorGetZ(normalSum) + tempNormal[j].z;
 
-					normalSum = XMVectorSet(tX, tY, tZ, 0.0f);	//If a face is using the vertex, add the unormalized face normal to the normalSum
+					normalSum = XMVectorSet(tX, tY, tZ, 0.0f);	//If a face is using the vertex, add the unormalized face Normal to the normalSum
 
 					//We can reuse tX, tY, tZ to sum up tangents
 					tX = XMVectorGetX(tangentSum) + tempTangent[j].x;
@@ -990,7 +990,7 @@ bool D3DUtils::CreateModelFromObjFile(
 				}
 			}
 
-			//Get the actual normal by dividing the normalSum by the number of faces sharing the vertex
+			//Get the actual Normal by dividing the normalSum by the number of faces sharing the vertex
 			normalSum = normalSum / (float)facesUsing;
 			tangentSum = tangentSum / (float)facesUsing;
 
@@ -998,14 +998,14 @@ bool D3DUtils::CreateModelFromObjFile(
 			normalSum = XMVector3Normalize(normalSum);
 			tangentSum = XMVector3Normalize(tangentSum);
 
-			//Store the normal in our current vertex
-			vertices[i].normal.x = XMVectorGetX(normalSum);
-			vertices[i].normal.y = XMVectorGetY(normalSum);
-			vertices[i].normal.z = XMVectorGetZ(normalSum);
+			//Store the Normal in our current vertex
+			vertices[i].Normal.x = XMVectorGetX(normalSum);
+			vertices[i].Normal.y = XMVectorGetY(normalSum);
+			vertices[i].Normal.z = XMVectorGetZ(normalSum);
 
-			vertices[i].tangent.x = XMVectorGetX(tangentSum);
-			vertices[i].tangent.y = XMVectorGetY(tangentSum);
-			vertices[i].tangent.z = XMVectorGetZ(tangentSum);
+			vertices[i].TangentU.x = XMVectorGetX(tangentSum);
+			vertices[i].TangentU.y = XMVectorGetY(tangentSum);
+			vertices[i].TangentU.z = XMVectorGetZ(tangentSum);
 
 			//Clear normalSum and facesUsing for next vertex
 			normalSum = XMVectorSet(0.0f, 0.0f, 0.0f, 0.0f);

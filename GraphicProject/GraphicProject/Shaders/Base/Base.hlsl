@@ -69,7 +69,7 @@ float4 PSMain(VS_OUTPUT psInput) : SV_TARGET {
 	//Change normal map range from [0, 1] to [-1, 1]
 	normalMap = (2.0f*normalMap) - 1.0f;
 
-	//Make sure tangent is normalized after interpolation
+	//Make sure TangentU is normalized after interpolation
 	psInput.TangentW = normalize(psInput.TangentW);
 
 	//Create the biTangent
