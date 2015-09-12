@@ -36,6 +36,10 @@ protected:
 	void ShowFPS();
 
 protected:
+	// multithreading stuff
+	vector<thread>					m_threads;
+	mutex							*m_mutex;
+
 	// window related
 	HINSTANCE						m_hinsApp;
 	HWND							m_hWindow;
@@ -65,7 +69,7 @@ protected:
 	ID3D11RenderTargetView			*m_renderTargetView;
 	ID3D11DepthStencilView			*m_depthStencilView;
 	D3D11_VIEWPORT					 m_screenViewport;	// non-pointer
-	ID3D11Debug						*m_d3dDebug = nullptr;
+	ID3D11Debug						*m_d3dDebug;
 
 	// default View, Projection
 	XMMATRIX						m_camView;

@@ -10,6 +10,9 @@
 #include <iostream>
 #include <string>
 #include <fstream>
+#include <thread>
+#include <mutex>
+#include <condition_variable>
 #include "DirectXTK/DDSTextureLoader.h"
 #include "TinyObjLoader/tiny_obj_loader.h"
 

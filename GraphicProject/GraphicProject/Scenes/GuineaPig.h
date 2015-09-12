@@ -3,6 +3,11 @@
 #include "../D3DApp/GeoGen.h"
 #include "../D3DApp/Waves.h"
 
+#include "../MeshControllers/ObjMesh.h"
+#include "../MeshControllers/Skybox.h"
+
+using namespace D3DSturcture;
+
 class GuineaPig : public D3DApp {
 public:
 	GuineaPig(HINSTANCE hinst);
@@ -32,6 +37,7 @@ private:
 
 	// Hill and Waves
 	GeoGen m_geoGen;
+	Waves m_waves;
 
 	// Lighting
 	DirectionalLight	m_directionalLight;

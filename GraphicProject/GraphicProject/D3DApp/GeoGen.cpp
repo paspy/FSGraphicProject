@@ -619,6 +619,7 @@ void GeoGen::CreateLandBuffer(ID3D11Device * _d3dDevice, ID3D11Buffer ** _vertBu
 	}
 
 	D3D11_BUFFER_DESC vbd;
+	ZeroMemory(&vbd, sizeof(vbd));
 	vbd.Usage = D3D11_USAGE_IMMUTABLE;
 	vbd.ByteWidth = sizeof(Vertex3D) * static_cast<UINT>(grid.Vertices.size());
 	vbd.BindFlags = D3D11_BIND_VERTEX_BUFFER;
@@ -629,6 +630,7 @@ void GeoGen::CreateLandBuffer(ID3D11Device * _d3dDevice, ID3D11Buffer ** _vertBu
 	HR(_d3dDevice->CreateBuffer(&vbd, &vinitData, _vertBuffer));
 
 	D3D11_BUFFER_DESC ibd;
+	ZeroMemory(&ibd, sizeof(ibd));
 	ibd.Usage = D3D11_USAGE_IMMUTABLE;
 	ibd.ByteWidth = sizeof(UINT) * indicesCount;
 	ibd.BindFlags = D3D11_BIND_INDEX_BUFFER;
@@ -644,6 +646,7 @@ void GeoGen::CreateWaveBuffer(ID3D11Device * _d3dDevice, ID3D11Buffer ** _vertBu
 	// we will be updating the data every time step of the simulation.
 
 	D3D11_BUFFER_DESC vbd;
+	ZeroMemory(&vbd, sizeof(vbd));
 	vbd.Usage = D3D11_USAGE_DYNAMIC;
 	vbd.ByteWidth = sizeof(Vertex3D) * _waves.VertexCount();
 	vbd.BindFlags = D3D11_BIND_VERTEX_BUFFER;
@@ -652,12 +655,8 @@ void GeoGen::CreateWaveBuffer(ID3D11Device * _d3dDevice, ID3D11Buffer ** _vertBu
 	HR(_d3dDevice->CreateBuffer(&vbd, 0, _vertBuffer));
 
 
-	// Create the index buffer.  The index buffer is fixed, so we only 
-	// need to create and set once.
+	vector<UINT> indices(3 * _waves.TriangleCount()); // 3 indices per face
 
-	std::vector<UINT> indices(3 * _waves.TriangleCount()); // 3 indices per face
-
-														   // Iterate over each quad.
 	UINT m = _waves.RowCount();
 	UINT n = _waves.ColumnCount();
 	int k = 0;
@@ -676,6 +675,7 @@ void GeoGen::CreateWaveBuffer(ID3D11Device * _d3dDevice, ID3D11Buffer ** _vertBu
 	}
 
 	D3D11_BUFFER_DESC ibd;
+	ZeroMemory(&ibd, sizeof(ibd));
 	ibd.Usage = D3D11_USAGE_IMMUTABLE;
 	ibd.ByteWidth = sizeof(UINT) * static_cast<UINT>(indices.size());
 	ibd.BindFlags = D3D11_BIND_INDEX_BUFFER;

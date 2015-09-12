@@ -30,6 +30,9 @@
     <Filter Include="D3DApp\TinyObjLoader">
       <UniqueIdentifier>{cab35f1e-a037-48bc-b421-e83acc01fcbe}</UniqueIdentifier>
     </Filter>
+    <Filter Include="MeshControllers">
+      <UniqueIdentifier>{84777eff-c215-4425-b9a9-0a9f0f3280cc}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Main.cpp">
@@ -61,6 +64,15 @@
     </ClCompile>
     <ClCompile Include="D3DApp\Waves.cpp">
       <Filter>D3DApp</Filter>
+    </ClCompile>
+    <ClCompile Include="MeshControllers\ObjMesh.cpp">
+      <Filter>MeshControllers</Filter>
+    </ClCompile>
+    <ClCompile Include="MeshControllers\Skybox.cpp">
+      <Filter>MeshControllers</Filter>
+    </ClCompile>
+    <ClCompile Include="MeshControllers\WaveMesh.cpp">
+      <Filter>MeshControllers</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -102,6 +114,18 @@
     </ClInclude>
     <ClInclude Include="D3DApp\Waves.h">
       <Filter>D3DApp</Filter>
+    </ClInclude>
+    <ClInclude Include="D3DApp\D3DSturcture.h">
+      <Filter>D3DApp</Filter>
+    </ClInclude>
+    <ClInclude Include="MeshControllers\ObjMesh.h">
+      <Filter>MeshControllers</Filter>
+    </ClInclude>
+    <ClInclude Include="MeshControllers\Skybox.h">
+      <Filter>MeshControllers</Filter>
+    </ClInclude>
+    <ClInclude Include="MeshControllers\WaveMesh.h">
+      <Filter>MeshControllers</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

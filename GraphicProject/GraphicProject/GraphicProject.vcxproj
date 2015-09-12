@@ -195,10 +195,14 @@
     <ClCompile Include="D3DApp\Waves.cpp" />
     <ClCompile Include="D3DApp\XTime.cpp" />
     <ClCompile Include="Main.cpp" />
+    <ClCompile Include="MeshControllers\ObjMesh.cpp" />
+    <ClCompile Include="MeshControllers\Skybox.cpp" />
+    <ClCompile Include="MeshControllers\WaveMesh.cpp" />
     <ClCompile Include="Scenes\GuineaPig.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="D3DApp\D3DApp.h" />
+    <ClInclude Include="D3DApp\D3DSturcture.h" />
     <ClInclude Include="D3DApp\D3DUtils.h" />
     <ClInclude Include="D3DApp\Defines.h" />
     <ClInclude Include="D3DApp\DirectXTK\dds.h" />
@@ -210,6 +214,9 @@
     <ClInclude Include="D3DApp\TinyObjLoader\tiny_obj_loader.h" />
     <ClInclude Include="D3DApp\Waves.h" />
     <ClInclude Include="D3DApp\XTime.h" />
+    <ClInclude Include="MeshControllers\ObjMesh.h" />
+    <ClInclude Include="MeshControllers\Skybox.h" />
+    <ClInclude Include="MeshControllers\WaveMesh.h" />
     <ClInclude Include="Scenes\GuineaPig.h" />
   </ItemGroup>
   <ItemGroup>

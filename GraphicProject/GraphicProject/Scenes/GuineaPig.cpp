@@ -39,79 +39,9 @@ void GuineaPig::BuildConstBuffer() {
 
 void GuineaPig::BuildGeometry() {
 	m_skyBox.Init(m_d3dDevice);
-	m_ground.Init(m_d3dDevice);
-	m_barrel.Init(m_d3dDevice);
-	m_bed.Init(m_d3dDevice);
-
-	D3DUtils::BuildSphere(m_d3dDevice ,10, 10, &m_skyBox.vertBuffer, &m_skyBox.indexBuffer, m_skyBox.numVertices, m_skyBox.numFaces);
-	// loading the texture - using dds loader
-	HR(CreateDDSTextureFromFile(m_d3dDevice, L"Resources/Skybox/skymap.dds", NULL, &m_skyBox.shaderResView));
-	// create the depending shader
-	HR(D3DUtils::CreateShaderAndLayoutFromFile(
-		m_d3dDevice,
-		L"Shaders/Skybox/Skybox.hlsl",
-		m_skyBox.vertexLayout, 2, &m_skyBox.vertexShader, &m_skyBox.pixelShader, &m_skyBox.inputLayout));
-
-
-	D3DUtils::CreateModelFromObjFile(
-		m_d3dDevice,
-		m_swapChain,
-		L"Resources/Models/ground.obj",
-		&m_ground.vertBuffer,
-		&m_ground.indexBuffer,
-		m_ground.textureNameArray,
-		m_ground.shaderResView,
-		m_ground.subsetIndexStart,
-		m_ground.subsetTexture,
-		m_ground.materials,
-		m_ground.subsets,
-		true,
-		true);
-
-	HR(D3DUtils::CreateShaderAndLayoutFromFile(
-		m_d3dDevice,
-		L"Shaders/Base/Base.hlsl",
-		m_ground.vertexLayout, 4, &m_ground.vertexShader, &m_ground.pixelShader, &m_ground.inputLayout));
-
-	D3DUtils::CreateModelFromObjFile(
-		m_d3dDevice,
-		m_swapChain,
-		L"Resources/Models/barrel.obj",
-		&m_barrel.vertBuffer,
-		&m_barrel.indexBuffer,
-		m_barrel.textureNameArray,
-		m_barrel.shaderResView,
-		m_barrel.subsetIndexStart,
-		m_barrel.subsetTexture,
-		m_barrel.materials,
-		m_barrel.subsets,
-		true,
-		true);
-
-	HR(D3DUtils::CreateShaderAndLayoutFromFile(
-		m_d3dDevice,
-		L"Shaders/Base/Base.hlsl",
-		m_barrel.vertexLayout, 4, &m_barrel.vertexShader, &m_barrel.pixelShader, &m_barrel.inputLayout));
-
-	D3DUtils::CreateModelFromObjFile(
-		m_d3dDevice,
-		m_swapChain,
-		L"Resources/Models/Bed.obj",
-		&m_bed.vertBuffer,
-		&m_bed.indexBuffer,
-		m_bed.textureNameArray,
-		m_bed.shaderResView,
-		m_bed.subsetIndexStart,
-		m_bed.subsetTexture,
-		m_bed.materials,
-		m_bed.subsets,
-		true,
-		true);
-
-	HR(D3DUtils::CreateShaderAndLayoutFromFile(
-		m_d3dDevice,
-		L"Shaders/Base/Base.hlsl",
-		m_bed.vertexLayout, 4, &m_bed.vertexShader, &m_bed.pixelShader, &m_bed.inputLayout));
+	m_ground.Init(m_d3dDevice, m_swapChain, L"Resources/Models/ground.obj", true, true, L"Shaders/Base/Base.hlsl");
+	m_barrel.Init(m_d3dDevice, m_swapChain, L"Resources/Models/barrel.obj", true, true, L"Shaders/Base/Base.hlsl");
+	m_bed.Init(m_d3dDevice, m_swapChain, L"Resources/Models/Bed.obj", true, true, L"Shaders/Base/Base.hlsl");
 
 	D3DUtils::CreateModelFromObjFileKaiNi(NULL, NULL, "Resources/Models/barrel.obj", NULL, NULL);
 }
@@ -178,33 +108,44 @@ void GuineaPig::UpdateScene(double _dt) {
 
 
 	// Update objects
-	static float rot = 0.00f;
 
-	rot += (float)_dt;
-
+	// ground update
 	m_ground.worldMat = XMMatrixIdentity();
-
 	XMMATRIX Rotation = XMMatrixRotationY(XM_PI);
 	XMMATRIX Scale = XMMatrixScaling(5.0f, 1.0f, 5.0f);
 	XMMATRIX Translation = XMMatrixTranslation(0.0f, .1f, 0.0f);
-
 	m_ground.worldMat = Rotation * Scale * Translation;
 
+	// barrel update
 	m_barrel.worldMat = XMMatrixIdentity();
-
 	Rotation = XMMatrixRotationY(0);
 	Scale = XMMatrixScaling(5.0f, 5.0f, 5.0f);
 	Translation = XMMatrixTranslation(0.0f, 5.0f, 25.0f);
-
 	m_barrel.worldMat = Rotation * Scale * Translation;
 
+	// bed update
 	m_bed.worldMat = XMMatrixIdentity();
-
 	Rotation = XMMatrixRotationY(0);
 	Scale = XMMatrixScaling(1.0f, 1.0f, 1.0f);
 	Translation = XMMatrixTranslation(0.0f, 1.0f, -30.0f);
-
 	m_bed.worldMat = Rotation * Scale * Translation;
+
+	// waves verteces update
+	//static float t_base = 0.0f;
+	//if ( (m_timer.TotalTime() - t_base) >= 0.25f ) {
+	//	t_base += 0.25f;
+
+	//	DWORD i = 5 + rand() % (m_waves.RowCount() - 10);
+	//	DWORD j = 5 + rand() % (m_waves.ColumnCount() - 10);
+
+	//	float r = D3DUtils::RandFloat(1.0f, 2.0f);
+
+	//	m_waves.Disturb(i, j, r);
+	//}
+
+	//m_waves.Update((float)_dt);
+
+	// Set the updated waves to the vertex buffer
 }
 
 void GuineaPig::DrawScene() {
@@ -240,9 +181,9 @@ void GuineaPig::DrawScene() {
 	// Render opaque objects //
 
 	// obj meshs
-	m_barrel.Render(m_d3dImmediateContext, m_camPosition, m_camView, m_camProjection);
-	m_bed.Render(m_d3dImmediateContext, m_camPosition, m_camView, m_camProjection);
-	m_ground.Render(m_d3dImmediateContext, m_camPosition, m_camView, m_camProjection);
+	m_barrel.Render	(m_mutex, m_d3dImmediateContext, m_camView, m_camProjection);
+	m_bed.Render	(m_mutex, m_d3dImmediateContext, m_camView, m_camProjection);
+	m_ground.Render	(m_mutex, m_d3dImmediateContext, m_camView, m_camProjection);
 
 	// Skybox
 	m_skyBox.Render(m_d3dImmediateContext, m_camView, m_camProjection);

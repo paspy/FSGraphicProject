@@ -1,7 +1,10 @@
 #pragma once
 #include "Defines.h"
-#include "D3DUtils.h"
+#include "D3DSturcture.h"
 #include "Waves.h"
+#include "D3DUtils.h"
+
+using namespace D3DSturcture;
 
 class GeoGen {
 public:

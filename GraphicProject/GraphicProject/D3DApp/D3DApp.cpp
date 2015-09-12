@@ -30,6 +30,8 @@ D3DApp::D3DApp(HINSTANCE hinst) :
 	m_timerStop(false),
 	m_4xMsaaQuality(1),
 
+	m_mutex(nullptr),
+
 	m_d3dDevice(nullptr),
 	m_d3dImmediateContext(nullptr),
 	m_swapChain(nullptr),
@@ -37,6 +39,7 @@ D3DApp::D3DApp(HINSTANCE hinst) :
 	m_depthStencilBuffer(nullptr),
 	m_renderTargetView(nullptr),
 	m_depthStencilView(nullptr),
+	m_d3dDebug(nullptr),
 
 	m_camView(XMMatrixIdentity()),
 	m_camProjection(XMMatrixIdentity()),
@@ -64,6 +67,9 @@ D3DApp::D3DApp(HINSTANCE hinst) :
 	m_camPosition = XMVectorSet(0.0f, 1.0f, -0.5f, 1.0f);
 	m_camTarget = XMVectorSet(0.0f, 0.0f, 1.0f, 1.0f);
 	m_camView = XMMatrixLookAtLH(m_camPosition, m_camTarget, m_camUp);
+
+	// multithreading
+	m_mutex = new mutex;
 
 	g_d3dApp = this;
 }
@@ -100,6 +106,8 @@ D3DApp::~D3DApp() {
 	m_d3dDebug->ReportLiveDeviceObjects(D3D11_RLDO_SUMMARY | D3D11_RLDO_DETAIL);
 	SafeRelease(m_d3dDevice);
 	SafeRelease(m_d3dDebug);
+
+	SafeDelete(m_mutex);
 
 	UnregisterClass(L"DirectXApplication", m_hinsApp);
 }
@@ -344,6 +352,7 @@ void D3DApp::ShowFPS() {
 		std::wostringstream outs;
 		outs.precision(6);
 		outs << m_mainWindTitle << L" - " << m_deviceName << L" - FPS: " << fps << L", Time: " << mspf << L" (ms)"
+			 << " - Total thread(s): " << m_threads.size() + 1
 			 << " - Cam Position: (" 
 			 << XMVectorGetX(m_camPosition) << ", "
 			 << XMVectorGetY(m_camPosition) << ", "
