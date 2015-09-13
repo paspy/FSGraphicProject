@@ -55,6 +55,8 @@ using namespace tinyobj;
 #define BACKBUFFER_WIDTH	1366
 #define BACKBUFFER_HEIGHT	768
 
+#define CAMERA_SPEED 20.0f
+
 #define IDR_MENU1                       101
 #define IDD_DIALOG1                     102
 #define IDR_ACCELERATOR1                105

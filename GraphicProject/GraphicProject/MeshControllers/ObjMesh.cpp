@@ -92,6 +92,7 @@ void ObjMesh::Render(mutex * _mutex, ID3D11DeviceContext * _d3dImmediateContext,
 		int indexStart = subsetIndexStart[i];
 		int indexDrawAmount = subsetIndexStart[i + 1] - subsetIndexStart[i];
 		_d3dImmediateContext->DrawIndexed(indexDrawAmount, indexStart, 0);
+
 	}
 
 }

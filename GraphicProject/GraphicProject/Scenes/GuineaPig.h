@@ -1,10 +1,9 @@
 #pragma once
 #include "../D3DApp/D3DApp.h"
-#include "../D3DApp/GeoGen.h"
-#include "../D3DApp/Waves.h"
 
 #include "../MeshControllers/ObjMesh.h"
 #include "../MeshControllers/Skybox.h"
+#include "../MeshControllers/WaveMesh.h"
 
 using namespace D3DSturcture;
 
@@ -30,14 +29,11 @@ private:
 	void BuildLighting();
 
 private:
-	Skybox			m_skyBox;
-	ObjMesh			m_ground;
-	ObjMesh			m_barrel;
-	ObjMesh			m_bed;
-
-	// Hill and Waves
-	GeoGen m_geoGen;
-	Waves m_waves;
+	Skybox				m_skyBox;
+	ObjMesh				m_ground;
+	ObjMesh				m_barrel;
+	ObjMesh				m_bed;
+	WaveMesh			m_wave;
 
 	// Lighting
 	DirectionalLight	m_directionalLight;

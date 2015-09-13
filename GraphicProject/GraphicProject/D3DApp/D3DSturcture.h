@@ -72,9 +72,4 @@ namespace D3DSturcture {
 
 	};
 
-
-
-	
-
-
 }

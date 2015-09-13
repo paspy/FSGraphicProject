@@ -43,6 +43,8 @@ void GuineaPig::BuildGeometry() {
 	m_barrel.Init(m_d3dDevice, m_swapChain, L"Resources/Models/barrel.obj", true, true, L"Shaders/Base/Base.hlsl");
 	m_bed.Init(m_d3dDevice, m_swapChain, L"Resources/Models/Bed.obj", true, true, L"Shaders/Base/Base.hlsl");
 
+	m_wave.Init(m_d3dDevice, L"Shaders/Base/Waves.hlsl");
+
 	D3DUtils::CreateModelFromObjFileKaiNi(NULL, NULL, "Resources/Models/barrel.obj", NULL, NULL);
 }
 
@@ -130,22 +132,9 @@ void GuineaPig::UpdateScene(double _dt) {
 	Translation = XMMatrixTranslation(0.0f, 1.0f, -30.0f);
 	m_bed.worldMat = Rotation * Scale * Translation;
 
-	// waves verteces update
-	//static float t_base = 0.0f;
-	//if ( (m_timer.TotalTime() - t_base) >= 0.25f ) {
-	//	t_base += 0.25f;
-
-	//	DWORD i = 5 + rand() % (m_waves.RowCount() - 10);
-	//	DWORD j = 5 + rand() % (m_waves.ColumnCount() - 10);
-
-	//	float r = D3DUtils::RandFloat(1.0f, 2.0f);
-
-	//	m_waves.Disturb(i, j, r);
-	//}
-
-	//m_waves.Update((float)_dt);
-
-	// Set the updated waves to the vertex buffer
+	// update waves
+	m_wave.Update(_dt, m_timer.TotalTime(), m_d3dImmediateContext);
+	
 }
 
 void GuineaPig::DrawScene() {
@@ -181,9 +170,11 @@ void GuineaPig::DrawScene() {
 	// Render opaque objects //
 
 	// obj meshs
-	m_barrel.Render	(m_mutex, m_d3dImmediateContext, m_camView, m_camProjection);
-	m_bed.Render	(m_mutex, m_d3dImmediateContext, m_camView, m_camProjection);
-	m_ground.Render	(m_mutex, m_d3dImmediateContext, m_camView, m_camProjection);
+	//m_barrel.Render	(m_mutex, m_d3dImmediateContext, m_camView, m_camProjection);
+	//m_bed.Render	(m_mutex, m_d3dImmediateContext, m_camView, m_camProjection);
+	//m_ground.Render	(m_mutex, m_d3dImmediateContext, m_camView, m_camProjection);
+
+	m_wave.Render(m_mutex, m_d3dImmediateContext, m_camView, m_camProjection);
 
 	// Skybox
 	m_skyBox.Render(m_d3dImmediateContext, m_camView, m_camProjection);
@@ -194,16 +185,16 @@ void GuineaPig::DrawScene() {
 
 void GuineaPig::UpdateKeyboardInput(double _dt) {
 	if ( GetAsyncKeyState(VK_LW) ) {
-		m_moveBackForward += (float)_dt * 10.0f;
+		m_moveBackForward	+= (float)_dt * CAMERA_SPEED;
 	}
 	if ( GetAsyncKeyState(VK_LS) ) {
-		m_moveBackForward -= (float)_dt * 10.0f;
+		m_moveBackForward	-= (float)_dt * CAMERA_SPEED;
 	}
 	if ( GetAsyncKeyState(VK_LA) ) {
-		m_moveLeftRight -= (float)_dt * 10.0f;
+		m_moveLeftRight		-= (float)_dt * CAMERA_SPEED;
 	}
 	if ( GetAsyncKeyState(VK_LD) ) {
-		m_moveLeftRight += (float)_dt * 10.0f;
+		m_moveLeftRight		+= (float)_dt * CAMERA_SPEED;
 	}
 }
 

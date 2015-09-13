@@ -14,7 +14,6 @@ public:
 	};
 
 	void CreateLandBuffer(ID3D11Device *_d3dDevice, ID3D11Buffer ** _vertBuffer, ID3D11Buffer ** _indexBuffer);
-	void CreateWaveBuffer(ID3D11Device *_d3dDevice, ID3D11Buffer ** _vertBuffer, ID3D11Buffer ** _indexBuffer, Waves _waves);
 
 private:
 	void CreateBox(float width, float height, float depth, MeshData& meshData);

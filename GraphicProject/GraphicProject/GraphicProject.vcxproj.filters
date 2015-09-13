@@ -33,15 +33,15 @@
     <Filter Include="MeshControllers">
       <UniqueIdentifier>{84777eff-c215-4425-b9a9-0a9f0f3280cc}</UniqueIdentifier>
     </Filter>
+    <Filter Include="D3DApp\D3DCore">
+      <UniqueIdentifier>{0b73c5a9-cde4-49e8-9cef-0aa468e9344e}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Main.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="D3DApp\XTime.cpp">
-      <Filter>D3DApp</Filter>
-    </ClCompile>
-    <ClCompile Include="D3DApp\D3DApp.cpp">
       <Filter>D3DApp</Filter>
     </ClCompile>
     <ClCompile Include="D3DApp\DirectXTK\DDSTextureLoader.cpp">
@@ -71,6 +71,9 @@
     <ClCompile Include="MeshControllers\Skybox.cpp">
       <Filter>MeshControllers</Filter>
     </ClCompile>
+    <ClCompile Include="D3DApp\D3DApp.cpp">
+      <Filter>D3DApp\D3DCore</Filter>
+    </ClCompile>
     <ClCompile Include="MeshControllers\WaveMesh.cpp">
       <Filter>MeshControllers</Filter>
     </ClCompile>
@@ -80,9 +83,6 @@
       <Filter>D3DApp</Filter>
     </ClInclude>
     <ClInclude Include="D3DApp\XTime.h">
-      <Filter>D3DApp</Filter>
-    </ClInclude>
-    <ClInclude Include="D3DApp\D3DApp.h">
       <Filter>D3DApp</Filter>
     </ClInclude>
     <ClInclude Include="D3DApp\DirectXTK\DDSTextureLoader.h">
@@ -106,9 +106,6 @@
     <ClInclude Include="D3DApp\TinyObjLoader\tiny_obj_loader.h">
       <Filter>D3DApp\TinyObjLoader</Filter>
     </ClInclude>
-    <ClInclude Include="D3DApp\Defines.h">
-      <Filter>D3DApp</Filter>
-    </ClInclude>
     <ClInclude Include="D3DApp\GeoGen.h">
       <Filter>D3DApp</Filter>
     </ClInclude>
@@ -124,6 +121,12 @@
     <ClInclude Include="MeshControllers\Skybox.h">
       <Filter>MeshControllers</Filter>
     </ClInclude>
+    <ClInclude Include="D3DApp\D3DApp.h">
+      <Filter>D3DApp\D3DCore</Filter>
+    </ClInclude>
+    <ClInclude Include="D3DApp\Defines.h">
+      <Filter>D3DApp\D3DCore</Filter>
+    </ClInclude>
     <ClInclude Include="MeshControllers\WaveMesh.h">
       <Filter>MeshControllers</Filter>
     </ClInclude>
@@ -136,6 +139,9 @@
       <Filter>Source Files\Scenes\Shaders\Skybox</Filter>
     </FxCompile>
     <FxCompile Include="Shaders\Base\Lighting.hlsl">
+      <Filter>Source Files\Scenes\Shaders\Base</Filter>
+    </FxCompile>
+    <FxCompile Include="Shaders\Base\Waves.hlsl">
       <Filter>Source Files\Scenes\Shaders\Base</Filter>
     </FxCompile>
   </ItemGroup>
