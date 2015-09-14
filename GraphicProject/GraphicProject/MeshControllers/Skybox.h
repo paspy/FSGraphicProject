@@ -13,7 +13,7 @@ public:
 	Skybox() {}
 	~Skybox();
 	void Init(ID3D11Device *_d3dDevice);
-	void Render(ID3D11DeviceContext *_d3dImmediateContext, XMMATRIX _camView, XMMATRIX _camProj);
+	void Render(ID3D11DeviceContext *_d3dImmediateContext, XMMATRIX _camView, XMMATRIX _camProj, ID3D11RasterizerState *_rasterState);
 
 	CBuffer								cBuffer;
 	ID3D11VertexShader					*vertexShader = nullptr;
@@ -25,7 +25,6 @@ public:
 	ID3D11Buffer						*vertBuffer = nullptr;
 	ID3D11Buffer						*constBuffer = nullptr;
 	ID3D11DepthStencilState				*DSLessEqual = nullptr;
-	ID3D11RasterizerState				*rasterState = nullptr;
 	ID3D11SamplerState					*texSamplerState = nullptr;
 	int									numVertices = 0;
 	int									numFaces = 0;

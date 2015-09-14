@@ -118,7 +118,7 @@ void Waves::Update(float dt) {
 		// We just overwrote the previous buffer with the new data, so
 		// this data needs to become the current solution and the old
 		// current solution becomes the new previous solution.
-		std::swap(mPrevSolution, mCurrSolution);
+		swap(mPrevSolution, mCurrSolution);
 
 		t = 0.0f; // reset time
 

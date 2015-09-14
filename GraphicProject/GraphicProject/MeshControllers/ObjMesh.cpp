@@ -10,7 +10,6 @@ ObjMesh::~ObjMesh() {
 	for ( size_t i = 0; i < shaderResView.size(); i++ ) {
 		SafeRelease(shaderResView[i]);
 	}
-	SafeRelease(rasterState);
 	SafeRelease(texSamplerState);
 }
 
@@ -23,13 +22,6 @@ void ObjMesh::Init(ID3D11Device *_d3dDevice, IDXGISwapChain *_swapChain, wstring
 	cbbd.CPUAccessFlags = 0;
 	cbbd.MiscFlags = 0;
 	HR(_d3dDevice->CreateBuffer(&cbbd, NULL, &constBuffer));
-
-	D3D11_RASTERIZER_DESC cmdesc;
-	ZeroMemory(&cmdesc, sizeof(D3D11_RASTERIZER_DESC));
-	cmdesc.FillMode = D3D11_FILL_SOLID;
-	cmdesc.CullMode = D3D11_CULL_NONE;
-
-	HR(_d3dDevice->CreateRasterizerState(&cmdesc, &rasterState));
 
 	D3D11_SAMPLER_DESC sampDesc;
 	ZeroMemory(&sampDesc, sizeof(sampDesc));
@@ -66,7 +58,7 @@ void ObjMesh::Init(ID3D11Device *_d3dDevice, IDXGISwapChain *_swapChain, wstring
 
 }
 
-void ObjMesh::Render(mutex * _mutex, ID3D11DeviceContext * _d3dImmediateContext, XMMATRIX _camView, XMMATRIX _camProj) {
+void ObjMesh::Render(ID3D11DeviceContext * _d3dImmediateContext, XMMATRIX _camView, XMMATRIX _camProj, ID3D11RasterizerState *_rasterState) {
 
 	// Set the default VS shader and depth/stencil state and layout
 	_d3dImmediateContext->VSSetShader(vertexShader, NULL, 0);
@@ -81,14 +73,16 @@ void ObjMesh::Render(mutex * _mutex, ID3D11DeviceContext * _d3dImmediateContext,
 		_d3dImmediateContext->IASetVertexBuffers(0, 1, &vertBuffer, &stride, &offset);
 		//Set the stuff to the constant buffer to the hlsl file
 		cbBuffer.World = XMMatrixTranspose(worldMat);
+		cbBuffer.WorldInvTranspose = D3DUtils::InverseTranspose(worldMat);
 		cbBuffer.WorldViewProj = XMMatrixTranspose(worldMat * (_camView)* (_camProj));
+		cbBuffer.TexTransform = objTexTransform;
 		_d3dImmediateContext->UpdateSubresource(constBuffer, 0, NULL, &cbBuffer, 0, 0);
 		_d3dImmediateContext->VSSetConstantBuffers(0, 1, &constBuffer);
 		_d3dImmediateContext->PSSetConstantBuffers(1, 1, &constBuffer);
 		_d3dImmediateContext->PSSetShaderResources(0, 1, &shaderResView[materials[subsetTexture[i]].texArrayIndex]);
 		_d3dImmediateContext->PSSetShaderResources(1, 1, &shaderResView[materials[subsetTexture[i]].normMapTexArrayIndex]);
 		_d3dImmediateContext->PSSetSamplers(0, 1, &texSamplerState);
-		_d3dImmediateContext->RSSetState(rasterState);
+		_d3dImmediateContext->RSSetState(_rasterState);
 		int indexStart = subsetIndexStart[i];
 		int indexDrawAmount = subsetIndexStart[i + 1] - subsetIndexStart[i];
 		_d3dImmediateContext->DrawIndexed(indexDrawAmount, indexStart, 0);

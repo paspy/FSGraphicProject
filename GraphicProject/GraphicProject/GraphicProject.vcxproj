@@ -191,12 +191,14 @@
     <ClCompile Include="D3DApp\DirectXTK\DDSTextureLoader.cpp" />
     <ClCompile Include="D3DApp\DirectXTK\pch.cpp" />
     <ClCompile Include="D3DApp\GeoGen.cpp" />
+    <ClCompile Include="D3DApp\RenderStates.cpp" />
     <ClCompile Include="D3DApp\TinyObjLoader\tiny_obj_loader.cc" />
     <ClCompile Include="D3DApp\Waves.cpp" />
     <ClCompile Include="D3DApp\XTime.cpp" />
     <ClCompile Include="Main.cpp" />
     <ClCompile Include="MeshControllers\ObjMesh.cpp" />
     <ClCompile Include="MeshControllers\Skybox.cpp" />
+    <ClCompile Include="MeshControllers\TerrainMesh.cpp" />
     <ClCompile Include="MeshControllers\WaveMesh.cpp" />
     <ClCompile Include="Scenes\GuineaPig.cpp" />
   </ItemGroup>
@@ -211,16 +213,18 @@
     <ClInclude Include="D3DApp\DirectXTK\pch.h" />
     <ClInclude Include="D3DApp\DirectXTK\PlatformHelpers.h" />
     <ClInclude Include="D3DApp\GeoGen.h" />
+    <ClInclude Include="D3DApp\RenderStates.h" />
     <ClInclude Include="D3DApp\TinyObjLoader\tiny_obj_loader.h" />
     <ClInclude Include="D3DApp\Waves.h" />
     <ClInclude Include="D3DApp\XTime.h" />
     <ClInclude Include="MeshControllers\ObjMesh.h" />
     <ClInclude Include="MeshControllers\Skybox.h" />
+    <ClInclude Include="MeshControllers\TerrainMesh.h" />
     <ClInclude Include="MeshControllers\WaveMesh.h" />
     <ClInclude Include="Scenes\GuineaPig.h" />
   </ItemGroup>
   <ItemGroup>
-    <FxCompile Include="Shaders\Base\Base.hlsl">
+    <FxCompile Include="Shaders\Base\Base_old.hlsl">
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
       </ShaderType>
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
@@ -284,7 +288,7 @@
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
     </FxCompile>
-    <FxCompile Include="Shaders\Base\Waves.hlsl">
+    <FxCompile Include="Shaders\Base\Base.hlsl">
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Vertex</ShaderType>
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Vertex</ShaderType>
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Vertex</ShaderType>

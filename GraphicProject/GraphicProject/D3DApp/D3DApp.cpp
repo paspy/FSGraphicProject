@@ -64,7 +64,7 @@ D3DApp::D3DApp(HINSTANCE hinst) :
 	m_lastMousePos.y = 0;
 
 	// default camera initalize
-	m_camPosition = XMVectorSet(0.0f, 1.0f, -0.5f, 1.0f);
+	m_camPosition = XMVectorSet(0.0f, 10.0f, -0.5f, 1.0f);
 	m_camTarget = XMVectorSet(0.0f, 0.0f, 1.0f, 1.0f);
 	m_camView = XMMatrixLookAtLH(m_camPosition, m_camTarget, m_camUp);
 

@@ -36,13 +36,13 @@
     <Filter Include="D3DApp\D3DCore">
       <UniqueIdentifier>{0b73c5a9-cde4-49e8-9cef-0aa468e9344e}</UniqueIdentifier>
     </Filter>
+    <Filter Include="D3DApp\D3DHelper">
+      <UniqueIdentifier>{0b1a2e29-6403-4626-a4d7-e3dd0f8acf73}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Main.cpp">
       <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="D3DApp\XTime.cpp">
-      <Filter>D3DApp</Filter>
     </ClCompile>
     <ClCompile Include="D3DApp\DirectXTK\DDSTextureLoader.cpp">
       <Filter>D3DApp\DirectXTK</Filter>
@@ -53,17 +53,8 @@
     <ClCompile Include="D3DApp\DirectXTK\pch.cpp">
       <Filter>D3DApp\DirectXTK</Filter>
     </ClCompile>
-    <ClCompile Include="D3DApp\D3DUtils.cpp">
-      <Filter>D3DApp</Filter>
-    </ClCompile>
     <ClCompile Include="D3DApp\TinyObjLoader\tiny_obj_loader.cc">
       <Filter>D3DApp\TinyObjLoader</Filter>
-    </ClCompile>
-    <ClCompile Include="D3DApp\GeoGen.cpp">
-      <Filter>D3DApp</Filter>
-    </ClCompile>
-    <ClCompile Include="D3DApp\Waves.cpp">
-      <Filter>D3DApp</Filter>
     </ClCompile>
     <ClCompile Include="MeshControllers\ObjMesh.cpp">
       <Filter>MeshControllers</Filter>
@@ -77,14 +68,26 @@
     <ClCompile Include="MeshControllers\WaveMesh.cpp">
       <Filter>MeshControllers</Filter>
     </ClCompile>
+    <ClCompile Include="MeshControllers\TerrainMesh.cpp">
+      <Filter>MeshControllers</Filter>
+    </ClCompile>
+    <ClCompile Include="D3DApp\D3DUtils.cpp">
+      <Filter>D3DApp\D3DHelper</Filter>
+    </ClCompile>
+    <ClCompile Include="D3DApp\GeoGen.cpp">
+      <Filter>D3DApp\D3DHelper</Filter>
+    </ClCompile>
+    <ClCompile Include="D3DApp\Waves.cpp">
+      <Filter>D3DApp\D3DHelper</Filter>
+    </ClCompile>
+    <ClCompile Include="D3DApp\XTime.cpp">
+      <Filter>D3DApp\D3DHelper</Filter>
+    </ClCompile>
+    <ClCompile Include="D3DApp\RenderStates.cpp">
+      <Filter>D3DApp\D3DHelper</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="D3DApp\D3DUtils.h">
-      <Filter>D3DApp</Filter>
-    </ClInclude>
-    <ClInclude Include="D3DApp\XTime.h">
-      <Filter>D3DApp</Filter>
-    </ClInclude>
     <ClInclude Include="D3DApp\DirectXTK\DDSTextureLoader.h">
       <Filter>D3DApp\DirectXTK</Filter>
     </ClInclude>
@@ -106,15 +109,6 @@
     <ClInclude Include="D3DApp\TinyObjLoader\tiny_obj_loader.h">
       <Filter>D3DApp\TinyObjLoader</Filter>
     </ClInclude>
-    <ClInclude Include="D3DApp\GeoGen.h">
-      <Filter>D3DApp</Filter>
-    </ClInclude>
-    <ClInclude Include="D3DApp\Waves.h">
-      <Filter>D3DApp</Filter>
-    </ClInclude>
-    <ClInclude Include="D3DApp\D3DSturcture.h">
-      <Filter>D3DApp</Filter>
-    </ClInclude>
     <ClInclude Include="MeshControllers\ObjMesh.h">
       <Filter>MeshControllers</Filter>
     </ClInclude>
@@ -130,18 +124,39 @@
     <ClInclude Include="MeshControllers\WaveMesh.h">
       <Filter>MeshControllers</Filter>
     </ClInclude>
+    <ClInclude Include="MeshControllers\TerrainMesh.h">
+      <Filter>MeshControllers</Filter>
+    </ClInclude>
+    <ClInclude Include="D3DApp\D3DUtils.h">
+      <Filter>D3DApp\D3DHelper</Filter>
+    </ClInclude>
+    <ClInclude Include="D3DApp\D3DSturcture.h">
+      <Filter>D3DApp\D3DHelper</Filter>
+    </ClInclude>
+    <ClInclude Include="D3DApp\GeoGen.h">
+      <Filter>D3DApp\D3DHelper</Filter>
+    </ClInclude>
+    <ClInclude Include="D3DApp\Waves.h">
+      <Filter>D3DApp\D3DHelper</Filter>
+    </ClInclude>
+    <ClInclude Include="D3DApp\XTime.h">
+      <Filter>D3DApp\D3DHelper</Filter>
+    </ClInclude>
+    <ClInclude Include="D3DApp\RenderStates.h">
+      <Filter>D3DApp\D3DHelper</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <FxCompile Include="Shaders\Base\Base.hlsl">
-      <Filter>Source Files\Scenes\Shaders\Base</Filter>
-    </FxCompile>
     <FxCompile Include="Shaders\Skybox\Skybox.hlsl">
       <Filter>Source Files\Scenes\Shaders\Skybox</Filter>
     </FxCompile>
     <FxCompile Include="Shaders\Base\Lighting.hlsl">
       <Filter>Source Files\Scenes\Shaders\Base</Filter>
     </FxCompile>
-    <FxCompile Include="Shaders\Base\Waves.hlsl">
+    <FxCompile Include="Shaders\Base\Base_old.hlsl">
+      <Filter>Source Files\Scenes\Shaders\Base</Filter>
+    </FxCompile>
+    <FxCompile Include="Shaders\Base\Base.hlsl">
       <Filter>Source Files\Scenes\Shaders\Base</Filter>
     </FxCompile>
   </ItemGroup>

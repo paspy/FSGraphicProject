@@ -1,6 +1,6 @@
-#include "WaveMesh.h"
+#include "TerrainMesh.h"
 
-WaveMesh::~WaveMesh() {
+TerrainMesh::~TerrainMesh() {
 	SafeRelease(inputLayout);
 	SafeRelease(indexBuffer);
 	SafeRelease(vertBuffer);
@@ -12,7 +12,7 @@ WaveMesh::~WaveMesh() {
 	SafeRelease(texSamplerState);
 }
 
-void WaveMesh::Init(ID3D11Device * _d3dDevice, LPCWSTR _shaderFilename) {
+void TerrainMesh::Init(ID3D11Device * _d3dDevice, LPCWSTR _shaderFilename) {
 	D3D11_BUFFER_DESC cbbd;
 	ZeroMemory(&cbbd, sizeof(D3D11_BUFFER_DESC));
 	cbbd.Usage = D3D11_USAGE_DEFAULT;
@@ -38,8 +38,8 @@ void WaveMesh::Init(ID3D11Device * _d3dDevice, LPCWSTR _shaderFilename) {
 	cbBuffer.material.Diffuse = XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f);
 	cbBuffer.material.Specular = XMFLOAT4(0.8f, 0.8f, 0.8f, 32.0f);
 
-	// init the wave
-	waves.Init(120, 120, 1.0f, 0.04f, 3.25f, 0.2f);
+	// scaling texture
+	terrainTexTransform = XMMatrixScaling(10.0f, 10.0f, 0.0f);
 
 	// loading the texture - using dds loader
 	HR(CreateDDSTextureFromFile(_d3dDevice, L"Resources/Models/ground_diffuse.dds", NULL, &shaderResView));
@@ -51,104 +51,49 @@ void WaveMesh::Init(ID3D11Device * _d3dDevice, LPCWSTR _shaderFilename) {
 	BuildBuffer(_d3dDevice);
 }
 
-void WaveMesh::BuildBuffer(ID3D11Device * _d3dDevice) {
-	D3D11_BUFFER_DESC vbd;
-	vbd.Usage = D3D11_USAGE_DYNAMIC;
-	vbd.ByteWidth = sizeof(Vertex3D) * waves.VertexCount();
-	vbd.BindFlags = D3D11_BIND_VERTEX_BUFFER;
-	vbd.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
-	vbd.MiscFlags = 0;
-	HR(_d3dDevice->CreateBuffer(&vbd, 0, &vertBuffer));
+void TerrainMesh::BuildBuffer(ID3D11Device * _d3dDevice) {
+	GeoGen::MeshData grid;
 
-	vector<UINT> indices(3 * waves.TriangleCount()); // 3 indices per face
+	GeoGen::CreateGrid(250.0f, 250.0f, 100, 100, grid);
 
-	// Iterate over each quad.
-	UINT m = waves.RowCount();
-	UINT n = waves.ColumnCount();
-	int k = 0;
-	for (UINT i = 0; i < m - 1; ++i) {
-		for (DWORD j = 0; j < n - 1; ++j) {
-			indices[k] = i*n + j;
-			indices[k + 1] = i*n + j + 1;
-			indices[k + 2] = (i + 1)*n + j;
+	indicesCount = static_cast<UINT>(grid.Indices.size());
 
-			indices[k + 3] = (i + 1)*n + j;
-			indices[k + 4] = i*n + j + 1;
-			indices[k + 5] = (i + 1)*n + j + 1;
+	vector<Vertex3D> vertices(grid.Vertices.size());
+	for (size_t i = 0; i < grid.Vertices.size(); ++i) {
+		XMFLOAT3 p = grid.Vertices[i].Position;
 
-			k += 6; // next quad
-		}
+		p.y = GeoGen::GetHillHeight(p.x, p.z);
+
+		vertices[i].Position = p;
+		vertices[i].Normal = GeoGen::GetHillNormal(p.x, p.z);
+		vertices[i].TexCoord = grid.Vertices[i].TexCoord;
+		vertices[i].TangentU = grid.Vertices[i].TangentU;
 	}
 
+	D3D11_BUFFER_DESC vbd;
+	ZeroMemory(&vbd, sizeof(vbd));
+	vbd.Usage = D3D11_USAGE_IMMUTABLE;
+	vbd.ByteWidth = sizeof(Vertex3D) * static_cast<UINT>(grid.Vertices.size());
+	vbd.BindFlags = D3D11_BIND_VERTEX_BUFFER;
+	vbd.CPUAccessFlags = 0;
+	vbd.MiscFlags = 0;
+	D3D11_SUBRESOURCE_DATA vinitData;
+	vinitData.pSysMem = &vertices[0];
+	HR(_d3dDevice->CreateBuffer(&vbd, &vinitData, &vertBuffer));
+
 	D3D11_BUFFER_DESC ibd;
+	ZeroMemory(&ibd, sizeof(ibd));
 	ibd.Usage = D3D11_USAGE_IMMUTABLE;
-	ibd.ByteWidth = sizeof(UINT) * static_cast<UINT>(indices.size());
+	ibd.ByteWidth = sizeof(UINT) * indicesCount;
 	ibd.BindFlags = D3D11_BIND_INDEX_BUFFER;
 	ibd.CPUAccessFlags = 0;
 	ibd.MiscFlags = 0;
 	D3D11_SUBRESOURCE_DATA iinitData;
-	iinitData.pSysMem = &indices[0];
+	iinitData.pSysMem = &grid.Indices[0];
 	HR(_d3dDevice->CreateBuffer(&ibd, &iinitData, &indexBuffer));
-
 }
 
-void WaveMesh::Update(double _dt, double _tt, ID3D11DeviceContext * _d3dImmediateContext) {
-	// waves verteces update
-	static float t_base = 0.0f;
-	if ((_tt - t_base) >= 0.25f) {
-		t_base += 0.25f;
-
-		DWORD i = 5 + rand() % (waves.RowCount() - 10);
-		DWORD j = 5 + rand() % (waves.ColumnCount() - 10);
-
-		float r = D3DUtils::RandFloat(1.0f, 2.0f);
-
-		waves.Disturb(i, j, r);
-	}
-
-	waves.Update((float)_dt);
-
-	//Set the updated waves to the vertex buffer
-
-	D3D11_MAPPED_SUBRESOURCE mappedData;
-	HR(_d3dImmediateContext->Map(vertBuffer, 0, D3D11_MAP_WRITE_DISCARD, 0, &mappedData));
-
-	Vertex3D* v = reinterpret_cast<Vertex3D*>(mappedData.pData);
-	for (UINT i = 0; i < waves.VertexCount(); ++i) {
-		v[i].Position = waves[i];
-		v[i].Normal = waves.Normal(i);
-		v[i].TangentU = waves.TangentX(i);
-
-		// Derive tex-coords in [0,1] from position.
-		v[i].TexCoord.x = 0.5f + waves[i].x / waves.Width();
-		v[i].TexCoord.y = 0.5f - waves[i].z / waves.Depth();
-	}
-
-	_d3dImmediateContext->Unmap(vertBuffer, 0);
-
-	// Animate water texture coordinates.
-
-	// Tile water texture.
-	XMMATRIX wavesScale = XMMatrixScaling(5.0f, 5.0f, 0.0f);
-
-	// Translate texture over time.
-	waterTexOffset.y += 0.05f*static_cast<float>(_dt);
-	waterTexOffset.x += 0.1f*static_cast<float>(_dt);
-	XMMATRIX wavesOffset = XMMatrixTranslation(waterTexOffset.x, waterTexOffset.y, 0.0f);
-
-	// Combine scale and translation.
-	waterTexTransform = wavesScale*wavesOffset;
-
-	worldMat = XMMatrixIdentity();
-	XMMATRIX Rotation = XMMatrixRotationY(0);
-	XMMATRIX Scale = XMMatrixScaling(4.0f, 1.0f, 4.0f);
-	XMMATRIX Translation = XMMatrixTranslation(0.0f, 0.0f, 0.0f);
-	worldMat = Rotation * Scale * Translation;
-
-}
-
-void WaveMesh::Render(ID3D11DeviceContext * _d3dImmediateContext, XMMATRIX _camView, XMMATRIX _camProj, ID3D11RasterizerState *_rasterState) {
-
+void TerrainMesh::Render(ID3D11DeviceContext * _d3dImmediateContext, XMMATRIX _camView, XMMATRIX _camProj, ID3D11RasterizerState *_rasterState) {
 	// Set the default VS shader and depth/stencil state and layout
 	_d3dImmediateContext->VSSetShader(vertexShader, NULL, 0);
 	_d3dImmediateContext->PSSetShader(pixelShader, NULL, 0);
@@ -163,7 +108,7 @@ void WaveMesh::Render(ID3D11DeviceContext * _d3dImmediateContext, XMMATRIX _camV
 	cbBuffer.World = XMMatrixTranspose(worldMat);
 	cbBuffer.WorldInvTranspose = D3DUtils::InverseTranspose(worldMat);
 	cbBuffer.WorldViewProj = XMMatrixTranspose(worldMat * _camView* _camProj);
-	cbBuffer.TexTransform = waterTexTransform;
+	cbBuffer.TexTransform = terrainTexTransform;
 
 	_d3dImmediateContext->UpdateSubresource(constBuffer, 0, NULL, &cbBuffer, 0, 0);
 	_d3dImmediateContext->VSSetConstantBuffers(0, 1, &constBuffer);
@@ -172,6 +117,7 @@ void WaveMesh::Render(ID3D11DeviceContext * _d3dImmediateContext, XMMATRIX _camV
 	_d3dImmediateContext->PSSetShaderResources(1, 1, &normalShaderResView);
 	_d3dImmediateContext->PSSetSamplers(0, 1, &texSamplerState);
 	_d3dImmediateContext->RSSetState(_rasterState);
-	_d3dImmediateContext->DrawIndexed(3 * waves.TriangleCount(), 0, 0);
-
+	_d3dImmediateContext->DrawIndexed(indicesCount, 0, 0);
 }
+
+

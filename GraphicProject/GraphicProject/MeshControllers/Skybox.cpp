@@ -9,7 +9,6 @@ Skybox::~Skybox() {
 	SafeRelease(pixelShader);
 	SafeRelease(shaderResView);
 	SafeRelease(DSLessEqual);
-	SafeRelease(rasterState);
 	SafeRelease(texSamplerState);
 }
 
@@ -34,13 +33,6 @@ void Skybox::Init(ID3D11Device * _d3dDevice) {
 	sampDesc.MaxLOD = D3D11_FLOAT32_MAX;
 	HR(_d3dDevice->CreateSamplerState(&sampDesc, &texSamplerState));
 
-	D3D11_RASTERIZER_DESC cmdesc;
-	ZeroMemory(&cmdesc, sizeof(D3D11_RASTERIZER_DESC));
-	cmdesc.FillMode = D3D11_FILL_SOLID;
-	cmdesc.CullMode = D3D11_CULL_NONE;
-
-	HR(_d3dDevice->CreateRasterizerState(&cmdesc, &rasterState));
-
 	D3D11_DEPTH_STENCIL_DESC dssDesc;
 	ZeroMemory(&dssDesc, sizeof(D3D11_DEPTH_STENCIL_DESC));
 	dssDesc.DepthEnable = true;
@@ -60,7 +52,7 @@ void Skybox::Init(ID3D11Device * _d3dDevice) {
 
 }
 
-void Skybox::Render(ID3D11DeviceContext * _d3dImmediateContext, XMMATRIX _camView, XMMATRIX _camProj) {
+void Skybox::Render(ID3D11DeviceContext * _d3dImmediateContext, XMMATRIX _camView, XMMATRIX _camProj, ID3D11RasterizerState *_rasterState) {
 	//Set the proper VS and PS shaders, and layout
 	_d3dImmediateContext->VSSetShader(vertexShader, 0, 0);
 	_d3dImmediateContext->PSSetShader(pixelShader, 0, 0);
@@ -78,7 +70,7 @@ void Skybox::Render(ID3D11DeviceContext * _d3dImmediateContext, XMMATRIX _camVie
 	_d3dImmediateContext->PSSetSamplers(0, 1, &texSamplerState);
 	//Set the new depth/stencil and RS states
 	_d3dImmediateContext->OMSetDepthStencilState(DSLessEqual, 0);
-	_d3dImmediateContext->RSSetState(rasterState);
+	_d3dImmediateContext->RSSetState(_rasterState);
 	_d3dImmediateContext->DrawIndexed(numFaces * 3, 0, 0);
 }
 

@@ -41,6 +41,14 @@ public:
 
 	static float RandFloat(float a, float b) { return a + RandFloat()*(b - a); }
 
+	static XMMATRIX InverseTranspose(XMMATRIX M) {
+		XMMATRIX A = M;
+		A.r[3] = XMVectorSet(0.0f, 0.0f, 0.0f, 1.0f);
+
+		XMVECTOR det = XMMatrixDeterminant(A);
+		return XMMatrixTranspose(XMMatrixInverse(&det, A));
+	}
+
 	static bool CreateModelFromObjFileKaiNi(
 		ID3D11Device *_d3dDevice,
 		IDXGISwapChain *_swapChain,

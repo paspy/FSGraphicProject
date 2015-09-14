@@ -489,11 +489,11 @@ void GeoGen::BuildCylinderBottomCap(float bottomRadius, float topRadius, float h
 	}
 }
 
-float GeoGen::GetHillHeight(float x, float z) const {
+float GeoGen::GetHillHeight(float x, float z) {
 	return 0.3f*(z*sinf(0.1f*x) + x*cosf(0.1f*z));
 }
 
-XMFLOAT3 GeoGen::GetHillNormal(float x, float z) const {
+XMFLOAT3 GeoGen::GetHillNormal(float x, float z) {
 	// n = (-df/dx, 1, -df/dz)
 	XMFLOAT3 n(
 		-0.03f*z*cosf(0.1f*x) - 0.3f*cosf(0.1f*z),
@@ -600,44 +600,4 @@ void GeoGen::CreateFullscreenQuad(MeshData& meshData) {
 	meshData.Indices[5] = 3;
 }
 
-void GeoGen::CreateLandBuffer(ID3D11Device * _d3dDevice, ID3D11Buffer ** _vertBuffer, ID3D11Buffer ** _indexBuffer) {
-	MeshData grid;
-
-	CreateGrid(160.0f, 160.0f, 50, 50, grid);
-
-	UINT indicesCount = static_cast<UINT>(grid.Indices.size());
-
-	vector<Vertex3D> vertices(grid.Vertices.size());
-	for ( size_t i = 0; i < grid.Vertices.size(); ++i ) {
-		XMFLOAT3 p = grid.Vertices[i].Position;
-
-		p.y = GetHillHeight(p.x, p.z);
-
-		vertices[i].Position = p;
-		vertices[i].Normal = GetHillNormal(p.x, p.z);
-		vertices[i].TexCoord = grid.Vertices[i].TexCoord;
-	}
-
-	D3D11_BUFFER_DESC vbd;
-	ZeroMemory(&vbd, sizeof(vbd));
-	vbd.Usage = D3D11_USAGE_IMMUTABLE;
-	vbd.ByteWidth = sizeof(Vertex3D) * static_cast<UINT>(grid.Vertices.size());
-	vbd.BindFlags = D3D11_BIND_VERTEX_BUFFER;
-	vbd.CPUAccessFlags = 0;
-	vbd.MiscFlags = 0;
-	D3D11_SUBRESOURCE_DATA vinitData;
-	vinitData.pSysMem = &vertices[0];
-	HR(_d3dDevice->CreateBuffer(&vbd, &vinitData, _vertBuffer));
-
-	D3D11_BUFFER_DESC ibd;
-	ZeroMemory(&ibd, sizeof(ibd));
-	ibd.Usage = D3D11_USAGE_IMMUTABLE;
-	ibd.ByteWidth = sizeof(UINT) * indicesCount;
-	ibd.BindFlags = D3D11_BIND_INDEX_BUFFER;
-	ibd.CPUAccessFlags = 0;
-	ibd.MiscFlags = 0;
-	D3D11_SUBRESOURCE_DATA iinitData;
-	iinitData.pSysMem = &grid.Indices[0];
-	HR(_d3dDevice->CreateBuffer(&ibd, &iinitData, _indexBuffer));
-}
 

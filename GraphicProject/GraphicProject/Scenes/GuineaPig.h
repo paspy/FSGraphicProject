@@ -3,7 +3,9 @@
 
 #include "../MeshControllers/ObjMesh.h"
 #include "../MeshControllers/Skybox.h"
+#include "../MeshControllers/TerrainMesh.h"
 #include "../MeshControllers/WaveMesh.h"
+
 
 using namespace D3DSturcture;
 
@@ -30,10 +32,10 @@ private:
 
 private:
 	Skybox				m_skyBox;
-	ObjMesh				m_ground;
 	ObjMesh				m_barrel;
 	ObjMesh				m_bed;
 	WaveMesh			m_wave;
+	TerrainMesh			m_terrain;
 
 	// Lighting
 	DirectionalLight	m_directionalLight;

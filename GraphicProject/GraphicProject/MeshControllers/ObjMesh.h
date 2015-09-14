@@ -27,7 +27,9 @@ public:
 	struct CBuffer {
 		CBuffer() {}
 		XMMATRIX World;
+		XMMATRIX WorldInvTranspose;
 		XMMATRIX WorldViewProj;
+		XMMATRIX TexTransform;
 		Material material;
 	};
 
@@ -36,7 +38,7 @@ public:
 
 	void Init(ID3D11Device *_d3dDevice, IDXGISwapChain *_swapChain, wstring _filename, bool _isRHCoordSys, bool _computeNormals, LPCWSTR _shaderFilename);
 
-	void Render(mutex *_mutex, ID3D11DeviceContext *_d3dImmediateContext, XMMATRIX _camView, XMMATRIX _camProj);
+	void Render(ID3D11DeviceContext *_d3dImmediateContext, XMMATRIX _camView, XMMATRIX _camProj, ID3D11RasterizerState *_rasterState);
 
 	CBuffer								cbBuffer;
 	ID3D11VertexShader					*vertexShader = nullptr;
@@ -46,9 +48,9 @@ public:
 	ID3D11Buffer						*vertBuffer = nullptr;
 	ID3D11Buffer						*indexBuffer = nullptr;
 	ID3D11Buffer						*constBuffer = nullptr;
-	ID3D11RasterizerState				*rasterState = nullptr;
 	ID3D11SamplerState					*texSamplerState = nullptr;
 	XMMATRIX							worldMat = XMMatrixIdentity();
+	XMMATRIX							objTexTransform = XMMatrixIdentity();
 	UINT								stride = sizeof(Vertex3D);
 	UINT								offset = 0;
 	int									subsets = 0;

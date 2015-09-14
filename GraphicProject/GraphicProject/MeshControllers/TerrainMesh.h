@@ -2,11 +2,11 @@
 #include "../D3DApp/D3DSturcture.h"
 #include "../D3DApp/D3DUtils.h"
 #include "../D3DApp/DirectXTK/DDSTextureLoader.h"
-#include "../D3DApp/Waves.h"
+#include "../D3DApp/GeoGen.h"
 
 using namespace D3DSturcture;
 
-class WaveMesh {
+class TerrainMesh {
 public:
 	struct Material {
 		Material() { ZeroMemory(this, sizeof(this)); }
@@ -25,12 +25,10 @@ public:
 		Material material;
 	};
 
-	WaveMesh() {}
-	~WaveMesh();
+	TerrainMesh() {}
+	~TerrainMesh();
 	void Init(ID3D11Device *_d3dDevice, LPCWSTR _shaderFilename);
 	void BuildBuffer(ID3D11Device * _d3dDevice);
-
-	void Update(double _dt, double _tt, ID3D11DeviceContext *_d3dImmediateContext);
 
 	void Render(ID3D11DeviceContext *_d3dImmediateContext, XMMATRIX _camView, XMMATRIX _camProj, ID3D11RasterizerState *_rasterState);
 
@@ -45,12 +43,10 @@ public:
 	ID3D11Buffer						*constBuffer = nullptr;
 	ID3D11SamplerState					*texSamplerState = nullptr;
 	XMMATRIX							worldMat = XMMatrixIdentity();
-	XMMATRIX							waterTexTransform = XMMatrixIdentity();
+	XMMATRIX							terrainTexTransform = XMMatrixIdentity();
 	UINT								stride = sizeof(Vertex3D);
 	UINT								offset = 0;
-	Waves								waves;
-	XMFLOAT2							waterTexOffset;
-
+	UINT								indicesCount;
 	D3D11_INPUT_ELEMENT_DESC			vertexLayout[4] =
 	{
 		{ "POSITION",	0, DXGI_FORMAT_R32G32B32_FLOAT,		0, D3D11_APPEND_ALIGNED_ELEMENT,	D3D11_INPUT_PER_VERTEX_DATA, 0 },

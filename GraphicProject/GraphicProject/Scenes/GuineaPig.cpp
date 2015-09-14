@@ -1,16 +1,19 @@
 #include "GuineaPig.h"
+#include "../D3DApp/RenderStates.h"
 
 GuineaPig::GuineaPig(HINSTANCE hinst) : D3DApp(hinst){ }
 
 GuineaPig::~GuineaPig() {
 	// release lighting ptr
 	SafeRelease(m_cbPerFrameBuffer);
+	RenderStates::DestroyAll();
 
 }
 
 bool GuineaPig::Init() {
 	if ( !D3DApp::Init() )
 		return false;
+	RenderStates::InitAll(m_d3dDevice);
 
 	BuildConstBuffer();
 	BuildGeometry();
@@ -39,19 +42,20 @@ void GuineaPig::BuildConstBuffer() {
 
 void GuineaPig::BuildGeometry() {
 	m_skyBox.Init(m_d3dDevice);
-	m_ground.Init(m_d3dDevice, m_swapChain, L"Resources/Models/ground.obj", true, true, L"Shaders/Base/Base.hlsl");
 	m_barrel.Init(m_d3dDevice, m_swapChain, L"Resources/Models/barrel.obj", true, true, L"Shaders/Base/Base.hlsl");
 	m_bed.Init(m_d3dDevice, m_swapChain, L"Resources/Models/Bed.obj", true, true, L"Shaders/Base/Base.hlsl");
 
-	m_wave.Init(m_d3dDevice, L"Shaders/Base/Waves.hlsl");
+	
+	m_terrain.Init(m_d3dDevice, L"Shaders/Base/Base.hlsl");
+	m_wave.Init(m_d3dDevice, L"Shaders/Base/Base.hlsl");
 
 	D3DUtils::CreateModelFromObjFileKaiNi(NULL, NULL, "Resources/Models/barrel.obj", NULL, NULL);
 }
 
 void GuineaPig::BuildLighting() {
 	// Direction light setting
-	m_directionalLight.Ambient = XMFLOAT4(0.2f, 0.2f, 0.2f, 1.0f);
-	m_directionalLight.Diffuse = XMFLOAT4(0.3f, 0.3f, 0.3f, 1.0f);
+	m_directionalLight.Ambient = XMFLOAT4(0.25f, 0.25f, 0.25f, 1.0f);
+	m_directionalLight.Diffuse = XMFLOAT4(0.5f, 0.5f, 0.5f, 1.0f);
 	m_directionalLight.Specular = XMFLOAT4(0.3f, 0.3f, 0.3f, 1.0f);
 	m_directionalLight.Direction = XMFLOAT3(0.58f, -0.58f, 0.58f);
 
@@ -89,9 +93,9 @@ void GuineaPig::UpdateScene(double _dt) {
 	// **Update Skybox **//
 
 	// **Update Directional Light **//
-	m_directionalLight.Direction.x = 0.85f * cosf(static_cast<float>(m_timer.TotalTime()));
-	m_directionalLight.Direction.z = 0.85f * sinf(static_cast<float>(m_timer.TotalTime()));
-	m_directionalLight.Direction.y = -0.58f;
+	//m_directionalLight.Direction.x = 0.85f * cosf(static_cast<float>(m_timer.TotalTime()));
+	//m_directionalLight.Direction.z = 0.85f * sinf(static_cast<float>(m_timer.TotalTime()));
+	//m_directionalLight.Direction.y = -0.58f;
 	// **Update Directional Light **//
 
 
@@ -110,13 +114,7 @@ void GuineaPig::UpdateScene(double _dt) {
 
 
 	// Update objects
-
-	// ground update
-	m_ground.worldMat = XMMatrixIdentity();
-	XMMATRIX Rotation = XMMatrixRotationY(XM_PI);
-	XMMATRIX Scale = XMMatrixScaling(5.0f, 1.0f, 5.0f);
-	XMMATRIX Translation = XMMatrixTranslation(0.0f, .1f, 0.0f);
-	m_ground.worldMat = Rotation * Scale * Translation;
+	XMMATRIX Rotation, Scale, Translation;
 
 	// barrel update
 	m_barrel.worldMat = XMMatrixIdentity();
@@ -131,6 +129,13 @@ void GuineaPig::UpdateScene(double _dt) {
 	Scale = XMMatrixScaling(1.0f, 1.0f, 1.0f);
 	Translation = XMMatrixTranslation(0.0f, 1.0f, -30.0f);
 	m_bed.worldMat = Rotation * Scale * Translation;
+
+	// terrain update
+	m_terrain.worldMat = XMMatrixIdentity();
+	Rotation = XMMatrixRotationY(0);
+	Scale = XMMatrixScaling(2.0f, 1.0f, 2.0f);
+	Translation = XMMatrixTranslation(0.0f, 0.0f, 0.0f);
+	m_terrain.worldMat = Rotation * Scale * Translation;
 
 	// update waves
 	m_wave.Update(_dt, m_timer.TotalTime(), m_d3dImmediateContext);
@@ -170,14 +175,14 @@ void GuineaPig::DrawScene() {
 	// Render opaque objects //
 
 	// obj meshs
-	//m_barrel.Render	(m_mutex, m_d3dImmediateContext, m_camView, m_camProjection);
+	m_barrel.Render	(m_d3dImmediateContext, m_camView, m_camProjection, RenderStates::NoCullRS);
 	//m_bed.Render	(m_mutex, m_d3dImmediateContext, m_camView, m_camProjection);
-	//m_ground.Render	(m_mutex, m_d3dImmediateContext, m_camView, m_camProjection);
 
-	m_wave.Render(m_mutex, m_d3dImmediateContext, m_camView, m_camProjection);
+	m_wave.Render(m_d3dImmediateContext, m_camView, m_camProjection, RenderStates::BackCullRS);
+	m_terrain.Render(m_d3dImmediateContext, m_camView, m_camProjection, RenderStates::BackCullRS);
 
 	// Skybox
-	m_skyBox.Render(m_d3dImmediateContext, m_camView, m_camProjection);
+	m_skyBox.Render(m_d3dImmediateContext, m_camView, m_camProjection, RenderStates::NoCullRS);
 
 	//Present the backbuffer to the screen
 	HR(m_swapChain->Present(0, 0));
