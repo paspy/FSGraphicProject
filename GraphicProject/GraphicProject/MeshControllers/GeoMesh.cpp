@@ -35,9 +35,9 @@ void GeoMesh::Init(ID3D11Device * _d3dDevice, LPCWSTR _shaderFilename, GeoType _
 	_d3dDevice->CreateSamplerState(&sampDesc, &texSamplerState);
 
 	// hard coded matrtial setting - NOT GOOD
-	cbBuffer.material.Ambient = XMFLOAT4(0.8f, 0.8f, 0.8f, 1.0f);
-	cbBuffer.material.Diffuse = XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f);
-	cbBuffer.material.Specular = XMFLOAT4(0.3f, 0.3f, 0.3f, 8.0f);
+	cbBuffer.material.Ambient = XMFLOAT4(0.6f, 0.6f, 0.6f, 1.0f);
+	cbBuffer.material.Diffuse = XMFLOAT4(0.0f, 0.0f, 0.0f, 1.0f);
+	cbBuffer.material.Specular = XMFLOAT4(0.2f, 0.2f, 0.2f, 8.0f);
 
 	// scaling texture
 	geoTexTransform = XMMatrixScaling(1.0f, 1.0f, 0.0f);

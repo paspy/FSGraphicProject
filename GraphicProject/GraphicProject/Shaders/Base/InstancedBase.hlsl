@@ -73,7 +73,7 @@ float4 PSMain(VS_OUTPUT psInput) : SV_TARGET {
 	float4 textColor = ObjTexture.Sample(ObjSamplerState, psInput.TexCoord);
 
 	Material currMat;
-	currMat.Ambient = gMaterial.Ambient;
+	currMat.Ambient = textColor * gMaterial.Ambient;
 	currMat.Diffuse = textColor;
 	currMat.Specular = gMaterial.Specular;
 

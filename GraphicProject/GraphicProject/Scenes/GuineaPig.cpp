@@ -163,7 +163,7 @@ void GuineaPig::DrawScene() {
 
 	m_d3dImmediateContext->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 
-	float blendFactor[] = { 0.75f, 0.75f, 0.75f, 1.0f };
+	float blendFactor[] = { 0.5f, 0.5f, 0.5f, 1.0f };
 
 	// apply lighting
 	m_cbPerFrame.directionalLight = m_directionalLight;
@@ -188,8 +188,9 @@ void GuineaPig::DrawScene() {
 	m_terrain.Render(m_d3dImmediateContext, m_camView, m_camProjection, 0);
 	m_barrel.Render	(m_d3dImmediateContext, m_camView, m_camProjection, RenderStates::NoCullRS);
 
-	//m_geoMesh.Render(m_d3dImmediateContext, m_camView, m_camProjection, RenderStates::NoCullRS);
-	m_bed.Render	(m_d3dImmediateContext, m_camView, m_camProjection, RenderStates::NoCullRS);
+	m_geoMesh.Render(m_d3dImmediateContext, m_camView, m_camProjection, RenderStates::NoCullRS);
+
+	//m_bed.Render(m_d3dImmediateContext, m_camView, m_camProjection, RenderStates::NoCullRS);
 
 
 	m_wave.Render(m_d3dImmediateContext, m_camView, m_camProjection, 0, RenderStates::TransparentBS, blendFactor);
