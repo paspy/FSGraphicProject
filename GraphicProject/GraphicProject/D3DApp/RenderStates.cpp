@@ -2,7 +2,6 @@
 
 ID3D11RasterizerState* RenderStates::WireframeRS	= nullptr;
 ID3D11RasterizerState* RenderStates::NoCullRS		= nullptr;
-ID3D11RasterizerState* RenderStates::BackCullRS		= nullptr;
 ID3D11RasterizerState* RenderStates::FrontCullRS	= nullptr;
 
 ID3D11BlendState*      RenderStates::AlphaToCoverageBS	= nullptr;
@@ -32,18 +31,6 @@ void RenderStates::InitAll(ID3D11Device* _d3dDevice) {
 	noCullDesc.DepthClipEnable = true;
 
 	HR(_d3dDevice->CreateRasterizerState(&noCullDesc, &NoCullRS));
-
-	//
-	// BackCullRS
-	//
-	D3D11_RASTERIZER_DESC backCullDesc;
-	ZeroMemory(&backCullDesc, sizeof(D3D11_RASTERIZER_DESC));
-	backCullDesc.FillMode = D3D11_FILL_SOLID;
-	backCullDesc.CullMode = D3D11_CULL_BACK;
-	backCullDesc.FrontCounterClockwise = false;
-	backCullDesc.DepthClipEnable = true;
-
-	HR(_d3dDevice->CreateRasterizerState(&backCullDesc, &BackCullRS));
 
 	//
 	// FrontCullRS
@@ -81,8 +68,8 @@ void RenderStates::InitAll(ID3D11Device* _d3dDevice) {
 	transparentDesc.AlphaToCoverageEnable = false;
 	transparentDesc.IndependentBlendEnable = false;
 	transparentDesc.RenderTarget[0].BlendEnable = true;
-	transparentDesc.RenderTarget[0].SrcBlend = D3D11_BLEND_SRC_ALPHA;
-	transparentDesc.RenderTarget[0].DestBlend = D3D11_BLEND_INV_SRC_ALPHA;
+	transparentDesc.RenderTarget[0].SrcBlend = D3D11_BLEND_SRC_COLOR;
+	transparentDesc.RenderTarget[0].DestBlend = D3D11_BLEND_BLEND_FACTOR;
 	transparentDesc.RenderTarget[0].BlendOp = D3D11_BLEND_OP_ADD;
 	transparentDesc.RenderTarget[0].SrcBlendAlpha = D3D11_BLEND_ONE;
 	transparentDesc.RenderTarget[0].DestBlendAlpha = D3D11_BLEND_ZERO;
@@ -95,7 +82,6 @@ void RenderStates::InitAll(ID3D11Device* _d3dDevice) {
 void RenderStates::DestroyAll() {
 	SafeRelease(WireframeRS);
 	SafeRelease(NoCullRS);
-	SafeRelease(BackCullRS);
 	SafeRelease(FrontCullRS);
 	SafeRelease(AlphaToCoverageBS);
 	SafeRelease(TransparentBS);

@@ -24,7 +24,8 @@ void WaveMesh::Init(ID3D11Device * _d3dDevice, LPCWSTR _shaderFilename) {
 
 	D3D11_SAMPLER_DESC sampDesc;
 	ZeroMemory(&sampDesc, sizeof(sampDesc));
-	sampDesc.Filter = D3D11_FILTER_MIN_MAG_MIP_LINEAR;
+	sampDesc.Filter = D3D11_FILTER_ANISOTROPIC;
+	sampDesc.MaxAnisotropy = 4;
 	sampDesc.AddressU = D3D11_TEXTURE_ADDRESS_WRAP;
 	sampDesc.AddressV = D3D11_TEXTURE_ADDRESS_WRAP;
 	sampDesc.AddressW = D3D11_TEXTURE_ADDRESS_WRAP;
@@ -34,16 +35,16 @@ void WaveMesh::Init(ID3D11Device * _d3dDevice, LPCWSTR _shaderFilename) {
 	_d3dDevice->CreateSamplerState(&sampDesc, &texSamplerState);
 
 	// hard coded matrtial setting - NOT GOOD
-	cbBuffer.material.Ambient = XMFLOAT4(0.5f, 0.5f, 0.5f, 1.0f);
+	cbBuffer.material.Ambient = XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f);
 	cbBuffer.material.Diffuse = XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f);
-	cbBuffer.material.Specular = XMFLOAT4(0.8f, 0.8f, 0.8f, 32.0f);
+	cbBuffer.material.Specular = XMFLOAT4(0.2f, 0.2f, 0.2f, 8.0f);
 
 	// init the wave
 	waves.Init(120, 120, 1.0f, 0.04f, 3.25f, 0.2f);
 
 	// loading the texture - using dds loader
-	HR(CreateDDSTextureFromFile(_d3dDevice, L"Resources/Models/ground_diffuse.dds", NULL, &shaderResView));
-	HR(CreateDDSTextureFromFile(_d3dDevice, L"Resources/Models/ground_normal.dds", NULL, &normalShaderResView));
+	HR(CreateDDSTextureFromFile(_d3dDevice, L"Resources/Textures/Water_diffuse.dds", NULL, &shaderResView));
+	HR(CreateDDSTextureFromFile(_d3dDevice, L"Resources/Textures/Water_normal.dds", NULL, &normalShaderResView));
 
 	// create the depending shader
 	HR(D3DUtils::CreateShaderAndLayoutFromFile(_d3dDevice, _shaderFilename, vertexLayout, 4, &vertexShader, &pixelShader, &inputLayout));
@@ -129,7 +130,7 @@ void WaveMesh::Update(double _dt, double _tt, ID3D11DeviceContext * _d3dImmediat
 	// Animate water texture coordinates.
 
 	// Tile water texture.
-	XMMATRIX wavesScale = XMMatrixScaling(5.0f, 5.0f, 0.0f);
+	XMMATRIX wavesScale = XMMatrixScaling(10.0f, 10.0f, 0.0f);
 
 	// Translate texture over time.
 	waterTexOffset.y += 0.05f*static_cast<float>(_dt);
@@ -147,7 +148,7 @@ void WaveMesh::Update(double _dt, double _tt, ID3D11DeviceContext * _d3dImmediat
 
 }
 
-void WaveMesh::Render(ID3D11DeviceContext * _d3dImmediateContext, XMMATRIX _camView, XMMATRIX _camProj, ID3D11RasterizerState *_rasterState) {
+void WaveMesh::Render(ID3D11DeviceContext * _d3dImmediateContext, XMMATRIX _camView, XMMATRIX _camProj, ID3D11RasterizerState *_rs, ID3D11BlendState* _bs = nullptr, float *_bf = nullptr) {
 
 	// Set the default VS shader and depth/stencil state and layout
 	_d3dImmediateContext->VSSetShader(vertexShader, NULL, 0);
@@ -171,7 +172,8 @@ void WaveMesh::Render(ID3D11DeviceContext * _d3dImmediateContext, XMMATRIX _camV
 	_d3dImmediateContext->PSSetShaderResources(0, 1, &shaderResView);
 	_d3dImmediateContext->PSSetShaderResources(1, 1, &normalShaderResView);
 	_d3dImmediateContext->PSSetSamplers(0, 1, &texSamplerState);
-	_d3dImmediateContext->RSSetState(_rasterState);
+	_d3dImmediateContext->RSSetState(_rs);
+	_d3dImmediateContext->OMSetBlendState(_bs, _bf, 0xffffffff);
 	_d3dImmediateContext->DrawIndexed(3 * waves.TriangleCount(), 0, 0);
 
 }

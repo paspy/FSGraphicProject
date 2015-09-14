@@ -49,12 +49,14 @@ void GuineaPig::BuildGeometry() {
 	m_terrain.Init(m_d3dDevice, L"Shaders/Base/Base.hlsl");
 	m_wave.Init(m_d3dDevice, L"Shaders/Base/Base.hlsl");
 
+	m_geoMesh.Init(m_d3dDevice, L"Shaders/Base/InstancedBase.hlsl", GeoMesh::GeoType::Box, L"Resources/Textures/Wood_diffuse.dds", L"Resources/Textures/Wood_normal.dds");
+
 	D3DUtils::CreateModelFromObjFileKaiNi(NULL, NULL, "Resources/Models/barrel.obj", NULL, NULL);
 }
 
 void GuineaPig::BuildLighting() {
 	// Direction light setting
-	m_directionalLight.Ambient = XMFLOAT4(0.25f, 0.25f, 0.25f, 1.0f);
+	m_directionalLight.Ambient = XMFLOAT4(0.3f, 0.3f, 0.3f, 1.0f);
 	m_directionalLight.Diffuse = XMFLOAT4(0.5f, 0.5f, 0.5f, 1.0f);
 	m_directionalLight.Specular = XMFLOAT4(0.3f, 0.3f, 0.3f, 1.0f);
 	m_directionalLight.Direction = XMFLOAT3(0.58f, -0.58f, 0.58f);
@@ -93,9 +95,9 @@ void GuineaPig::UpdateScene(double _dt) {
 	// **Update Skybox **//
 
 	// **Update Directional Light **//
-	//m_directionalLight.Direction.x = 0.85f * cosf(static_cast<float>(m_timer.TotalTime()));
-	//m_directionalLight.Direction.z = 0.85f * sinf(static_cast<float>(m_timer.TotalTime()));
-	//m_directionalLight.Direction.y = -0.58f;
+	m_directionalLight.Direction.x = 0.85f * cosf(static_cast<float>(m_timer.TotalTime()));
+	m_directionalLight.Direction.z = 0.85f * sinf(static_cast<float>(m_timer.TotalTime()));
+	m_directionalLight.Direction.y = -0.58f;
 	// **Update Directional Light **//
 
 
@@ -122,6 +124,13 @@ void GuineaPig::UpdateScene(double _dt) {
 	Scale = XMMatrixScaling(5.0f, 5.0f, 5.0f);
 	Translation = XMMatrixTranslation(0.0f, 5.0f, 25.0f);
 	m_barrel.worldMat = Rotation * Scale * Translation;
+
+	// m_geoMesh update
+	m_geoMesh.worldMat = XMMatrixIdentity();
+	Rotation = XMMatrixRotationY(0);
+	Scale = XMMatrixScaling(5.0f, 5.0f, 5.0f);
+	Translation = XMMatrixTranslation(0.0f, 20.0f, 0.0f);
+	m_geoMesh.worldMat = Rotation * Scale * Translation;
 
 	// bed update
 	m_bed.worldMat = XMMatrixIdentity();
@@ -153,7 +162,8 @@ void GuineaPig::DrawScene() {
 	m_d3dImmediateContext->ClearDepthStencilView(m_depthStencilView, D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL, 1.0f, 0);
 
 	m_d3dImmediateContext->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
-	// opaque objects drawing
+
+	float blendFactor[] = { 0.75f, 0.75f, 0.75f, 1.0f };
 
 	// apply lighting
 	m_cbPerFrame.directionalLight = m_directionalLight;
@@ -169,21 +179,26 @@ void GuineaPig::DrawScene() {
 	// Bind the render target view and depth/stencil view to the pipeline.
 	m_d3dImmediateContext->OMSetRenderTargets(1, &m_renderTargetView, m_depthStencilView);
 
-	//Set the default blend state (no blending) for opaque objects
-	m_d3dImmediateContext->OMSetBlendState(0, 0, 0xffffffff);
-
 	// Render opaque objects //
-
-	// obj meshs
-	m_barrel.Render	(m_d3dImmediateContext, m_camView, m_camProjection, RenderStates::NoCullRS);
-	//m_bed.Render	(m_mutex, m_d3dImmediateContext, m_camView, m_camProjection);
-
-	m_wave.Render(m_d3dImmediateContext, m_camView, m_camProjection, RenderStates::BackCullRS);
-	m_terrain.Render(m_d3dImmediateContext, m_camView, m_camProjection, RenderStates::BackCullRS);
 
 	// Skybox
 	m_skyBox.Render(m_d3dImmediateContext, m_camView, m_camProjection, RenderStates::NoCullRS);
 
+	// obj meshs
+	m_terrain.Render(m_d3dImmediateContext, m_camView, m_camProjection, 0);
+	m_barrel.Render	(m_d3dImmediateContext, m_camView, m_camProjection, RenderStates::NoCullRS);
+
+	//m_geoMesh.Render(m_d3dImmediateContext, m_camView, m_camProjection, RenderStates::NoCullRS);
+	m_bed.Render	(m_d3dImmediateContext, m_camView, m_camProjection, RenderStates::NoCullRS);
+
+
+	m_wave.Render(m_d3dImmediateContext, m_camView, m_camProjection, 0, RenderStates::TransparentBS, blendFactor);
+	
+
+
+
+	//Set the default blend state (no blending) for opaque objects
+	m_d3dImmediateContext->OMSetBlendState(0, blendFactor, 0xffffffff);
 	//Present the backbuffer to the screen
 	HR(m_swapChain->Present(0, 0));
 }

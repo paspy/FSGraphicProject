@@ -86,6 +86,9 @@
     <ClCompile Include="D3DApp\RenderStates.cpp">
       <Filter>D3DApp\D3DHelper</Filter>
     </ClCompile>
+    <ClCompile Include="MeshControllers\GeoMesh.cpp">
+      <Filter>MeshControllers</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="D3DApp\DirectXTK\DDSTextureLoader.h">
@@ -145,6 +148,9 @@
     <ClInclude Include="D3DApp\RenderStates.h">
       <Filter>D3DApp\D3DHelper</Filter>
     </ClInclude>
+    <ClInclude Include="MeshControllers\GeoMesh.h">
+      <Filter>MeshControllers</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <FxCompile Include="Shaders\Skybox\Skybox.hlsl">
@@ -153,10 +159,10 @@
     <FxCompile Include="Shaders\Base\Lighting.hlsl">
       <Filter>Source Files\Scenes\Shaders\Base</Filter>
     </FxCompile>
-    <FxCompile Include="Shaders\Base\Base_old.hlsl">
+    <FxCompile Include="Shaders\Base\Base.hlsl">
       <Filter>Source Files\Scenes\Shaders\Base</Filter>
     </FxCompile>
-    <FxCompile Include="Shaders\Base\Base.hlsl">
+    <FxCompile Include="Shaders\Base\InstancedBase.hlsl">
       <Filter>Source Files\Scenes\Shaders\Base</Filter>
     </FxCompile>
   </ItemGroup>

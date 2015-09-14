@@ -52,7 +52,7 @@ void Skybox::Init(ID3D11Device * _d3dDevice) {
 
 }
 
-void Skybox::Render(ID3D11DeviceContext * _d3dImmediateContext, XMMATRIX _camView, XMMATRIX _camProj, ID3D11RasterizerState *_rasterState) {
+void Skybox::Render(ID3D11DeviceContext * _d3dImmediateContext, XMMATRIX _camView, XMMATRIX _camProj, ID3D11RasterizerState *_rs) {
 	//Set the proper VS and PS shaders, and layout
 	_d3dImmediateContext->VSSetShader(vertexShader, 0, 0);
 	_d3dImmediateContext->PSSetShader(pixelShader, 0, 0);
@@ -70,7 +70,7 @@ void Skybox::Render(ID3D11DeviceContext * _d3dImmediateContext, XMMATRIX _camVie
 	_d3dImmediateContext->PSSetSamplers(0, 1, &texSamplerState);
 	//Set the new depth/stencil and RS states
 	_d3dImmediateContext->OMSetDepthStencilState(DSLessEqual, 0);
-	_d3dImmediateContext->RSSetState(_rasterState);
+	_d3dImmediateContext->RSSetState(_rs);
 	_d3dImmediateContext->DrawIndexed(numFaces * 3, 0, 0);
 }
 

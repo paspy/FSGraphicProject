@@ -36,14 +36,14 @@ void TerrainMesh::Init(ID3D11Device * _d3dDevice, LPCWSTR _shaderFilename) {
 	// hard coded matrtial setting - NOT GOOD
 	cbBuffer.material.Ambient = XMFLOAT4(0.5f, 0.5f, 0.5f, 1.0f);
 	cbBuffer.material.Diffuse = XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f);
-	cbBuffer.material.Specular = XMFLOAT4(0.8f, 0.8f, 0.8f, 32.0f);
+	cbBuffer.material.Specular = XMFLOAT4(0.3f, 0.3f, 0.3f, 8.0f);
 
 	// scaling texture
-	terrainTexTransform = XMMatrixScaling(10.0f, 10.0f, 0.0f);
+	terrainTexTransform = XMMatrixScaling(100.0f, 100.0f, 0.0f);
 
 	// loading the texture - using dds loader
-	HR(CreateDDSTextureFromFile(_d3dDevice, L"Resources/Models/ground_diffuse.dds", NULL, &shaderResView));
-	HR(CreateDDSTextureFromFile(_d3dDevice, L"Resources/Models/ground_normal.dds", NULL, &normalShaderResView));
+	HR(CreateDDSTextureFromFile(_d3dDevice, L"Resources/Textures/Grass_diffuse.dds", NULL, &shaderResView));
+	HR(CreateDDSTextureFromFile(_d3dDevice, L"Resources/Textures/Grass_normal.dds", NULL, &normalShaderResView));
 
 	// create the depending shader
 	HR(D3DUtils::CreateShaderAndLayoutFromFile(_d3dDevice, _shaderFilename, vertexLayout, 4, &vertexShader, &pixelShader, &inputLayout));
@@ -93,7 +93,7 @@ void TerrainMesh::BuildBuffer(ID3D11Device * _d3dDevice) {
 	HR(_d3dDevice->CreateBuffer(&ibd, &iinitData, &indexBuffer));
 }
 
-void TerrainMesh::Render(ID3D11DeviceContext * _d3dImmediateContext, XMMATRIX _camView, XMMATRIX _camProj, ID3D11RasterizerState *_rasterState) {
+void TerrainMesh::Render(ID3D11DeviceContext * _d3dImmediateContext, XMMATRIX _camView, XMMATRIX _camProj, ID3D11RasterizerState *_rs) {
 	// Set the default VS shader and depth/stencil state and layout
 	_d3dImmediateContext->VSSetShader(vertexShader, NULL, 0);
 	_d3dImmediateContext->PSSetShader(pixelShader, NULL, 0);
@@ -116,7 +116,7 @@ void TerrainMesh::Render(ID3D11DeviceContext * _d3dImmediateContext, XMMATRIX _c
 	_d3dImmediateContext->PSSetShaderResources(0, 1, &shaderResView);
 	_d3dImmediateContext->PSSetShaderResources(1, 1, &normalShaderResView);
 	_d3dImmediateContext->PSSetSamplers(0, 1, &texSamplerState);
-	_d3dImmediateContext->RSSetState(_rasterState);
+	_d3dImmediateContext->RSSetState(_rs);
 	_d3dImmediateContext->DrawIndexed(indicesCount, 0, 0);
 }
 

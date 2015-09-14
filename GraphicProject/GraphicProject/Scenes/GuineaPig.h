@@ -5,7 +5,7 @@
 #include "../MeshControllers/Skybox.h"
 #include "../MeshControllers/TerrainMesh.h"
 #include "../MeshControllers/WaveMesh.h"
-
+#include "../MeshControllers/GeoMesh.h"
 
 using namespace D3DSturcture;
 
@@ -36,6 +36,7 @@ private:
 	ObjMesh				m_bed;
 	WaveMesh			m_wave;
 	TerrainMesh			m_terrain;
+	GeoMesh				m_geoMesh;
 
 	// Lighting
 	DirectionalLight	m_directionalLight;

@@ -13,7 +13,7 @@ public:
 	Skybox() {}
 	~Skybox();
 	void Init(ID3D11Device *_d3dDevice);
-	void Render(ID3D11DeviceContext *_d3dImmediateContext, XMMATRIX _camView, XMMATRIX _camProj, ID3D11RasterizerState *_rasterState);
+	void Render(ID3D11DeviceContext *_d3dImmediateContext, XMMATRIX _camView, XMMATRIX _camProj, ID3D11RasterizerState *_rs);
 
 	CBuffer								cBuffer;
 	ID3D11VertexShader					*vertexShader = nullptr;

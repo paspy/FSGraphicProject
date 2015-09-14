@@ -32,7 +32,7 @@ public:
 
 	void Update(double _dt, double _tt, ID3D11DeviceContext *_d3dImmediateContext);
 
-	void Render(ID3D11DeviceContext *_d3dImmediateContext, XMMATRIX _camView, XMMATRIX _camProj, ID3D11RasterizerState *_rasterState);
+	void Render(ID3D11DeviceContext * _d3dImmediateContext, XMMATRIX _camView, XMMATRIX _camProj, ID3D11RasterizerState *_rs, ID3D11BlendState* _bs, float *_bf);
 
 	CBuffer								cbBuffer;
 	ID3D11VertexShader					*vertexShader = nullptr;
@@ -49,7 +49,7 @@ public:
 	UINT								stride = sizeof(Vertex3D);
 	UINT								offset = 0;
 	Waves								waves;
-	XMFLOAT2							waterTexOffset;
+	XMFLOAT2							waterTexOffset = XMFLOAT2(0.0f, 0.0f);
 
 	D3D11_INPUT_ELEMENT_DESC			vertexLayout[4] =
 	{

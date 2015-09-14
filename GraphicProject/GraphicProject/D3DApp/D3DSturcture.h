@@ -24,6 +24,11 @@ namespace D3DSturcture {
 		XMFLOAT3 TangentU;
 	}*Vertex3D_ptr;
 
+	typedef struct InstancedData {
+		XMFLOAT4X4 World;
+		XMFLOAT4 Color;
+	}*InstancedData_ptr;
+
 	// constant buffer structures
 	struct DirectionalLight {
 		DirectionalLight() { ZeroMemory(this, sizeof(this)); }

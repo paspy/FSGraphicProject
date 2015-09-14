@@ -58,7 +58,7 @@ void ObjMesh::Init(ID3D11Device *_d3dDevice, IDXGISwapChain *_swapChain, wstring
 
 }
 
-void ObjMesh::Render(ID3D11DeviceContext * _d3dImmediateContext, XMMATRIX _camView, XMMATRIX _camProj, ID3D11RasterizerState *_rasterState) {
+void ObjMesh::Render(ID3D11DeviceContext * _d3dImmediateContext, XMMATRIX _camView, XMMATRIX _camProj, ID3D11RasterizerState *_rs) {
 
 	// Set the default VS shader and depth/stencil state and layout
 	_d3dImmediateContext->VSSetShader(vertexShader, NULL, 0);
@@ -82,7 +82,7 @@ void ObjMesh::Render(ID3D11DeviceContext * _d3dImmediateContext, XMMATRIX _camVi
 		_d3dImmediateContext->PSSetShaderResources(0, 1, &shaderResView[materials[subsetTexture[i]].texArrayIndex]);
 		_d3dImmediateContext->PSSetShaderResources(1, 1, &shaderResView[materials[subsetTexture[i]].normMapTexArrayIndex]);
 		_d3dImmediateContext->PSSetSamplers(0, 1, &texSamplerState);
-		_d3dImmediateContext->RSSetState(_rasterState);
+		_d3dImmediateContext->RSSetState(_rs);
 		int indexStart = subsetIndexStart[i];
 		int indexDrawAmount = subsetIndexStart[i + 1] - subsetIndexStart[i];
 		_d3dImmediateContext->DrawIndexed(indexDrawAmount, indexStart, 0);
