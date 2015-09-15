@@ -1,5 +1,11 @@
 #include "Skybox.h"
 
+void LoadThread(Skybox *_skybox, ID3D11Device * _d3dDevice) {
+	if ( _skybox ) {
+		_skybox->LoadStuff(_d3dDevice);
+	}
+}
+
 Skybox::~Skybox() {
 	SafeRelease(inputLayout);
 	SafeRelease(indexBuffer);
@@ -44,6 +50,11 @@ void Skybox::Init(ID3D11Device * _d3dDevice) {
 	// build the "skysphere"
 	BuildSphere(_d3dDevice, 10, 10, &vertBuffer, &indexBuffer, numVertices, numFaces);
 
+	thread loadThread = thread(LoadThread, this, _d3dDevice);
+	loadThread.join();
+}
+
+void Skybox::LoadStuff(ID3D11Device * _d3dDevice) {
 	// loading the texture - using dds loader
 	HR(CreateDDSTextureFromFile(_d3dDevice, L"Resources/Skybox/skymap.dds", NULL, &shaderResView));
 

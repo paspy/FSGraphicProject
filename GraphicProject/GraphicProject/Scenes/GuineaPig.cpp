@@ -49,7 +49,7 @@ void GuineaPig::BuildGeometry() {
 	m_terrain.Init(m_d3dDevice, L"Shaders/Base/Base.hlsl");
 	m_wave.Init(m_d3dDevice, L"Shaders/Base/Base.hlsl");
 
-	m_geoMesh.Init(m_d3dDevice, L"Shaders/Base/InstancedBase.hlsl", GeoMesh::GeoType::Box, L"Resources/Textures/Wood_diffuse.dds", L"Resources/Textures/Wood_normal.dds");
+	m_geoMesh.Init(m_d3dDevice, L"Shaders/Base/InstancedBase.hlsl", GeoMesh::GeoType::Box, L"Resources/Textures/WireFence_diffuse.dds", L"Resources/Textures/WireFence_normal.dds");
 
 	D3DUtils::CreateModelFromObjFileKaiNi(NULL, NULL, "Resources/Models/barrel.obj", NULL, NULL);
 }
@@ -148,7 +148,7 @@ void GuineaPig::UpdateScene(double _dt) {
 
 	// update waves
 	m_wave.Update(_dt, m_timer.TotalTime(), m_d3dImmediateContext);
-	
+	m_geoMesh.Update(m_d3dImmediateContext, m_camPosition);
 }
 
 void GuineaPig::DrawScene() {
@@ -163,7 +163,8 @@ void GuineaPig::DrawScene() {
 
 	m_d3dImmediateContext->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 
-	float blendFactor[] = { 0.5f, 0.5f, 0.5f, 1.0f };
+	float blendFactor1[] = { 0.5f, 0.5f, 0.5f, 1.0f };
+	float blendFactor2[] = { 0.7f, 0.7f, 0.7f, 1.0f };
 
 	// apply lighting
 	m_cbPerFrame.directionalLight = m_directionalLight;
@@ -188,18 +189,16 @@ void GuineaPig::DrawScene() {
 	m_terrain.Render(m_d3dImmediateContext, m_camView, m_camProjection, 0);
 	m_barrel.Render	(m_d3dImmediateContext, m_camView, m_camProjection, RenderStates::NoCullRS);
 
-	m_geoMesh.Render(m_d3dImmediateContext, m_camView, m_camProjection, RenderStates::NoCullRS);
 
 	//m_bed.Render(m_d3dImmediateContext, m_camView, m_camProjection, RenderStates::NoCullRS);
-
-
-	m_wave.Render(m_d3dImmediateContext, m_camView, m_camProjection, 0, RenderStates::TransparentBS, blendFactor);
+	m_wave.Render(m_d3dImmediateContext, m_camView, m_camProjection, 0, RenderStates::TransparentBSbyColor, blendFactor1);
 	
+	m_geoMesh.Render(m_d3dImmediateContext, m_camView, m_camProjection, RenderStates::TransparentBSbyColor, blendFactor1);
 
 
 
 	//Set the default blend state (no blending) for opaque objects
-	m_d3dImmediateContext->OMSetBlendState(0, blendFactor, 0xffffffff);
+	m_d3dImmediateContext->OMSetBlendState(0, blendFactor1, 0xffffffff);
 	//Present the backbuffer to the screen
 	HR(m_swapChain->Present(0, 0));
 }

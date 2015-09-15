@@ -159,10 +159,10 @@
     <FxCompile Include="Shaders\Base\Lighting.hlsl">
       <Filter>Source Files\Scenes\Shaders\Base</Filter>
     </FxCompile>
-    <FxCompile Include="Shaders\Base\Base.hlsl">
+    <FxCompile Include="Shaders\Base\InstancedBase.hlsl">
       <Filter>Source Files\Scenes\Shaders\Base</Filter>
     </FxCompile>
-    <FxCompile Include="Shaders\Base\InstancedBase.hlsl">
+    <FxCompile Include="Shaders\Base\Base.hlsl">
       <Filter>Source Files\Scenes\Shaders\Base</Filter>
     </FxCompile>
   </ItemGroup>

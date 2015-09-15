@@ -11,6 +11,8 @@ GeoMesh::~GeoMesh() {
 	SafeRelease(shaderResView);
 	SafeRelease(normalShaderResView);
 	SafeRelease(texSamplerState);
+	SafeRelease(CCWcullMode);
+	SafeRelease(CWcullMode);
 }
 
 void GeoMesh::Init(ID3D11Device * _d3dDevice, LPCWSTR _shaderFilename, GeoType _genType, LPCWSTR _diffuseFile, LPCWSTR _normalFile) {
@@ -34,6 +36,17 @@ void GeoMesh::Init(ID3D11Device * _d3dDevice, LPCWSTR _shaderFilename, GeoType _
 	sampDesc.MaxLOD = D3D11_FLOAT32_MAX;
 	_d3dDevice->CreateSamplerState(&sampDesc, &texSamplerState);
 
+	D3D11_RASTERIZER_DESC cmdesc;
+	ZeroMemory(&cmdesc, sizeof(cmdesc));
+
+	cmdesc.FillMode = D3D11_FILL_SOLID;
+	cmdesc.CullMode = D3D11_CULL_BACK;
+
+	cmdesc.FrontCounterClockwise = true;
+	HR(_d3dDevice->CreateRasterizerState(&cmdesc, &CCWcullMode));
+	cmdesc.FrontCounterClockwise = false;
+	HR(_d3dDevice->CreateRasterizerState(&cmdesc, &CWcullMode));
+
 	// hard coded matrtial setting - NOT GOOD
 	cbBuffer.material.Ambient = XMFLOAT4(0.6f, 0.6f, 0.6f, 1.0f);
 	cbBuffer.material.Diffuse = XMFLOAT4(0.0f, 0.0f, 0.0f, 1.0f);
@@ -47,7 +60,7 @@ void GeoMesh::Init(ID3D11Device * _d3dDevice, LPCWSTR _shaderFilename, GeoType _
 	HR(CreateDDSTextureFromFile(_d3dDevice, _normalFile, NULL, &normalShaderResView));
 
 	// create the depending shader
-	HR(D3DUtils::CreateShaderAndLayoutFromFile(_d3dDevice, _shaderFilename, vertexLayout, 9, &vertexShader, &pixelShader, &inputLayout));
+	HR(D3DUtils::CreateShaderAndLayoutFromFile(_d3dDevice, _shaderFilename, vertexLayout, 8, &vertexShader, &pixelShader, &inputLayout));
 
 	BuildBuffer(_d3dDevice, _genType);
 	BuildInstancedBuffer(_d3dDevice);
@@ -113,50 +126,62 @@ void GeoMesh::BuildBuffer(ID3D11Device * _d3dDevice, GeoType _genType) {
 }
 
 void GeoMesh::BuildInstancedBuffer(ID3D11Device * _d3dDevice) {
-	const int n = 5;
-	instancedData.resize(n*n*n);
 
-	float width = 200.0f;
-	float height = 200.0f;
-	float depth = 200.0f;
-
-	float x = -0.5f*width;
-	float y = -0.5f*height;
-	float z = -0.5f*depth;
-	float dx = width / (n - 1);
-	float dy = height / (n - 1);
-	float dz = depth / (n - 1);
-	for (int k = 0; k < n; ++k) {
-		for (int i = 0; i < n; ++i) {
-			for (int j = 0; j < n; ++j) {
-				// Position instanced along a 3D grid.
-				instancedData[k*n*n + i*n + j].World = XMFLOAT4X4(
-					1.0f, 0.0f, 0.0f, 0.0f,
-					0.0f, 1.0f, 0.0f, 0.0f,
-					0.0f, 0.0f, 1.0f, 0.0f,
-					x + j*dx, y + i*dy, z + k*dz, 1.0f);
-
-				// Random color.
-				instancedData[k*n*n + i*n + j].Color.x = D3DUtils::RandFloat(0.0f, 1.0f);
-				instancedData[k*n*n + i*n + j].Color.y = D3DUtils::RandFloat(0.0f, 1.0f);
-				instancedData[k*n*n + i*n + j].Color.z = D3DUtils::RandFloat(0.0f, 1.0f);
-				instancedData[k*n*n + i*n + j].Color.w = 1.0f;
-			}
-		}
-	}
+	InstancedData tmp;
+	DirectX::XMStoreFloat4x4(&tmp.World, XMMatrixScaling(2.0f, 2.0f, 2.0f) * XMMatrixTranslation(5, 20, 0));
+	instancedData.push_back(tmp);
+	DirectX::XMStoreFloat4x4(&tmp.World, XMMatrixScaling(2.0f, 2.0f, 2.0f) * XMMatrixTranslation(0, 20, 0));
+	instancedData.push_back(tmp);
+	DirectX::XMStoreFloat4x4(&tmp.World, XMMatrixScaling(2.0f, 2.0f, 2.0f) * XMMatrixTranslation(-5, 20, 0));
+	instancedData.push_back(tmp);
 
 	D3D11_BUFFER_DESC vbd;
+	ZeroMemory(&vbd, sizeof(vbd));
 	vbd.Usage = D3D11_USAGE_DYNAMIC;
 	vbd.ByteWidth = sizeof(InstancedData) * (UINT)instancedData.size();
 	vbd.BindFlags = D3D11_BIND_VERTEX_BUFFER;
 	vbd.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
 	vbd.MiscFlags = 0;
 	vbd.StructureByteStride = 0;
-
 	HR(_d3dDevice->CreateBuffer(&vbd, 0, &instancedBuffer));
 }
 
-void GeoMesh::Render(ID3D11DeviceContext * _d3dImmediateContext, XMMATRIX _camView, XMMATRIX _camProj, ID3D11RasterizerState *_rs) {
+
+float GeoMesh::GetDistanceFromCamera(XMFLOAT4X4 _m4x4, XMVECTOR _camPosition) {
+	XMVECTOR tmpPos = XMVectorZero();
+	XMMATRIX tmp;
+
+	tmpPos = XMVector3TransformCoord(tmpPos, XMLoadFloat4x4(&_m4x4));
+
+	float distX = XMVectorGetX(tmpPos) - XMVectorGetX(_camPosition);
+	float distY = XMVectorGetY(tmpPos) - XMVectorGetY(_camPosition);
+	float distZ = XMVectorGetZ(tmpPos) - XMVectorGetZ(_camPosition);
+
+	return (distX*distX + distY*distY + distZ*distZ);
+}
+
+
+void GeoMesh::Update(ID3D11DeviceContext * _d3dImmediateContext, XMVECTOR _camPosition) {
+	D3D11_MAPPED_SUBRESOURCE mapSubres;
+	_d3dImmediateContext->Map(instancedBuffer, 0, D3D11_MAP_WRITE_DISCARD, 0, &mapSubres);
+
+	if ( GetDistanceFromCamera(instancedData[0].World, _camPosition) < GetDistanceFromCamera(instancedData[1].World, _camPosition) ) {
+		swap(instancedData[0].World, instancedData[1].World);
+		if ( GetDistanceFromCamera(instancedData[1].World, _camPosition) < GetDistanceFromCamera(instancedData[2].World, _camPosition) ) {
+			swap(instancedData[1].World, instancedData[2].World);
+		}
+	} else {
+		if ( GetDistanceFromCamera(instancedData[1].World, _camPosition) < GetDistanceFromCamera(instancedData[2].World, _camPosition) ) {
+			swap(instancedData[1].World, instancedData[2].World);
+		}
+	}
+
+	memcpy(mapSubres.pData, instancedData.data(), sizeof(InstancedData)*instancedData.size());
+	_d3dImmediateContext->Unmap(instancedBuffer, 0);
+}
+
+void GeoMesh::Render(ID3D11DeviceContext * _d3dImmediateContext, XMMATRIX _camView, XMMATRIX _camProj, ID3D11BlendState* _bs = nullptr, float *_bf = nullptr) {
+
 	// Set the default VS shader and depth/stencil state and layout
 	_d3dImmediateContext->VSSetShader(vertexShader, NULL, 0);
 	_d3dImmediateContext->PSSetShader(pixelShader, NULL, 0);
@@ -170,20 +195,26 @@ void GeoMesh::Render(ID3D11DeviceContext * _d3dImmediateContext, XMMATRIX _camVi
 	ID3D11Buffer *vbs[2] = { vertBuffer, instancedBuffer };
 	_d3dImmediateContext->IASetVertexBuffers(0, 2, vbs, stride, offset);
 
-	cbBuffer.World = XMMatrixTranspose(worldMat);
 	cbBuffer.WorldInvTranspose = D3DUtils::InverseTranspose(worldMat);
-	cbBuffer.WorldViewProj = XMMatrixTranspose(worldMat * _camView* _camProj);
+
+	cbBuffer.View = XMMatrixTranspose(_camView);
+	cbBuffer.Proj = XMMatrixTranspose(_camProj);
 	cbBuffer.TexTransform = geoTexTransform;
 
 	_d3dImmediateContext->UpdateSubresource(constBuffer, 0, NULL, &cbBuffer, 0, 0);
+
 	_d3dImmediateContext->VSSetConstantBuffers(0, 1, &constBuffer);
 	_d3dImmediateContext->PSSetConstantBuffers(1, 1, &constBuffer);
 	_d3dImmediateContext->PSSetShaderResources(0, 1, &shaderResView);
 	_d3dImmediateContext->PSSetShaderResources(1, 1, &normalShaderResView);
 	_d3dImmediateContext->PSSetSamplers(0, 1, &texSamplerState);
-	_d3dImmediateContext->RSSetState(_rs);
+	_d3dImmediateContext->OMSetBlendState(_bs, _bf, 0xffffffff);
+
+	_d3dImmediateContext->RSSetState(CCWcullMode);
 	_d3dImmediateContext->DrawIndexedInstanced(indicesCount, (UINT)instancedData.size(), 0, 0, 0);
-	//_d3dImmediateContext->DrawIndexed(indicesCount, 0, 0);
+
+	_d3dImmediateContext->RSSetState(CWcullMode);
+	_d3dImmediateContext->DrawIndexedInstanced(indicesCount, (UINT)instancedData.size(), 0, 0, 0);
 }
 
 

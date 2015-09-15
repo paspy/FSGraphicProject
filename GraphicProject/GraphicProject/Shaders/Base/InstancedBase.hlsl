@@ -8,9 +8,9 @@ cbuffer cbPerFrame {
 };
 
 cbuffer CBuffer {
-	float4x4 gWorld;
 	float4x4 gWorldInvTranspose;
-	float4x4 gWorldViewProj;
+	float4x4 gView;
+	float4x4 gProj;
 	float4x4 gTexTransform;
 	Material gMaterial;
 };
@@ -27,7 +27,6 @@ struct VS_INPUT {
 	float3 TangentL : TANGENT;
 
 	row_major float4x4 World  : WORLD;
-	float4 Color    : COLOR;
 	uint InstanceId : SV_InstanceID;
 };
 
@@ -37,8 +36,6 @@ struct VS_OUTPUT {
 	float2 TexCoord : TEXCOORD;
 	float3 NormalW : NORMAL;
 	float3 TangentW : TANGENT;
-
-	float4 Color   : COLOR;
 };
 
 
@@ -47,19 +44,15 @@ VS_OUTPUT VSMain(VS_INPUT vsInput) {
 
 	VS_OUTPUT vsOutput = (VS_OUTPUT)0;
 
-	// Transform to homogeneous clip space.
-	vsOutput.PositionH = mul(float4(vsInput.PositionL, 1.0f), gWorldViewProj);
-
 	// Transform to world space space.
-	vsOutput.PositionW = mul(float4(vsInput.PositionL, 1.0f), gWorld).xyz;
-	vsOutput.NormalW = normalize(mul(vsInput.NormalL, (float3x3)gWorldInvTranspose));
-	vsOutput.TangentW = normalize(mul(vsInput.TangentL, (float3x3)gWorld));
+	vsOutput.PositionW = mul(float4(vsInput.PositionL, 1.0f), vsInput.World).xyz;
+	vsOutput.NormalW = normalize(mul(vsInput.NormalL, (float3x3)vsInput.World));
+	vsOutput.TangentW = normalize(mul(vsInput.TangentL, (float3x3)vsInput.World));
 
-	//vsOutput.TexCoord = vsInput.TexCoord;
+	// Transform to homogeneous clip space.
+	vsOutput.PositionH = mul(mul(mul(float4(vsInput.PositionL, 1.0f), vsInput.World), gView), gProj);
+
 	vsOutput.TexCoord = mul(float4(vsInput.TexCoord, 0.0f, 1.0f), gTexTransform).xy;
-
-	// instanced color
-	vsOutput.Color = vsInput.Color;
 
 	return vsOutput;
 }
@@ -70,11 +63,12 @@ float4 PSMain(VS_OUTPUT psInput) : SV_TARGET {
 	
 	psInput.NormalW = normalize(psInput.NormalW);
 
-	float4 textColor = ObjTexture.Sample(ObjSamplerState, psInput.TexCoord);
+	float4 texColor = ObjTexture.Sample(ObjSamplerState, psInput.TexCoord);
+	clip(texColor.a - 0.1f);
 
 	Material currMat;
-	currMat.Ambient = textColor * gMaterial.Ambient;
-	currMat.Diffuse = textColor;
+	currMat.Ambient = texColor * gMaterial.Ambient;
+	currMat.Diffuse = texColor;
 	currMat.Specular = gMaterial.Specular;
 
 	//Load normal from normal map

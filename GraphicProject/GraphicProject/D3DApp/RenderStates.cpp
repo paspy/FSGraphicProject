@@ -5,7 +5,8 @@ ID3D11RasterizerState* RenderStates::NoCullRS		= nullptr;
 ID3D11RasterizerState* RenderStates::FrontCullRS	= nullptr;
 
 ID3D11BlendState*      RenderStates::AlphaToCoverageBS	= nullptr;
-ID3D11BlendState*      RenderStates::TransparentBS		= nullptr;
+ID3D11BlendState*      RenderStates::TransparentBSbyAlpha = nullptr;
+ID3D11BlendState*      RenderStates::TransparentBSbyColor = nullptr;
 
 void RenderStates::InitAll(ID3D11Device* _d3dDevice) {
 	//
@@ -59,7 +60,7 @@ void RenderStates::InitAll(ID3D11Device* _d3dDevice) {
 	HR(_d3dDevice->CreateBlendState(&alphaToCoverageDesc, &AlphaToCoverageBS));
 
 	//
-	// TransparentBS
+	// TransparentBS by Color
 	//
 
 	D3D11_BLEND_DESC transparentDesc;
@@ -76,7 +77,26 @@ void RenderStates::InitAll(ID3D11Device* _d3dDevice) {
 	transparentDesc.RenderTarget[0].BlendOpAlpha = D3D11_BLEND_OP_ADD;
 	transparentDesc.RenderTarget[0].RenderTargetWriteMask = D3D11_COLOR_WRITE_ENABLE_ALL;
 
-	HR(_d3dDevice->CreateBlendState(&transparentDesc, &TransparentBS));
+	HR(_d3dDevice->CreateBlendState(&transparentDesc, &TransparentBSbyColor));
+
+	//
+	// TransparentBS by Alpha
+	//
+
+	ZeroMemory(&transparentDesc, sizeof(D3D11_BLEND_DESC));
+
+	transparentDesc.AlphaToCoverageEnable = false;
+	transparentDesc.IndependentBlendEnable = false;
+	transparentDesc.RenderTarget[0].BlendEnable = true;
+	transparentDesc.RenderTarget[0].SrcBlend = D3D11_BLEND_SRC_ALPHA;
+	transparentDesc.RenderTarget[0].DestBlend = D3D11_BLEND_INV_SRC_ALPHA;
+	transparentDesc.RenderTarget[0].BlendOp = D3D11_BLEND_OP_ADD;
+	transparentDesc.RenderTarget[0].SrcBlendAlpha = D3D11_BLEND_ONE;
+	transparentDesc.RenderTarget[0].DestBlendAlpha = D3D11_BLEND_ZERO;
+	transparentDesc.RenderTarget[0].BlendOpAlpha = D3D11_BLEND_OP_ADD;
+	transparentDesc.RenderTarget[0].RenderTargetWriteMask = D3D11_COLOR_WRITE_ENABLE_ALL;
+
+	HR(_d3dDevice->CreateBlendState(&transparentDesc, &TransparentBSbyAlpha));
 }
 
 void RenderStates::DestroyAll() {
@@ -84,5 +104,6 @@ void RenderStates::DestroyAll() {
 	SafeRelease(NoCullRS);
 	SafeRelease(FrontCullRS);
 	SafeRelease(AlphaToCoverageBS);
-	SafeRelease(TransparentBS);
+	SafeRelease(TransparentBSbyAlpha);
+	SafeRelease(TransparentBSbyColor);
 }

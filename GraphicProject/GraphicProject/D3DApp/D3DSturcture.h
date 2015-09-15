@@ -26,7 +26,7 @@ namespace D3DSturcture {
 
 	typedef struct InstancedData {
 		XMFLOAT4X4 World;
-		XMFLOAT4 Color;
+		
 	}*InstancedData_ptr;
 
 	// constant buffer structures

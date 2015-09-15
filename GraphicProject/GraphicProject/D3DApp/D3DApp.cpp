@@ -103,7 +103,10 @@ D3DApp::~D3DApp() {
 			d3dInfoQueue->Release();
 		}
 	}
+#if defined(DEBUG) || defined(_DEBUG)
 	m_d3dDebug->ReportLiveDeviceObjects(D3D11_RLDO_SUMMARY | D3D11_RLDO_DETAIL);
+#endif
+
 	SafeRelease(m_d3dDevice);
 	SafeRelease(m_d3dDebug);
 
@@ -352,7 +355,7 @@ void D3DApp::ShowFPS() {
 		std::wostringstream outs;
 		outs.precision(6);
 		outs << m_mainWindTitle << L" - " << m_deviceName << L" - FPS: " << fps << L", Time: " << mspf << L" (ms)"
-			 << " - Total thread(s): " << m_threads.size() + 1
+			 << " - Total thread(s): 1" 
 			 << " - Cam Position: (" 
 			 << XMVectorGetX(m_camPosition) << ", "
 			 << XMVectorGetY(m_camPosition) << ", "

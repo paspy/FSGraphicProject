@@ -37,7 +37,6 @@ protected:
 
 protected:
 	// multithreading stuff
-	vector<thread>					m_threads;
 	mutex							*m_mutex;
 
 	// window related

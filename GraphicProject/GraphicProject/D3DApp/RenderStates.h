@@ -11,5 +11,6 @@ public:
 	static ID3D11RasterizerState* FrontCullRS;
 
 	static ID3D11BlendState* AlphaToCoverageBS;
-	static ID3D11BlendState* TransparentBS;
+	static ID3D11BlendState* TransparentBSbyColor;
+	static ID3D11BlendState* TransparentBSbyAlpha;
 };
