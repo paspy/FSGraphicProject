@@ -89,6 +89,9 @@
     <ClCompile Include="MeshControllers\GeoMesh.cpp">
       <Filter>MeshControllers</Filter>
     </ClCompile>
+    <ClCompile Include="MeshControllers\MirrorMesh.cpp">
+      <Filter>MeshControllers</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="D3DApp\DirectXTK\DDSTextureLoader.h">
@@ -149,6 +152,9 @@
       <Filter>D3DApp\D3DHelper</Filter>
     </ClInclude>
     <ClInclude Include="MeshControllers\GeoMesh.h">
+      <Filter>MeshControllers</Filter>
+    </ClInclude>
+    <ClInclude Include="MeshControllers\MirrorMesh.h">
       <Filter>MeshControllers</Filter>
     </ClInclude>
   </ItemGroup>
