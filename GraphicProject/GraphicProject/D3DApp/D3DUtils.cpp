@@ -9,7 +9,7 @@ HRESULT D3DUtils::CreateShaderAndLayoutFromFile(
 	ID3D11PixelShader ** _pixelShader,
 	ID3D11InputLayout **_inputLayout ) {
 
-	HRESULT hr;
+	HRESULT hr = E_NOTIMPL;
 	ID3DBlob* vertexShaderBlob = nullptr;
 	ID3DBlob* pixelShaderBlob = nullptr;
 	ID3DBlob* errorBlob = nullptr;
@@ -49,6 +49,8 @@ HRESULT D3DUtils::CreateShaderAndLayoutFromFile(
 		return hr;
 	}
 
+
+
 	// create vertex layout
 	HR(_d3dDevice->CreateInputLayout(_inputElemDesc, _elemNum, vertexShaderBlob->GetBufferPointer(), vertexShaderBlob->GetBufferSize(), _inputLayout));
 	// create vertex shader
@@ -59,7 +61,110 @@ HRESULT D3DUtils::CreateShaderAndLayoutFromFile(
 	return hr;
 }
 
+HRESULT D3DUtils::CreateOptionalShaderFromFile(ID3D11Device * _d3dDevice, const LPCWSTR _tesselFileName, ID3D11HullShader ** _hullSahder, ID3D11DomainShader ** _domainShader) {
+	HRESULT hr = E_NOTIMPL;
+	ID3DBlob* hullShaderBlob = nullptr;
+	ID3DBlob* domainShaderBlob = nullptr;
+	ID3DBlob* errorBlob = nullptr;
 
+	UINT flags = D3DCOMPILE_ENABLE_STRICTNESS;
+#if defined( DEBUG ) || defined( _DEBUG )
+	flags |= D3DCOMPILE_DEBUG;
+#endif
+
+	hr = D3DCompileFromFile(_tesselFileName, NULL, D3D_COMPILE_STANDARD_FILE_INCLUDE, "HullMain", "hs_5_0", flags, 0, &hullShaderBlob, &errorBlob);
+	if ( FAILED(hr) ) {
+		if ( errorBlob ) {
+			string err = (char*)errorBlob->GetBufferPointer();
+			wstring werr(err.begin(), err.end());
+			MessageBox(0, werr.c_str(), L"Error", MB_OK);
+			SafeRelease(errorBlob);
+		}
+
+		SafeRelease(hullShaderBlob);
+		return hr;
+	}
+
+	hr = D3DCompileFromFile(_tesselFileName, NULL, D3D_COMPILE_STANDARD_FILE_INCLUDE, "DoMain", "ds_5_0", flags, 0, &domainShaderBlob, &errorBlob);
+	if ( FAILED(hr) ) {
+		if ( errorBlob ) {
+			string err = (char*)errorBlob->GetBufferPointer();
+			wstring werr(err.begin(), err.end());
+			MessageBox(0, werr.c_str(), L"Error", MB_OK);
+			SafeRelease(errorBlob);
+		}
+
+		SafeRelease(domainShaderBlob);
+		return hr;
+	}
+
+	// create hull shader
+	HR(_d3dDevice->CreateHullShader(hullShaderBlob->GetBufferPointer(), hullShaderBlob->GetBufferSize(), NULL, _hullSahder));
+	// create domain shader
+	HR(_d3dDevice->CreateDomainShader(domainShaderBlob->GetBufferPointer(), domainShaderBlob->GetBufferSize(), NULL, _domainShader));
+
+	return hr;
+}
+
+HRESULT D3DUtils::CreateOptionalShaderFromFile(ID3D11Device * _d3dDevice, const LPCWSTR _geoFileName, ID3D11GeometryShader ** _geoShader) {
+	HRESULT hr = E_NOTIMPL;
+
+	ID3DBlob* geoShaderBlob = nullptr;
+	ID3DBlob* errorBlob = nullptr;
+	
+	UINT flags = D3DCOMPILE_ENABLE_STRICTNESS;
+#if defined( DEBUG ) || defined( _DEBUG )
+	flags |= D3DCOMPILE_DEBUG;
+#endif
+
+	hr = D3DCompileFromFile(_geoFileName, NULL, D3D_COMPILE_STANDARD_FILE_INCLUDE, "GeoMain", "gs_5_0", flags, 0, &geoShaderBlob, &errorBlob);
+	if ( FAILED(hr) ) {
+		if ( errorBlob ) {
+			string err = (char*)errorBlob->GetBufferPointer();
+			wstring werr(err.begin(), err.end());
+			MessageBox(0, werr.c_str(), L"Error", MB_OK);
+			SafeRelease(errorBlob);
+		}
+
+		SafeRelease(geoShaderBlob);
+		return hr;
+	}
+
+	// create geometry shader
+	HR(_d3dDevice->CreateGeometryShader(geoShaderBlob->GetBufferPointer(), geoShaderBlob->GetBufferSize(), NULL, _geoShader));
+
+	return hr;
+}
+
+HRESULT D3DUtils::CreateOptionalShaderFromFile(ID3D11Device * _d3dDevice, const LPCWSTR _compFileName, ID3D11ComputeShader ** _compShader) {
+	HRESULT hr = E_NOTIMPL;
+
+	ID3DBlob* compShaderBlob = nullptr;
+	ID3DBlob* errorBlob = nullptr;
+
+	UINT flags = D3DCOMPILE_ENABLE_STRICTNESS;
+#if defined( DEBUG ) || defined( _DEBUG )
+	flags |= D3DCOMPILE_DEBUG;
+#endif
+
+	hr = D3DCompileFromFile(_compFileName, NULL, D3D_COMPILE_STANDARD_FILE_INCLUDE, "CompMain", "cs_5_0", flags, 0, &compShaderBlob, &errorBlob);
+	if ( FAILED(hr) ) {
+		if ( errorBlob ) {
+			string err = (char*)errorBlob->GetBufferPointer();
+			wstring werr(err.begin(), err.end());
+			MessageBox(0, werr.c_str(), L"Error", MB_OK);
+			SafeRelease(errorBlob);
+		}
+
+		SafeRelease(compShaderBlob);
+		return hr;
+	}
+
+	// create geometry shader
+	HR(_d3dDevice->CreateComputeShader(compShaderBlob->GetBufferPointer(), compShaderBlob->GetBufferSize(), NULL, _compShader));
+
+	return hr;
+}
 
 bool D3DUtils::CreateModelFromObjFileKaiNi(ID3D11Device * _d3dDevice, IDXGISwapChain * _swapChain, string _filename, ID3D11Buffer ** _vertBuff, ID3D11Buffer ** _indexBuff) {
 

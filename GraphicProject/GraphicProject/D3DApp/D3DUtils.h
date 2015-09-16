@@ -38,7 +38,6 @@ public:
 	}
 
 	static float RandFloat() { return (float)(rand()) / (float)RAND_MAX; }
-
 	static float RandFloat(float a, float b) { return a + RandFloat()*(b - a); }
 
 	static XMMATRIX InverseTranspose(XMMATRIX M) {
@@ -66,4 +65,20 @@ public:
 		ID3D11PixelShader ** _pixelShader,
 		ID3D11InputLayout **_inputLayout
 		);
+
+	static HRESULT CreateOptionalShaderFromFile(
+		ID3D11Device *_d3dDevice,
+		const LPCWSTR _tesselFileName,
+		ID3D11HullShader **_hullSahder,
+		ID3D11DomainShader **_domainShader);
+
+	static HRESULT CreateOptionalShaderFromFile(
+		ID3D11Device *_d3dDevice,
+		const LPCWSTR _geoFileName,
+		ID3D11GeometryShader **_geoShader);
+
+	static HRESULT CreateOptionalShaderFromFile(
+		ID3D11Device *_d3dDevice,
+		const LPCWSTR _compFileName,
+		ID3D11ComputeShader **_compShader);
 };
