@@ -1,17 +1,17 @@
 #include "RenderStates.h"
 
-ID3D11RasterizerState*		RenderStates::WireframeRS	= nullptr;
-ID3D11RasterizerState*		RenderStates::NoCullRS		= nullptr;
-ID3D11RasterizerState*		RenderStates::FrontCullRS	= nullptr;
+ID3D11RasterizerState*		RenderStates::WireframeRS = nullptr;
+ID3D11RasterizerState*		RenderStates::NoCullRS	  = nullptr;
+ID3D11RasterizerState*		RenderStates::FrontCullRS = nullptr;
 
-ID3D11BlendState*			RenderStates::AlphaToCoverageBS		= nullptr;
-ID3D11BlendState*			RenderStates::TransparentBSbyAlpha	= nullptr;
-ID3D11BlendState*			RenderStates::TransparentBSbyColor	= nullptr;
+ID3D11BlendState*			RenderStates::AlphaToCoverageBS		 = nullptr;
+ID3D11BlendState*			RenderStates::TransparentBSbyAlpha	 = nullptr;
+ID3D11BlendState*			RenderStates::TransparentBSbyColor	 = nullptr;
 ID3D11BlendState*			RenderStates::NoRenderTargetWritesBS = nullptr;
 
 ID3D11DepthStencilState*	RenderStates::MarkMirrorDSS		= nullptr;
 ID3D11DepthStencilState*	RenderStates::DrawReflectionDSS	= nullptr;
-ID3D11DepthStencilState*	RenderStates::NoDoubleBlendDSS		= nullptr;
+ID3D11DepthStencilState*	RenderStates::NoDoubleBlendDSS	= nullptr;
 
 void RenderStates::InitAll(ID3D11Device* _d3dDevice) {
 

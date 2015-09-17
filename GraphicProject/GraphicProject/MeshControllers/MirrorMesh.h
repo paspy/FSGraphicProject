@@ -29,10 +29,15 @@ public:
 	~MirrorMesh();
 	void Init(ID3D11Device *_d3dDevice, LPCWSTR _shaderFilename);
 	void BuildBuffer(ID3D11Device * _d3dDevice);
-
+	void Update();
 	void Render(ID3D11DeviceContext *_d3dImmediateContext, XMMATRIX _camView, XMMATRIX _camProj, ID3D11RasterizerState *_rs);
 
-	CBuffer								cbBuffer;
+	CBuffer								cbObject;
+	Material							mtObject;
+	Material							mtWallAndFloor;
+	Material							mtMirror;
+	Material							mtShadow;
+
 	ID3D11VertexShader					*vertexShader = nullptr;
 	ID3D11PixelShader					*pixelShader = nullptr;
 	ID3D11InputLayout					*inputLayout = nullptr;
@@ -43,7 +48,8 @@ public:
 	ID3D11Buffer						*constBuffer = nullptr;
 	ID3D11SamplerState					*texSamplerState = nullptr;
 	XMMATRIX							worldMat = XMMatrixIdentity();
-	XMMATRIX							terrainTexTransform = XMMatrixIdentity();
+	XMMATRIX							wallFloorMat = XMMatrixIdentity();
+
 	UINT								stride = sizeof(Vertex3D);
 	UINT								offset = 0;
 	UINT								indicesCount;

@@ -15,8 +15,6 @@ public:
 	static ID3D11BlendState* TransparentBSbyAlpha;
 	static ID3D11BlendState* NoRenderTargetWritesBS;
 
-
-	// Depth/stencil states
 	static ID3D11DepthStencilState* MarkMirrorDSS;
 	static ID3D11DepthStencilState* DrawReflectionDSS;
 	static ID3D11DepthStencilState* NoDoubleBlendDSS;
