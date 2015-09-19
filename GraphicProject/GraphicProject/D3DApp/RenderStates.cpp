@@ -1,8 +1,9 @@
 #include "RenderStates.h"
 
-ID3D11RasterizerState*		RenderStates::WireframeRS = nullptr;
-ID3D11RasterizerState*		RenderStates::NoCullRS	  = nullptr;
-ID3D11RasterizerState*		RenderStates::FrontCullRS = nullptr;
+ID3D11RasterizerState*		RenderStates::WireframeRS		= nullptr;
+ID3D11RasterizerState*		RenderStates::NoCullRS			= nullptr;
+ID3D11RasterizerState*		RenderStates::FrontCullRS		= nullptr;
+ID3D11RasterizerState*		RenderStates::CullClockwiseRS	= nullptr;
 
 ID3D11BlendState*			RenderStates::AlphaToCoverageBS		 = nullptr;
 ID3D11BlendState*			RenderStates::TransparentBSbyAlpha	 = nullptr;
@@ -44,6 +45,22 @@ void RenderStates::InitAll(ID3D11Device* _d3dDevice) {
 	fontCullDesc.DepthClipEnable = true;
 
 	HR(_d3dDevice->CreateRasterizerState(&fontCullDesc, &FrontCullRS));
+
+	//
+	// CullClockwiseRS
+	//
+
+	// Note: Define such that we still cull backfaces by making front faces CCW.
+	// If we did not cull backfaces, then we have to worry about the BackFace
+	// property in the D3D11_DEPTH_STENCIL_DESC.
+	D3D11_RASTERIZER_DESC cullClockwiseDesc;
+	ZeroMemory(&cullClockwiseDesc, sizeof(D3D11_RASTERIZER_DESC));
+	cullClockwiseDesc.FillMode = D3D11_FILL_SOLID;
+	cullClockwiseDesc.CullMode = D3D11_CULL_BACK;
+	cullClockwiseDesc.FrontCounterClockwise = true;
+	cullClockwiseDesc.DepthClipEnable = true;
+
+	HR(_d3dDevice->CreateRasterizerState(&cullClockwiseDesc, &CullClockwiseRS));
 
 	// AlphaToCoverageBS
 	D3D11_BLEND_DESC alphaToCoverageDesc;
@@ -178,6 +195,7 @@ void RenderStates::DestroyAll() {
 	SafeRelease(WireframeRS);
 	SafeRelease(NoCullRS);
 	SafeRelease(FrontCullRS);
+	SafeRelease(CullClockwiseRS);
 	SafeRelease(AlphaToCoverageBS);
 	SafeRelease(TransparentBSbyAlpha);
 	SafeRelease(TransparentBSbyColor);

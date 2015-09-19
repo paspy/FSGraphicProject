@@ -6,6 +6,7 @@
 #include "../MeshControllers/TerrainMesh.h"
 #include "../MeshControllers/WaveMesh.h"
 #include "../MeshControllers/GeoMesh.h"
+#include "../MeshControllers/MirrorMesh.h"
 
 using namespace D3DSturcture;
 
@@ -37,6 +38,7 @@ private:
 	WaveMesh			m_wave;
 	TerrainMesh			m_terrain;
 	GeoMesh				m_geoMesh;
+	MirrorMesh			m_mirrorMesh;
 
 	// Lighting
 	DirectionalLight	m_directionalLight;

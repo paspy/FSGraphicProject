@@ -51,6 +51,8 @@ void GuineaPig::BuildGeometry() {
 
 	m_geoMesh.Init(m_d3dDevice, L"Shaders/Base/InstancedBase.hlsl", GeoMesh::GeoType::Box, L"Resources/Textures/WireFence_diffuse.dds", L"Resources/Textures/WireFence_normal.dds");
 
+	m_mirrorMesh.Init(m_d3dDevice, L"Shaders/Base/Base.hlsl");
+
 	D3DUtils::CreateModelFromObjFileKaiNi(NULL, NULL, "Resources/Models/barrel.obj", NULL, NULL);
 }
 
@@ -149,6 +151,8 @@ void GuineaPig::UpdateScene(double _dt) {
 	// update waves
 	m_wave.Update(_dt, m_timer.TotalTime(), m_d3dImmediateContext);
 	m_geoMesh.Update(m_d3dImmediateContext, m_camPosition);
+
+	m_mirrorMesh.Update();
 }
 
 void GuineaPig::DrawScene() {
@@ -195,7 +199,7 @@ void GuineaPig::DrawScene() {
 	
 	m_geoMesh.Render(m_d3dImmediateContext, m_camView, m_camProjection, RenderStates::TransparentBSbyColor, blendFactor1);
 
-
+	m_mirrorMesh.Render(m_d3dImmediateContext, m_camView, m_camProjection, NULL);
 
 	//Set the default blend state (no blending) for opaque objects
 	m_d3dImmediateContext->OMSetBlendState(0, blendFactor1, 0xffffffff);
