@@ -182,7 +182,7 @@ void MirrorMesh::Render(ID3D11DeviceContext * _d3dImmediateContext, XMMATRIX _ca
 	_d3dImmediateContext->OMSetDepthStencilState(0, 0);
 	_d3dImmediateContext->OMSetBlendState(0, blendFactor, 0xffffffff);
 
-// draw the normal objects
+// draw the normal wall and floor
 	//Set the vertex buffer
 	_d3dImmediateContext->IASetVertexBuffers(0, 1, &vertBuffer[0], &stride, &offset);
 
@@ -198,7 +198,7 @@ void MirrorMesh::Render(ID3D11DeviceContext * _d3dImmediateContext, XMMATRIX _ca
 	_d3dImmediateContext->PSSetShaderResources(0, 1, &shaderResViews[0]);
 	_d3dImmediateContext->PSSetShaderResources(1, 1, &normalShaderResViews[0]);
 	_d3dImmediateContext->PSSetSamplers(0, 1, &texSamplerState);
-	_d3dImmediateContext->RSSetState(_rs);
+	_d3dImmediateContext->RSSetState(RenderStates::NoCullRS);
 	// floor
 	_d3dImmediateContext->Draw(6, 0);
 
@@ -207,8 +207,7 @@ void MirrorMesh::Render(ID3D11DeviceContext * _d3dImmediateContext, XMMATRIX _ca
 	// wall
 	_d3dImmediateContext->Draw(18, 6);
 
-// draw the normal cube
-
+// draw the normal object
 	//Set the vertex buffer
 	_d3dImmediateContext->IASetVertexBuffers(0, 1, &vertBuffer[1], &stride, &offset);
 	//Set the index buffer
@@ -305,7 +304,7 @@ void MirrorMesh::Render(ID3D11DeviceContext * _d3dImmediateContext, XMMATRIX _ca
 	_d3dImmediateContext->PSSetShaderResources(0, 1, &shaderResViews[2]);
 	_d3dImmediateContext->PSSetShaderResources(1, 1, &normalShaderResViews[2]);
 	_d3dImmediateContext->PSSetSamplers(0, 1, &texSamplerState);
-	_d3dImmediateContext->RSSetState(_rs);
+	_d3dImmediateContext->RSSetState(RenderStates::NoCullRS);
 	_d3dImmediateContext->OMSetBlendState(RenderStates::TransparentBSbyColor, blendFactor, 0xffffffff);
 
 	// mirror

@@ -65,6 +65,8 @@ void ComputeDirectionalLight(
 	}
 }
 
+
+
 void ComputePointLight(
 	in Material mat, in PointLight light, in float3 position, in float3 normal, in float3 toCamera,
 	out float4 ambient, out float4 diffuse, out float4 specular) {

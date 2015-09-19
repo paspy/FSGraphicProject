@@ -40,6 +40,8 @@ private:
 	GeoMesh				m_geoMesh;
 	MirrorMesh			m_mirrorMesh;
 
+	GeoMesh				m_quadMesh;
+
 	// Lighting
 	DirectionalLight	m_directionalLight;
 	PointLight			m_pointLight;
