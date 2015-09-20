@@ -1,4 +1,5 @@
 #include "WaveMesh.h"
+#include "../D3DApp/Camera.h"
 
 WaveMesh::~WaveMesh() {
 	SafeRelease(inputLayout);
@@ -148,7 +149,7 @@ void WaveMesh::Update(double _dt, double _tt, ID3D11DeviceContext * _d3dImmediat
 
 }
 
-void WaveMesh::Render(ID3D11DeviceContext * _d3dImmediateContext, XMMATRIX _camView, XMMATRIX _camProj, ID3D11RasterizerState *_rs, ID3D11BlendState* _bs = nullptr, float *_bf = nullptr) {
+void WaveMesh::Render(ID3D11DeviceContext * _d3dImmediateContext, const Camera &_camera, ID3D11RasterizerState *_rs, ID3D11BlendState* _bs = nullptr, float *_bf = nullptr) {
 
 	// Set the default VS shader and depth/stencil state and layout
 	_d3dImmediateContext->VSSetShader(vertexShader, NULL, 0);
@@ -163,7 +164,7 @@ void WaveMesh::Render(ID3D11DeviceContext * _d3dImmediateContext, XMMATRIX _camV
 
 	cbBuffer.World = XMMatrixTranspose(worldMat);
 	cbBuffer.WorldInvTranspose = D3DUtils::InverseTranspose(worldMat);
-	cbBuffer.WorldViewProj = XMMatrixTranspose(worldMat * _camView* _camProj);
+	cbBuffer.WorldViewProj = XMMatrixTranspose(worldMat * _camera.GetViewProj());
 	cbBuffer.TexTransform = waterTexTransform;
 
 	_d3dImmediateContext->UpdateSubresource(constBuffer, 0, NULL, &cbBuffer, 0, 0);

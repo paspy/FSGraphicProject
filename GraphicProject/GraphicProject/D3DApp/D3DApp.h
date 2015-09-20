@@ -2,8 +2,7 @@
 
 #include "D3DUtils.h"
 #include "XTime.h"
-
-
+#include "Camera.h"
 
 class D3DApp {
 public:
@@ -25,9 +24,6 @@ public:
 	virtual void OnMouseUp(WPARAM _btnState, int _x, int _y) {}
 	virtual void OnMouseMove(WPARAM _btnState, int _x, int _y) {}
 
-	virtual void InitCamera();
-	virtual void UpdateCamera();
-
 	bool Run();
 
 protected:
@@ -36,9 +32,6 @@ protected:
 	void ShowFPS();
 
 protected:
-	// multithreading stuff
-	mutex							*m_mutex;
-
 	// window related
 	HINSTANCE						m_hinsApp;
 	HWND							m_hWindow;
@@ -70,31 +63,8 @@ protected:
 	D3D11_VIEWPORT					 m_screenViewport;	// non-pointer
 	ID3D11Debug						*m_d3dDebug;
 
-	// default View, Projection
-	XMMATRIX						m_camView;
-	XMMATRIX						m_camProjection;
-
-	// camera
-	XMVECTOR						m_camPosition;
-	XMVECTOR						m_camTarget;
-	XMVECTOR						m_camUp;
-
-	XMVECTOR						m_constDefaultForward;
-	XMVECTOR						m_constDefaultRight;
-	XMVECTOR						m_camForward;
-	XMVECTOR						m_camRight;
-
-	XMMATRIX						m_camRotationMatrix;
-
-	float							m_moveLeftRight;
-	float							m_moveBackForward;
-
-	float							m_camYaw;
-	float							m_camPitch;
-
-	// user control stuff
+	Camera							m_camera;
+	// user control 
 	POINT							m_lastMousePos;
-	float							m_mouseAplha;
-	float							m_mouseBeta;
 
 };

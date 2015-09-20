@@ -1,7 +1,6 @@
 
 cbuffer ConstPerObject {
 	float4x4 WorldViewProj;
-	float4x4 World;
 };
 
 TextureCube SkyMap;

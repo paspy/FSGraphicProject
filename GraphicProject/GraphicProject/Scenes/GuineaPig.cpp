@@ -1,7 +1,7 @@
 #include "GuineaPig.h"
 #include "../D3DApp/RenderStates.h"
 
-GuineaPig::GuineaPig(HINSTANCE hinst) : D3DApp(hinst){ }
+GuineaPig::GuineaPig(HINSTANCE hinst) : D3DApp(hinst), m_camWalkMode(false){ }
 
 GuineaPig::~GuineaPig() {
 	// release lighting ptr
@@ -24,7 +24,8 @@ bool GuineaPig::Init() {
 
 void GuineaPig::OnResize() {
 	D3DApp::OnResize();
-
+	// reset camera
+	m_camera.SetLens(0.4f*XM_PI, AspectRatio(), 1.0f, 3000.0f);
 }
 
 void GuineaPig::BuildConstBuffer() {
@@ -93,7 +94,7 @@ void GuineaPig::UpdateScene(double _dt) {
 	//Define sphereWorld's world space matrix
 	XMMATRIX scale = XMMatrixScaling(5.0f, 5.0f, 5.0f);
 	//Make sure the sphere is always centered around camera
-	XMMATRIX translation = XMMatrixTranslation(XMVectorGetX(m_camPosition), XMVectorGetY(m_camPosition), XMVectorGetZ(m_camPosition));
+	XMMATRIX translation = XMMatrixTranslation(XMVectorGetX(m_camera.GetPosition()), XMVectorGetY(m_camera.GetPosition()), XMVectorGetZ(m_camera.GetPosition()));
 
 	//Set sphereWorld's world space using the transformations
 	m_skyBox.worldMat = scale * translation;
@@ -113,10 +114,10 @@ void GuineaPig::UpdateScene(double _dt) {
 	// **Update Point Light **//
 
 	// **Update Spot Light **//
-	m_spotLight.Position.x = XMVectorGetX(m_camPosition);
-	m_spotLight.Position.y = XMVectorGetY(m_camPosition);
-	m_spotLight.Position.z = XMVectorGetZ(m_camPosition);
-	XMStoreFloat3(&m_spotLight.Direction, XMVector3Normalize(m_camTarget - m_camPosition));
+	m_spotLight.Position.x = XMVectorGetX(m_camera.GetPosition());
+	m_spotLight.Position.y = XMVectorGetY(m_camera.GetPosition());
+	m_spotLight.Position.z = XMVectorGetZ(m_camera.GetPosition());
+	XMStoreFloat3(&m_spotLight.Direction, XMVector3Normalize(m_camera.GetLook() - m_camera.GetPosition()));
 	// **Update Spot Light **//
 
 
@@ -153,7 +154,7 @@ void GuineaPig::UpdateScene(double _dt) {
 
 	// update waves
 	m_wave.Update(_dt, m_timer.TotalTime(), m_d3dImmediateContext);
-	m_geoMesh.Update(m_d3dImmediateContext, m_camPosition);
+	m_geoMesh.Update(m_d3dImmediateContext, m_camera);
 
 	m_mirrorMesh.Update();
 }
@@ -178,7 +179,7 @@ void GuineaPig::DrawScene() {
 	m_cbPerFrame.pointLight = m_pointLight;
 	m_cbPerFrame.spotLight = m_spotLight;
 	XMFLOAT4 curCamPos;
-	XMStoreFloat4(&curCamPos, m_camPosition);
+	XMStoreFloat4(&curCamPos, m_camera.GetPosition());
 	m_cbPerFrame.cameraPos = curCamPos;
 
 	m_d3dImmediateContext->UpdateSubresource(m_cbPerFrameBuffer, 0, NULL, &m_cbPerFrame, 0, 0);
@@ -190,19 +191,19 @@ void GuineaPig::DrawScene() {
 	// Render opaque objects //
 
 	// Skybox
-	m_skyBox.Render(m_d3dImmediateContext, m_camView, m_camProjection, RenderStates::NoCullRS);
+	m_skyBox.Render(m_d3dImmediateContext, m_camera, RenderStates::NoCullRS);
 
 	// obj meshs
-	m_terrain.Render(m_d3dImmediateContext, m_camView, m_camProjection, 0);
-	m_barrel.Render	(m_d3dImmediateContext, m_camView, m_camProjection, RenderStates::NoCullRS);
+	m_terrain.Render(m_d3dImmediateContext, m_camera, 0);
+	m_barrel.Render	(m_d3dImmediateContext, m_camera, RenderStates::NoCullRS);
 
 
 	//m_bed.Render(m_d3dImmediateContext, m_camView, m_camProjection, RenderStates::NoCullRS);
-	m_wave.Render(m_d3dImmediateContext, m_camView, m_camProjection, 0, RenderStates::TransparentBSbyColor, blendFactor1);
+	m_wave.Render(m_d3dImmediateContext, m_camera, 0, RenderStates::TransparentBSbyColor, blendFactor1);
 	
-	m_geoMesh.Render(m_d3dImmediateContext, m_camView, m_camProjection, RenderStates::TransparentBSbyColor, blendFactor1);
+	m_geoMesh.Render(m_d3dImmediateContext, m_camera, RenderStates::TransparentBSbyColor, blendFactor1);
 
-	m_mirrorMesh.Render(m_d3dImmediateContext, m_camView, m_camProjection, NULL);
+	m_mirrorMesh.Render(m_d3dImmediateContext, m_camera, NULL);
 
 	//Set the default blend state (no blending) for opaque objects
 	m_d3dImmediateContext->OMSetBlendState(0, blendFactor1, 0xffffffff);
@@ -211,22 +212,31 @@ void GuineaPig::DrawScene() {
 }
 
 void GuineaPig::UpdateKeyboardInput(double _dt) {
-	if ( GetAsyncKeyState(VK_LW) ) {
-		m_moveBackForward	+= (float)_dt * CAMERA_SPEED;
-	}
-	if ( GetAsyncKeyState(VK_LS) ) {
-		m_moveBackForward	-= (float)_dt * CAMERA_SPEED;
-	}
-	if ( GetAsyncKeyState(VK_LA) ) {
-		m_moveLeftRight		-= (float)_dt * CAMERA_SPEED;
-	}
-	if ( GetAsyncKeyState(VK_LD) ) {
-		m_moveLeftRight		+= (float)_dt * CAMERA_SPEED;
-	}
-}
 
-void GuineaPig::UpdateCamera() {
-	D3DApp::UpdateCamera();
+	if (GetAsyncKeyState('W') & 0x8000) {
+		m_camera.Walk(CAMERA_SPEED*static_cast<float>(_dt));
+	}
+
+	if (GetAsyncKeyState('S') & 0x8000) {
+		m_camera.Walk(-CAMERA_SPEED*static_cast<float>(_dt));
+	}
+
+	if (GetAsyncKeyState('A') & 0x8000) {
+		m_camera.Strafe(-CAMERA_SPEED*static_cast<float>(_dt));
+	}
+
+	if (GetAsyncKeyState('D') & 0x8000) {
+		m_camera.Strafe(CAMERA_SPEED*static_cast<float>(_dt));
+	}
+
+	if (GetAsyncKeyState('M') & 0x8000) m_camWalkMode = !m_camWalkMode;
+
+	if (m_camWalkMode) {
+		//XMFLOAT3 camPos = m_camera.GetPosition();
+		//float y = mTerrain.GetHeight(camPos.x, camPos.z);
+		//mCam.SetPosition(camPos.x, y + 2.0f, camPos.z);
+	}
+	m_camera.UpdateViewMatrix();
 }
 
 void GuineaPig::OnMouseDown(WPARAM _btnState, int _x, int _y) {
@@ -243,10 +253,11 @@ void GuineaPig::OnMouseUp(WPARAM _btnState, int _x, int _y) {
 void GuineaPig::OnMouseMove(WPARAM _btnState, int _x, int _y) {
 	if ( (MK_RBUTTON & _btnState) != 0 ) {
 
-		m_camYaw += 0.01f*(_x - m_lastMousePos.x);
-		m_camPitch += 0.01f*(_y - m_lastMousePos.y);
+		float dx = XMConvertToRadians(0.25f*static_cast<float>(_x - m_lastMousePos.x));
+		float dy = XMConvertToRadians(0.25f*static_cast<float>(_y - m_lastMousePos.y));
 
-		m_camPitch = D3DUtils::Clamp(m_camPitch, -XM_PIDIV2 + 0.01f, XM_PIDIV2 - 0.01f);
+		m_camera.RotateY(dx);
+		m_camera.Pitch(dy);
 	}
 
 	m_lastMousePos.x = _x;

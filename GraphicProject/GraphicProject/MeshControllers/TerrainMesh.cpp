@@ -1,4 +1,5 @@
 #include "TerrainMesh.h"
+#include "../D3DApp/Camera.h"
 
 TerrainMesh::~TerrainMesh() {
 	SafeRelease(inputLayout);
@@ -93,7 +94,7 @@ void TerrainMesh::BuildBuffer(ID3D11Device * _d3dDevice) {
 	HR(_d3dDevice->CreateBuffer(&ibd, &iinitData, &indexBuffer));
 }
 
-void TerrainMesh::Render(ID3D11DeviceContext * _d3dImmediateContext, XMMATRIX _camView, XMMATRIX _camProj, ID3D11RasterizerState *_rs) {
+void TerrainMesh::Render(ID3D11DeviceContext * _d3dImmediateContext, const Camera &_camera, ID3D11RasterizerState *_rs) {
 	// Set the default VS shader and depth/stencil state and layout
 	_d3dImmediateContext->VSSetShader(vertexShader, NULL, 0);
 	_d3dImmediateContext->PSSetShader(pixelShader, NULL, 0);
@@ -107,7 +108,7 @@ void TerrainMesh::Render(ID3D11DeviceContext * _d3dImmediateContext, XMMATRIX _c
 
 	cbBuffer.World = XMMatrixTranspose(worldMat);
 	cbBuffer.WorldInvTranspose = D3DUtils::InverseTranspose(worldMat);
-	cbBuffer.WorldViewProj = XMMatrixTranspose(worldMat * _camView* _camProj);
+	cbBuffer.WorldViewProj = XMMatrixTranspose(worldMat *_camera.GetViewProj());
 	cbBuffer.TexTransform = terrainTexTransform;
 
 	_d3dImmediateContext->UpdateSubresource(constBuffer, 0, NULL, &cbBuffer, 0, 0);

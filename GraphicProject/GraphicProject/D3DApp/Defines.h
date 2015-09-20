@@ -75,8 +75,3 @@ using namespace tinyobj;
 #define ID_FILE_OPEN_MENU               40001
 #define ID_FILE_EXIT                    40002
 #define ID_ACCELERATOR_OPEN             40005
-
-#define VK_LW 0x57
-#define VK_LS 0x53
-#define VK_LA 0x41
-#define VK_LD 0x44

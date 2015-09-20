@@ -1,4 +1,5 @@
 #include "GeoMesh.h"
+#include "../D3DApp/Camera.h"
 
 GeoMesh::~GeoMesh() {
 	SafeRelease(inputLayout);
@@ -147,31 +148,31 @@ void GeoMesh::BuildInstancedBuffer(ID3D11Device * _d3dDevice) {
 }
 
 
-float GeoMesh::GetDistanceFromCamera(XMFLOAT4X4 _m4x4, XMVECTOR _camPosition) {
+float GeoMesh::GetDistanceFromCamera(XMFLOAT4X4 _m4x4, const Camera &_camera) {
 	XMVECTOR tmpPos = XMVectorZero();
 	XMMATRIX tmp;
 
 	tmpPos = XMVector3TransformCoord(tmpPos, XMLoadFloat4x4(&_m4x4));
 
-	float distX = XMVectorGetX(tmpPos) - XMVectorGetX(_camPosition);
-	float distY = XMVectorGetY(tmpPos) - XMVectorGetY(_camPosition);
-	float distZ = XMVectorGetZ(tmpPos) - XMVectorGetZ(_camPosition);
+	float distX = XMVectorGetX(tmpPos) - XMVectorGetX(_camera.GetPosition());
+	float distY = XMVectorGetY(tmpPos) - XMVectorGetY(_camera.GetPosition());
+	float distZ = XMVectorGetZ(tmpPos) - XMVectorGetZ(_camera.GetPosition());
 
 	return (distX*distX + distY*distY + distZ*distZ);
 }
 
 
-void GeoMesh::Update(ID3D11DeviceContext * _d3dImmediateContext, XMVECTOR _camPosition) {
+void GeoMesh::Update(ID3D11DeviceContext * _d3dImmediateContext, const Camera &_camera) {
 	D3D11_MAPPED_SUBRESOURCE mapSubres;
 	_d3dImmediateContext->Map(instancedBuffer, 0, D3D11_MAP_WRITE_DISCARD, 0, &mapSubres);
 
-	if ( GetDistanceFromCamera(instancedData[0].World, _camPosition) < GetDistanceFromCamera(instancedData[1].World, _camPosition) ) {
+	if ( GetDistanceFromCamera(instancedData[0].World, _camera) < GetDistanceFromCamera(instancedData[1].World, _camera) ) {
 		swap(instancedData[0].World, instancedData[1].World);
-		if ( GetDistanceFromCamera(instancedData[1].World, _camPosition) < GetDistanceFromCamera(instancedData[2].World, _camPosition) ) {
+		if ( GetDistanceFromCamera(instancedData[1].World, _camera) < GetDistanceFromCamera(instancedData[2].World, _camera) ) {
 			swap(instancedData[1].World, instancedData[2].World);
 		}
 	} else {
-		if ( GetDistanceFromCamera(instancedData[1].World, _camPosition) < GetDistanceFromCamera(instancedData[2].World, _camPosition) ) {
+		if ( GetDistanceFromCamera(instancedData[1].World, _camera) < GetDistanceFromCamera(instancedData[2].World, _camera) ) {
 			swap(instancedData[1].World, instancedData[2].World);
 		}
 	}
@@ -180,7 +181,7 @@ void GeoMesh::Update(ID3D11DeviceContext * _d3dImmediateContext, XMVECTOR _camPo
 	_d3dImmediateContext->Unmap(instancedBuffer, 0);
 }
 
-void GeoMesh::Render(ID3D11DeviceContext * _d3dImmediateContext, XMMATRIX _camView, XMMATRIX _camProj, ID3D11BlendState* _bs = nullptr, float *_bf = nullptr) {
+void GeoMesh::Render(ID3D11DeviceContext * _d3dImmediateContext, const Camera &_camera, ID3D11BlendState* _bs = nullptr, float *_bf = nullptr) {
 
 	// Set the default VS shader and depth/stencil state and layout
 	_d3dImmediateContext->VSSetShader(vertexShader, NULL, 0);
@@ -197,8 +198,8 @@ void GeoMesh::Render(ID3D11DeviceContext * _d3dImmediateContext, XMMATRIX _camVi
 
 	cbBuffer.WorldInvTranspose = D3DUtils::InverseTranspose(worldMat);
 
-	cbBuffer.View = XMMatrixTranspose(_camView);
-	cbBuffer.Proj = XMMatrixTranspose(_camProj);
+	cbBuffer.View = XMMatrixTranspose(_camera.GetView());
+	cbBuffer.Proj = XMMatrixTranspose(_camera.GetProj());
 	cbBuffer.TexTransform = geoTexTransform;
 
 	_d3dImmediateContext->UpdateSubresource(constBuffer, 0, NULL, &cbBuffer, 0, 0);

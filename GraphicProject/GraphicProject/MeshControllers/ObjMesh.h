@@ -5,6 +5,8 @@
 
 using namespace D3DSturcture;
 
+class Camera;
+
 class ObjMesh {
 public:
 
@@ -38,7 +40,7 @@ public:
 
 	void Init(ID3D11Device *_d3dDevice, IDXGISwapChain *_swapChain, wstring _filename, bool _isRHCoordSys, bool _computeNormals, LPCWSTR _shaderFilename);
 
-	void Render(ID3D11DeviceContext *_d3dImmediateContext, XMMATRIX _camView, XMMATRIX _camProj, ID3D11RasterizerState *_rs);
+	void Render(ID3D11DeviceContext *_d3dImmediateContext, const Camera &_camera, ID3D11RasterizerState *_rs);
 
 	CBuffer								cbBuffer;
 	ID3D11VertexShader					*vertexShader = nullptr;

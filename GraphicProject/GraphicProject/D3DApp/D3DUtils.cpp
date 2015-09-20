@@ -241,7 +241,7 @@ ID3D11ShaderResourceView * D3DUtils::CreateTexture2DArraySRV(
 	ID3D11DeviceContext * context, 
 	vector<wstring>& filenames) {
 
-	UINT size = filenames.size();
+	UINT size = static_cast<UINT>(filenames.size());
 
 	vector<ID3D11Texture2D*> srcTex(size);
 	for (UINT i = 0; i < size; ++i) {

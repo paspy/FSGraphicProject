@@ -6,6 +6,8 @@
 
 using namespace D3DSturcture;
 
+class Camera;
+
 class WaveMesh {
 public:
 	struct Material {
@@ -32,7 +34,7 @@ public:
 
 	void Update(double _dt, double _tt, ID3D11DeviceContext *_d3dImmediateContext);
 
-	void Render(ID3D11DeviceContext * _d3dImmediateContext, XMMATRIX _camView, XMMATRIX _camProj, ID3D11RasterizerState *_rs, ID3D11BlendState* _bs, float *_bf);
+	void Render(ID3D11DeviceContext * _d3dImmediateContext, const Camera &_camera, ID3D11RasterizerState *_rs, ID3D11BlendState* _bs, float *_bf);
 
 	CBuffer								cbBuffer;
 	ID3D11VertexShader					*vertexShader = nullptr;

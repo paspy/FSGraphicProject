@@ -1,4 +1,5 @@
 #include "Skybox.h"
+#include "../D3DApp/Camera.h"
 
 void LoadThread(Skybox *_skybox, ID3D11Device * _d3dDevice) {
 	if ( _skybox ) {
@@ -63,7 +64,7 @@ void Skybox::LoadStuff(ID3D11Device * _d3dDevice) {
 
 }
 
-void Skybox::Render(ID3D11DeviceContext * _d3dImmediateContext, XMMATRIX _camView, XMMATRIX _camProj, ID3D11RasterizerState *_rs) {
+void Skybox::Render(ID3D11DeviceContext * _d3dImmediateContext, const Camera& _camera, ID3D11RasterizerState *_rs) {
 	//Set the proper VS and PS shaders, and layout
 	_d3dImmediateContext->VSSetShader(vertexShader, 0, 0);
 	_d3dImmediateContext->PSSetShader(pixelShader, 0, 0);
@@ -73,7 +74,8 @@ void Skybox::Render(ID3D11DeviceContext * _d3dImmediateContext, XMMATRIX _camVie
 	//Set the spheres vertex buffer
 	_d3dImmediateContext->IASetVertexBuffers(0, 1, &vertBuffer, &stride, &offset);
 	//Set the WorldViewProj matrix and send it to the constant buffer in shader file
-	cBuffer.WorldViewProj = XMMatrixTranspose(worldMat * _camView * _camProj);
+	cBuffer.WorldViewProj = XMMatrixTranspose(worldMat * _camera.GetViewProj());
+
 	_d3dImmediateContext->UpdateSubresource(constBuffer, 0, NULL, &cBuffer, 0, 0);
 	_d3dImmediateContext->VSSetConstantBuffers(0, 1, &constBuffer);
 	//Send our skymap resource view to pixel shader

@@ -1,5 +1,6 @@
 #include "MirrorMesh.h"
 #include "../D3DApp/RenderStates.h"
+#include "../D3DApp/Camera.h"
 
 MirrorMesh::~MirrorMesh() {
 	SafeRelease(inputLayout);
@@ -169,7 +170,7 @@ void MirrorMesh::Update() {
 	wallFloorMat = XMMatrixRotationY(0) * XMMatrixScaling(2.0f, 2.0f,2.0f) * XMMatrixTranslation(0.0f, -20.0f, 0.0f);
 }
 
-void MirrorMesh::Render(ID3D11DeviceContext * _d3dImmediateContext, XMMATRIX _camView, XMMATRIX _camProj, ID3D11RasterizerState *_rs) {
+void MirrorMesh::Render(ID3D11DeviceContext * _d3dImmediateContext, const Camera &_camera, ID3D11RasterizerState *_rs) {
 	// Set the default VS shader and depth/stencil state and layout
 	_d3dImmediateContext->VSSetShader(vertexShader, NULL, 0);
 	_d3dImmediateContext->PSSetShader(pixelShader, NULL, 0);
@@ -188,7 +189,7 @@ void MirrorMesh::Render(ID3D11DeviceContext * _d3dImmediateContext, XMMATRIX _ca
 
 	cbObject.World = XMMatrixTranspose(wallFloorMat);
 	cbObject.WorldInvTranspose = D3DUtils::InverseTranspose(wallFloorMat);
-	cbObject.WorldViewProj = XMMatrixTranspose(wallFloorMat * _camView* _camProj);
+	cbObject.WorldViewProj = XMMatrixTranspose(wallFloorMat * _camera.GetView());
 	cbObject.material = mtWallAndFloor;
 	cbObject.TexTransform = XMMatrixIdentity();
 
@@ -215,7 +216,7 @@ void MirrorMesh::Render(ID3D11DeviceContext * _d3dImmediateContext, XMMATRIX _ca
 
 	cbObject.World = XMMatrixTranspose(worldMat);
 	cbObject.WorldInvTranspose = D3DUtils::InverseTranspose(worldMat);
-	cbObject.WorldViewProj = XMMatrixTranspose(worldMat * _camView* _camProj);
+	cbObject.WorldViewProj = XMMatrixTranspose(worldMat * _camera.GetView());
 	cbObject.material = mtObject;
 	cbObject.TexTransform = XMMatrixIdentity();
 
@@ -236,7 +237,7 @@ void MirrorMesh::Render(ID3D11DeviceContext * _d3dImmediateContext, XMMATRIX _ca
 
 	cbObject.World = XMMatrixTranspose(wallFloorMat);
 	cbObject.WorldInvTranspose = D3DUtils::InverseTranspose(wallFloorMat);
-	cbObject.WorldViewProj = XMMatrixTranspose(wallFloorMat * _camView* _camProj);
+	cbObject.WorldViewProj = XMMatrixTranspose(wallFloorMat * _camera.GetView());
 	cbObject.material = mtWallAndFloor;
 	cbObject.TexTransform = XMMatrixIdentity();
 
@@ -270,7 +271,7 @@ void MirrorMesh::Render(ID3D11DeviceContext * _d3dImmediateContext, XMMATRIX _ca
 
 	cbObject.World = XMMatrixTranspose(worldMat * R);
 	cbObject.WorldInvTranspose = D3DUtils::InverseTranspose(worldMat);
-	cbObject.WorldViewProj = XMMatrixTranspose((worldMat* R) * _camView* _camProj);
+	cbObject.WorldViewProj = XMMatrixTranspose((worldMat* R) * _camera.GetView());
 	cbObject.material = mtObject;
 	cbObject.TexTransform = XMMatrixIdentity();
 
@@ -294,7 +295,7 @@ void MirrorMesh::Render(ID3D11DeviceContext * _d3dImmediateContext, XMMATRIX _ca
 
 	cbObject.World = XMMatrixTranspose(wallFloorMat);
 	cbObject.WorldInvTranspose = D3DUtils::InverseTranspose(wallFloorMat);
-	cbObject.WorldViewProj = XMMatrixTranspose(wallFloorMat * _camView* _camProj);
+	cbObject.WorldViewProj = XMMatrixTranspose(wallFloorMat * _camera.GetView());
 	cbObject.material = mtWallAndFloor;
 	cbObject.TexTransform = XMMatrixIdentity();
 

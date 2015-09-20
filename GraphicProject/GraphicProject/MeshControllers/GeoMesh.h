@@ -6,6 +6,8 @@
 
 using namespace D3DSturcture;
 
+class Camera;
+
 class GeoMesh {
 public:
 
@@ -36,10 +38,10 @@ public:
 	void BuildBuffer(ID3D11Device * _d3dDevice, GeoType _genType);
 	void BuildInstancedBuffer(ID3D11Device * _d3dDevice);
 
-	float GetDistanceFromCamera(XMFLOAT4X4 _m4x4, XMVECTOR _camPosition);
+	float GetDistanceFromCamera(XMFLOAT4X4 _m4x4, const Camera &_camera);
 
-	void Update(ID3D11DeviceContext * _d3dImmediateContext, XMVECTOR _camPosition);
-	void Render(ID3D11DeviceContext *_d3dImmediateContext, XMMATRIX _camView, XMMATRIX _camProj, ID3D11BlendState* _bs, float *_bf);
+	void Update(ID3D11DeviceContext * _d3dImmediateContext, const Camera &_camera);
+	void Render(ID3D11DeviceContext *_d3dImmediateContext, const Camera &_camera, ID3D11BlendState* _bs, float *_bf);
 
 	CBuffer								cbBuffer;
 	ID3D11VertexShader					*vertexShader = nullptr;

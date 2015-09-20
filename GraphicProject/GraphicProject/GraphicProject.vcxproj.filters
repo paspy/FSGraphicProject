@@ -39,9 +39,6 @@
     <Filter Include="D3DApp\D3DHelper">
       <UniqueIdentifier>{0b1a2e29-6403-4626-a4d7-e3dd0f8acf73}</UniqueIdentifier>
     </Filter>
-    <Filter Include="D3DApp\DirectXTex">
-      <UniqueIdentifier>{004e715f-6af1-40d3-aada-b3e0379d30c2}</UniqueIdentifier>
-    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Main.cpp">

@@ -57,7 +57,6 @@ public:
 	void UpdateViewMatrix();
 
 private:
-
 	// Camera coordinate system with coordinates relative to world space.
 	XMVECTOR m_position;
 	XMVECTOR m_right;

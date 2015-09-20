@@ -19,7 +19,6 @@ public:
 	void OnResize();
 	void UpdateKeyboardInput(double _dt);
 	void UpdateScene(double _dt);
-	void UpdateCamera();
 	void DrawScene();
 
 	void OnMouseDown(WPARAM _btnState, int _x, int _y);
@@ -49,5 +48,9 @@ private:
 
 	cbPerFrame			m_cbPerFrame;
 	ID3D11Buffer		*m_cbPerFrameBuffer = nullptr;
+
+	// camera setting
+	bool				m_camWalkMode;
+
 };
 
