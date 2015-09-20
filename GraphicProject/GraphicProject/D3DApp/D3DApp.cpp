@@ -246,7 +246,7 @@ bool D3DApp::InitDirect3D() {
 		return false;
 	}
 
-	HR(m_d3dDevice->CheckMultisampleQualityLevels(DXGI_FORMAT_R8G8B8A8_UNORM, 4, &m_4xMsaaQuality));
+	//HR(m_d3dDevice->CheckMultisampleQualityLevels(DXGI_FORMAT_R8G8B8A8_UNORM, 4, &m_4xMsaaQuality));
 	assert(m_4xMsaaQuality > 0);
 
 	OnResize();

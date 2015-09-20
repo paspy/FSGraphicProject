@@ -39,6 +39,9 @@
     <Filter Include="D3DApp\D3DHelper">
       <UniqueIdentifier>{0b1a2e29-6403-4626-a4d7-e3dd0f8acf73}</UniqueIdentifier>
     </Filter>
+    <Filter Include="D3DApp\DirectXTex">
+      <UniqueIdentifier>{004e715f-6af1-40d3-aada-b3e0379d30c2}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Main.cpp">
@@ -49,9 +52,6 @@
     </ClCompile>
     <ClCompile Include="Scenes\GuineaPig.cpp">
       <Filter>Source Files\Scenes</Filter>
-    </ClCompile>
-    <ClCompile Include="D3DApp\DirectXTK\pch.cpp">
-      <Filter>D3DApp\DirectXTK</Filter>
     </ClCompile>
     <ClCompile Include="D3DApp\TinyObjLoader\tiny_obj_loader.cc">
       <Filter>D3DApp\TinyObjLoader</Filter>
@@ -92,6 +92,12 @@
     <ClCompile Include="MeshControllers\MirrorMesh.cpp">
       <Filter>MeshControllers</Filter>
     </ClCompile>
+    <ClCompile Include="MeshControllers\Terrain.cpp">
+      <Filter>MeshControllers</Filter>
+    </ClCompile>
+    <ClCompile Include="D3DApp\Camera.cpp">
+      <Filter>D3DApp\D3DHelper</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="D3DApp\DirectXTK\DDSTextureLoader.h">
@@ -99,18 +105,6 @@
     </ClInclude>
     <ClInclude Include="Scenes\GuineaPig.h">
       <Filter>Source Files\Scenes</Filter>
-    </ClInclude>
-    <ClInclude Include="D3DApp\DirectXTK\dds.h">
-      <Filter>D3DApp\DirectXTK</Filter>
-    </ClInclude>
-    <ClInclude Include="D3DApp\DirectXTK\DirectXHelpers.h">
-      <Filter>D3DApp\DirectXTK</Filter>
-    </ClInclude>
-    <ClInclude Include="D3DApp\DirectXTK\pch.h">
-      <Filter>D3DApp\DirectXTK</Filter>
-    </ClInclude>
-    <ClInclude Include="D3DApp\DirectXTK\PlatformHelpers.h">
-      <Filter>D3DApp\DirectXTK</Filter>
     </ClInclude>
     <ClInclude Include="D3DApp\TinyObjLoader\tiny_obj_loader.h">
       <Filter>D3DApp\TinyObjLoader</Filter>
@@ -156,6 +150,12 @@
     </ClInclude>
     <ClInclude Include="MeshControllers\MirrorMesh.h">
       <Filter>MeshControllers</Filter>
+    </ClInclude>
+    <ClInclude Include="MeshControllers\Terrain.h">
+      <Filter>MeshControllers</Filter>
+    </ClInclude>
+    <ClInclude Include="D3DApp\Camera.h">
+      <Filter>D3DApp\D3DHelper</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

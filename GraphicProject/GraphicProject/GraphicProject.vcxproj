@@ -186,10 +186,10 @@
     </FxCompile>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="D3DApp\Camera.cpp" />
     <ClCompile Include="D3DApp\D3DApp.cpp" />
     <ClCompile Include="D3DApp\D3DUtils.cpp" />
     <ClCompile Include="D3DApp\DirectXTK\DDSTextureLoader.cpp" />
-    <ClCompile Include="D3DApp\DirectXTK\pch.cpp" />
     <ClCompile Include="D3DApp\GeoGen.cpp" />
     <ClCompile Include="D3DApp\RenderStates.cpp" />
     <ClCompile Include="D3DApp\TinyObjLoader\tiny_obj_loader.cc" />
@@ -200,20 +200,21 @@
     <ClCompile Include="MeshControllers\MirrorMesh.cpp" />
     <ClCompile Include="MeshControllers\ObjMesh.cpp" />
     <ClCompile Include="MeshControllers\Skybox.cpp" />
+    <ClCompile Include="MeshControllers\Terrain.cpp">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
+    </ClCompile>
     <ClCompile Include="MeshControllers\TerrainMesh.cpp" />
     <ClCompile Include="MeshControllers\WaveMesh.cpp" />
     <ClCompile Include="Scenes\GuineaPig.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="D3DApp\Camera.h" />
     <ClInclude Include="D3DApp\D3DApp.h" />
     <ClInclude Include="D3DApp\D3DSturcture.h" />
     <ClInclude Include="D3DApp\D3DUtils.h" />
     <ClInclude Include="D3DApp\Defines.h" />
-    <ClInclude Include="D3DApp\DirectXTK\dds.h" />
     <ClInclude Include="D3DApp\DirectXTK\DDSTextureLoader.h" />
-    <ClInclude Include="D3DApp\DirectXTK\DirectXHelpers.h" />
-    <ClInclude Include="D3DApp\DirectXTK\pch.h" />
-    <ClInclude Include="D3DApp\DirectXTK\PlatformHelpers.h" />
     <ClInclude Include="D3DApp\GeoGen.h" />
     <ClInclude Include="D3DApp\RenderStates.h" />
     <ClInclude Include="D3DApp\TinyObjLoader\tiny_obj_loader.h" />
@@ -223,6 +224,10 @@
     <ClInclude Include="MeshControllers\MirrorMesh.h" />
     <ClInclude Include="MeshControllers\ObjMesh.h" />
     <ClInclude Include="MeshControllers\Skybox.h" />
+    <ClInclude Include="MeshControllers\Terrain.h">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
+    </ClInclude>
     <ClInclude Include="MeshControllers\TerrainMesh.h" />
     <ClInclude Include="MeshControllers\WaveMesh.h" />
     <ClInclude Include="Scenes\GuineaPig.h" />

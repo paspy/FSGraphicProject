@@ -56,7 +56,7 @@ void Skybox::Init(ID3D11Device * _d3dDevice) {
 
 void Skybox::LoadStuff(ID3D11Device * _d3dDevice) {
 	// loading the texture - using dds loader
-	HR(CreateDDSTextureFromFile(_d3dDevice, L"Resources/Skybox/skymap.dds", NULL, &shaderResView));
+	HR(CreateDDSTextureFromFile(_d3dDevice, L"Resources/Skybox/snow.dds", NULL, &shaderResView));
 
 	// create the depending shader
 	HR(D3DUtils::CreateShaderAndLayoutFromFile(_d3dDevice, L"Shaders/Skybox/Skybox.hlsl", vertexLayout, 2, &vertexShader, &pixelShader, &inputLayout));

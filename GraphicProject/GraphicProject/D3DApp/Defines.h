@@ -3,9 +3,11 @@
 #include <Windowsx.h>
 #include <d3d11.h>
 #include <DirectXMath.h>
+#include <DirectXPackedVector.h>
 #include <DirectXColors.h>
 #include <D3Dcompiler.h>
 #include <vector>
+#include <algorithm>
 #include <sstream>
 #include <iostream>
 #include <string>

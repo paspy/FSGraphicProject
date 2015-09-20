@@ -48,6 +48,13 @@ public:
 		return XMMatrixTranspose(XMMatrixInverse(&det, A));
 	}
 
+	static void ExtractFrustumPlanes(XMFLOAT4 planes[6], XMMATRIX M);
+
+	static ID3D11ShaderResourceView* CreateTexture2DArraySRV(
+		ID3D11Device* device,
+		ID3D11DeviceContext* context,
+		vector<wstring>& filenames);
+
 	static bool CreateModelFromObjFileKaiNi(
 		ID3D11Device *_d3dDevice,
 		IDXGISwapChain *_swapChain,
