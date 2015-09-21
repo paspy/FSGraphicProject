@@ -189,7 +189,7 @@ void MirrorMesh::Render(ID3D11DeviceContext * _context, const Camera &_camera, I
 
 	cbObject.World = XMMatrixTranspose(wallFloorMat);
 	cbObject.WorldInvTranspose = D3DUtils::InverseTranspose(wallFloorMat);
-	cbObject.WorldViewProj = XMMatrixTranspose(wallFloorMat * _camera.GetView());
+	cbObject.WorldViewProj = XMMatrixTranspose(wallFloorMat * _camera.GetViewProj());
 	cbObject.material = mtWallAndFloor;
 	cbObject.TexTransform = XMMatrixIdentity();
 
@@ -216,7 +216,7 @@ void MirrorMesh::Render(ID3D11DeviceContext * _context, const Camera &_camera, I
 
 	cbObject.World = XMMatrixTranspose(worldMat);
 	cbObject.WorldInvTranspose = D3DUtils::InverseTranspose(worldMat);
-	cbObject.WorldViewProj = XMMatrixTranspose(worldMat * _camera.GetView());
+	cbObject.WorldViewProj = XMMatrixTranspose(worldMat * _camera.GetViewProj());
 	cbObject.material = mtObject;
 	cbObject.TexTransform = XMMatrixIdentity();
 
@@ -237,7 +237,7 @@ void MirrorMesh::Render(ID3D11DeviceContext * _context, const Camera &_camera, I
 
 	cbObject.World = XMMatrixTranspose(wallFloorMat);
 	cbObject.WorldInvTranspose = D3DUtils::InverseTranspose(wallFloorMat);
-	cbObject.WorldViewProj = XMMatrixTranspose(wallFloorMat * _camera.GetView());
+	cbObject.WorldViewProj = XMMatrixTranspose(wallFloorMat * _camera.GetViewProj());
 	cbObject.material = mtWallAndFloor;
 	cbObject.TexTransform = XMMatrixIdentity();
 
@@ -271,7 +271,7 @@ void MirrorMesh::Render(ID3D11DeviceContext * _context, const Camera &_camera, I
 
 	cbObject.World = XMMatrixTranspose(worldMat * R);
 	cbObject.WorldInvTranspose = D3DUtils::InverseTranspose(worldMat);
-	cbObject.WorldViewProj = XMMatrixTranspose((worldMat* R) * _camera.GetView());
+	cbObject.WorldViewProj = XMMatrixTranspose((worldMat* R) * _camera.GetViewProj());
 	cbObject.material = mtObject;
 	cbObject.TexTransform = XMMatrixIdentity();
 
@@ -295,7 +295,7 @@ void MirrorMesh::Render(ID3D11DeviceContext * _context, const Camera &_camera, I
 
 	cbObject.World = XMMatrixTranspose(wallFloorMat);
 	cbObject.WorldInvTranspose = D3DUtils::InverseTranspose(wallFloorMat);
-	cbObject.WorldViewProj = XMMatrixTranspose(wallFloorMat * _camera.GetView());
+	cbObject.WorldViewProj = XMMatrixTranspose(wallFloorMat * _camera.GetViewProj());
 	cbObject.material = mtWallAndFloor;
 	cbObject.TexTransform = XMMatrixIdentity();
 

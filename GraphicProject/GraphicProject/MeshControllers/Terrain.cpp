@@ -217,10 +217,10 @@ void Terrain::Render(ID3D11DeviceContext* _context, const Camera& _camera, D3DSt
 	_context->IASetVertexBuffers(0, 1, &m_quadPatchVertBuffer, &stride, &offset);
 	_context->IASetIndexBuffer(m_quadPatchIndexBuffer, DXGI_FORMAT_R16_UINT, 0);
 
-	XMMATRIX viewProj = _camera.GetViewProj();
+	XMMATRIX viewProj = XMMatrixTranspose(_camera.GetViewProj());
 	XMMATRIX world = m_world;
 	XMMATRIX worldInvTranspose = D3DUtils::InverseTranspose(m_world);
-	XMMATRIX worldViewProj = world*viewProj;
+	//XMMATRIX worldViewProj = world*viewProj;
 
 	XMFLOAT4 worldPlanes[6];
 	D3DUtils::ExtractFrustumPlanes(worldPlanes, _camera.GetViewProj());

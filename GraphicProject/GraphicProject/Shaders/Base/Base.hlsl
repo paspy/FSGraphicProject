@@ -41,20 +41,19 @@ VS_OUTPUT VSMain(VS_INPUT vsInput) {
 
 	VS_OUTPUT vsOutput = (VS_OUTPUT)0;
 
-	// Transform to homogeneous clip space.
-	vsOutput.PositionH = mul(float4(vsInput.PositionL, 1.0f), gWorldViewProj);
-
 	// Transform to world space space.
 	vsOutput.PositionW = mul(float4(vsInput.PositionL, 1.0f), gWorld).xyz;
 	vsOutput.NormalW = normalize(mul(vsInput.NormalL, (float3x3)gWorldInvTranspose));
 	vsOutput.TangentW = normalize(mul(vsInput.TangentL, (float3x3)gWorld));
+
+	// Transform to homogeneous clip space.
+	vsOutput.PositionH = mul(float4(vsInput.PositionL, 1.0f), gWorldViewProj);
 
 	//vsOutput.TexCoord = vsInput.TexCoord;
 	vsOutput.TexCoord = mul(float4(vsInput.TexCoord, 0.0f, 1.0f), gTexTransform).xy;
 
 	return vsOutput;
 }
-
 
 // Pixel Shader Entry Point
 float4 PSMain(VS_OUTPUT psInput) : SV_TARGET {
