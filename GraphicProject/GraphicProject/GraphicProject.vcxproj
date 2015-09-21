@@ -191,6 +191,7 @@
     <ClCompile Include="D3DApp\D3DUtils.cpp" />
     <ClCompile Include="D3DApp\DirectXTK\DDSTextureLoader.cpp" />
     <ClCompile Include="D3DApp\GeoGen.cpp" />
+    <ClCompile Include="D3DApp\ParticleSystem.cpp" />
     <ClCompile Include="D3DApp\RenderStates.cpp" />
     <ClCompile Include="D3DApp\TinyObjLoader\tiny_obj_loader.cc" />
     <ClCompile Include="D3DApp\Waves.cpp" />
@@ -216,6 +217,7 @@
     <ClInclude Include="D3DApp\Defines.h" />
     <ClInclude Include="D3DApp\DirectXTK\DDSTextureLoader.h" />
     <ClInclude Include="D3DApp\GeoGen.h" />
+    <ClInclude Include="D3DApp\ParticleSystem.h" />
     <ClInclude Include="D3DApp\RenderStates.h" />
     <ClInclude Include="D3DApp\TinyObjLoader\tiny_obj_loader.h" />
     <ClInclude Include="D3DApp\Waves.h" />

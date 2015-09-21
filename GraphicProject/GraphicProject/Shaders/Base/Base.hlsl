@@ -58,7 +58,8 @@ VS_OUTPUT VSMain(VS_INPUT vsInput) {
 
 // Pixel Shader Entry Point
 float4 PSMain(VS_OUTPUT psInput) : SV_TARGET {
-		psInput.NormalW = normalize(psInput.NormalW);
+	
+	psInput.NormalW = normalize(psInput.NormalW);
 
 	float4 textColor = ObjTexture.Sample(ObjSamplerState, psInput.TexCoord);
 

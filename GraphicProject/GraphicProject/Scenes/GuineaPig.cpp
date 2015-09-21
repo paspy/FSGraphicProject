@@ -44,8 +44,6 @@ void GuineaPig::BuildConstBuffer() {
 void GuineaPig::BuildGeometry() {
 	m_skyBox.Init(m_d3dDevice);
 	m_barrel.Init(m_d3dDevice, m_swapChain, L"Resources/Models/barrel.obj", true, true, L"Shaders/Base/Base.hlsl");
-	m_bed.Init(m_d3dDevice, m_swapChain, L"Resources/Models/Bed.obj", true, true, L"Shaders/Base/Base.hlsl");
-
 	
 	m_terrain.Init(m_d3dDevice, L"Shaders/Base/Base.hlsl");
 	m_wave.Init(m_d3dDevice, L"Shaders/Base/Base.hlsl");
@@ -54,9 +52,9 @@ void GuineaPig::BuildGeometry() {
 
 	m_mirrorMesh.Init(m_d3dDevice, L"Shaders/Base/Base.hlsl");
 
-	m_quadMesh.Init(m_d3dDevice, L"Shaders/Base/InstancedBase.hlsl", GeoMesh::GeoType::Grid, L"Resources/Textures/WireFence_diffuse.dds", L"Resources/Textures/WireFence_normal.dds");
+	//m_quadMesh.Init(m_d3dDevice, L"Shaders/Base/InstancedBase.hlsl", GeoMesh::GeoType::Grid, L"Resources/Textures/WireFence_diffuse.dds", L"Resources/Textures/WireFence_normal.dds");
 
-	m_heighMapTerrain.Init(m_d3dDevice, m_d3dImmediateContext);
+	//m_heighMapTerrain.Init(m_d3dDevice, m_d3dImmediateContext);
 	
 	D3DUtils::CreateModelFromObjFileKaiNi(NULL, NULL, "Resources/Models/barrel.obj", NULL, NULL);
 }
@@ -139,13 +137,6 @@ void GuineaPig::UpdateScene(double _dt) {
 	Translation = XMMatrixTranslation(0.0f, 20.0f, 0.0f);
 	m_geoMesh.worldMat = Rotation * Scale * Translation;
 
-	// bed update
-	m_bed.worldMat = XMMatrixIdentity();
-	Rotation = XMMatrixRotationY(0);
-	Scale = XMMatrixScaling(1.0f, 1.0f, 1.0f);
-	Translation = XMMatrixTranslation(0.0f, 1.0f, -30.0f);
-	m_bed.worldMat = Rotation * Scale * Translation;
-
 	// terrain update
 	m_terrain.worldMat = XMMatrixIdentity();
 	Rotation = XMMatrixRotationY(0);
@@ -159,7 +150,7 @@ void GuineaPig::UpdateScene(double _dt) {
 
 	m_mirrorMesh.Update();
 
-	m_heighMapTerrain.Update();
+	//m_heighMapTerrain.Update();
 }
 
 void GuineaPig::DrawScene() {
@@ -197,18 +188,17 @@ void GuineaPig::DrawScene() {
 	// Skybox
 	m_skyBox.Render(m_d3dImmediateContext, m_camera, RenderStates::NoCullRS);
 
-	m_heighMapTerrain.Render(m_d3dImmediateContext, m_camera, m_directionalLight);
+	//m_heighMapTerrain.Render(m_d3dImmediateContext, m_camera, m_directionalLight);
 	// obj meshs
-	//m_terrain.Render(m_d3dImmediateContext, m_camera, 0);
-	//m_barrel.Render	(m_d3dImmediateContext, m_camera, RenderStates::NoCullRS);
+	m_terrain.Render(m_d3dImmediateContext, m_camera, 0);
+	m_barrel.Render	(m_d3dImmediateContext, m_camera, RenderStates::NoCullRS);
 
 
-	//m_bed.Render(m_d3dImmediateContext, m_camView, m_camProjection, RenderStates::NoCullRS);
-	//m_wave.Render(m_d3dImmediateContext, m_camera, 0, RenderStates::TransparentBSbyColor, blendFactor1);
+	m_wave.Render(m_d3dImmediateContext, m_camera, 0, RenderStates::TransparentBSbyColor, blendFactor1);
 	
-	//m_geoMesh.Render(m_d3dImmediateContext, m_camera, RenderStates::TransparentBSbyColor, blendFactor1);
+	m_geoMesh.Render(m_d3dImmediateContext, m_camera, RenderStates::TransparentBSbyColor, blendFactor1);
 
-	//m_mirrorMesh.Render(m_d3dImmediateContext, m_camera, NULL);
+	m_mirrorMesh.Render(m_d3dImmediateContext, m_camera, NULL);
 
 	//Set the default blend state (no blending) for opaque objects
 

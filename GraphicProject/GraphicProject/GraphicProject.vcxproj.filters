@@ -42,6 +42,9 @@
     <Filter Include="Source Files\Scenes\Shaders\Terrain">
       <UniqueIdentifier>{d30799a1-a5a6-40b6-b8e3-eacf44edad0c}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Source Files\Scenes\Shaders\Particle">
+      <UniqueIdentifier>{aaa745e6-e6dd-4136-a740-ba09edf633fb}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Main.cpp">
@@ -96,6 +99,9 @@
       <Filter>MeshControllers</Filter>
     </ClCompile>
     <ClCompile Include="D3DApp\Camera.cpp">
+      <Filter>D3DApp\D3DHelper</Filter>
+    </ClCompile>
+    <ClCompile Include="D3DApp\ParticleSystem.cpp">
       <Filter>D3DApp\D3DHelper</Filter>
     </ClCompile>
   </ItemGroup>
@@ -155,6 +161,9 @@
       <Filter>MeshControllers</Filter>
     </ClInclude>
     <ClInclude Include="D3DApp\Camera.h">
+      <Filter>D3DApp\D3DHelper</Filter>
+    </ClInclude>
+    <ClInclude Include="D3DApp\ParticleSystem.h">
       <Filter>D3DApp\D3DHelper</Filter>
     </ClInclude>
   </ItemGroup>
