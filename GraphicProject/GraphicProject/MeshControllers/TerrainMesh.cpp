@@ -94,31 +94,31 @@ void TerrainMesh::BuildBuffer(ID3D11Device * _d3dDevice) {
 	HR(_d3dDevice->CreateBuffer(&ibd, &iinitData, &indexBuffer));
 }
 
-void TerrainMesh::Render(ID3D11DeviceContext * _d3dImmediateContext, const Camera &_camera, ID3D11RasterizerState *_rs) {
+void TerrainMesh::Render(ID3D11DeviceContext * _context, const Camera &_camera, ID3D11RasterizerState *_rs) {
 	// Set the default VS shader and depth/stencil state and layout
-	_d3dImmediateContext->VSSetShader(vertexShader, NULL, 0);
-	_d3dImmediateContext->PSSetShader(pixelShader, NULL, 0);
-	_d3dImmediateContext->IASetInputLayout(inputLayout);
-	_d3dImmediateContext->OMSetDepthStencilState(NULL, 0);
+	_context->VSSetShader(vertexShader, NULL, 0);
+	_context->PSSetShader(pixelShader, NULL, 0);
+	_context->IASetInputLayout(inputLayout);
+	_context->OMSetDepthStencilState(NULL, 0);
 
 	//Set the index buffer
-	_d3dImmediateContext->IASetIndexBuffer(indexBuffer, DXGI_FORMAT_R32_UINT, 0);
+	_context->IASetIndexBuffer(indexBuffer, DXGI_FORMAT_R32_UINT, 0);
 	//Set the vertex buffer
-	_d3dImmediateContext->IASetVertexBuffers(0, 1, &vertBuffer, &stride, &offset);
+	_context->IASetVertexBuffers(0, 1, &vertBuffer, &stride, &offset);
 
 	cbBuffer.World = XMMatrixTranspose(worldMat);
 	cbBuffer.WorldInvTranspose = D3DUtils::InverseTranspose(worldMat);
 	cbBuffer.WorldViewProj = XMMatrixTranspose(worldMat *_camera.GetViewProj());
 	cbBuffer.TexTransform = terrainTexTransform;
 
-	_d3dImmediateContext->UpdateSubresource(constBuffer, 0, NULL, &cbBuffer, 0, 0);
-	_d3dImmediateContext->VSSetConstantBuffers(0, 1, &constBuffer);
-	_d3dImmediateContext->PSSetConstantBuffers(1, 1, &constBuffer);
-	_d3dImmediateContext->PSSetShaderResources(0, 1, &shaderResView);
-	_d3dImmediateContext->PSSetShaderResources(1, 1, &normalShaderResView);
-	_d3dImmediateContext->PSSetSamplers(0, 1, &texSamplerState);
-	_d3dImmediateContext->RSSetState(_rs);
-	_d3dImmediateContext->DrawIndexed(indicesCount, 0, 0);
+	_context->UpdateSubresource(constBuffer, 0, NULL, &cbBuffer, 0, 0);
+	_context->VSSetConstantBuffers(0, 1, &constBuffer);
+	_context->PSSetConstantBuffers(1, 1, &constBuffer);
+	_context->PSSetShaderResources(0, 1, &shaderResView);
+	_context->PSSetShaderResources(1, 1, &normalShaderResView);
+	_context->PSSetSamplers(0, 1, &texSamplerState);
+	_context->RSSetState(_rs);
+	_context->DrawIndexed(indicesCount, 0, 0);
 }
 
 

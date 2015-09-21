@@ -8,6 +8,8 @@
 #include "../MeshControllers/GeoMesh.h"
 #include "../MeshControllers/MirrorMesh.h"
 
+#include "../MeshControllers/Terrain.h"
+
 using namespace D3DSturcture;
 
 class GuineaPig : public D3DApp {
@@ -38,6 +40,8 @@ private:
 	TerrainMesh			m_terrain;
 	GeoMesh				m_geoMesh;
 	MirrorMesh			m_mirrorMesh;
+
+	Terrain				m_heighMapTerrain;
 
 	GeoMesh				m_quadMesh;
 

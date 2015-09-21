@@ -32,9 +32,9 @@ public:
 	void Init(ID3D11Device *_d3dDevice, LPCWSTR _shaderFilename);
 	void BuildBuffer(ID3D11Device * _d3dDevice);
 
-	void Update(double _dt, double _tt, ID3D11DeviceContext *_d3dImmediateContext);
+	void Update(double _dt, double _tt, ID3D11DeviceContext *_context);
 
-	void Render(ID3D11DeviceContext * _d3dImmediateContext, const Camera &_camera, ID3D11RasterizerState *_rs, ID3D11BlendState* _bs, float *_bf);
+	void Render(ID3D11DeviceContext * _context, const Camera &_camera, ID3D11RasterizerState *_rs, ID3D11BlendState* _bs, float *_bf);
 
 	CBuffer								cbBuffer;
 	ID3D11VertexShader					*vertexShader = nullptr;

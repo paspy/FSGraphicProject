@@ -94,7 +94,7 @@ void WaveMesh::BuildBuffer(ID3D11Device * _d3dDevice) {
 
 }
 
-void WaveMesh::Update(double _dt, double _tt, ID3D11DeviceContext * _d3dImmediateContext) {
+void WaveMesh::Update(double _dt, double _tt, ID3D11DeviceContext * _context) {
 	// waves verteces update
 	static float t_base = 0.0f;
 	if ((_tt - t_base) >= 0.25f) {
@@ -113,7 +113,7 @@ void WaveMesh::Update(double _dt, double _tt, ID3D11DeviceContext * _d3dImmediat
 	//Set the updated waves to the vertex buffer
 
 	D3D11_MAPPED_SUBRESOURCE mappedData;
-	HR(_d3dImmediateContext->Map(vertBuffer, 0, D3D11_MAP_WRITE_DISCARD, 0, &mappedData));
+	HR(_context->Map(vertBuffer, 0, D3D11_MAP_WRITE_DISCARD, 0, &mappedData));
 
 	Vertex3D* v = reinterpret_cast<Vertex3D*>(mappedData.pData);
 	for (UINT i = 0; i < waves.VertexCount(); ++i) {
@@ -126,7 +126,7 @@ void WaveMesh::Update(double _dt, double _tt, ID3D11DeviceContext * _d3dImmediat
 		v[i].TexCoord.y = 0.5f - waves[i].z / waves.Depth();
 	}
 
-	_d3dImmediateContext->Unmap(vertBuffer, 0);
+	_context->Unmap(vertBuffer, 0);
 
 	// Animate water texture coordinates.
 
@@ -149,32 +149,32 @@ void WaveMesh::Update(double _dt, double _tt, ID3D11DeviceContext * _d3dImmediat
 
 }
 
-void WaveMesh::Render(ID3D11DeviceContext * _d3dImmediateContext, const Camera &_camera, ID3D11RasterizerState *_rs, ID3D11BlendState* _bs = nullptr, float *_bf = nullptr) {
+void WaveMesh::Render(ID3D11DeviceContext * _context, const Camera &_camera, ID3D11RasterizerState *_rs, ID3D11BlendState* _bs = nullptr, float *_bf = nullptr) {
 
 	// Set the default VS shader and depth/stencil state and layout
-	_d3dImmediateContext->VSSetShader(vertexShader, NULL, 0);
-	_d3dImmediateContext->PSSetShader(pixelShader, NULL, 0);
-	_d3dImmediateContext->IASetInputLayout(inputLayout);
-	_d3dImmediateContext->OMSetDepthStencilState(NULL, 0);
+	_context->VSSetShader(vertexShader, NULL, 0);
+	_context->PSSetShader(pixelShader, NULL, 0);
+	_context->IASetInputLayout(inputLayout);
+	_context->OMSetDepthStencilState(NULL, 0);
 
 	//Set the index buffer
-	_d3dImmediateContext->IASetIndexBuffer(indexBuffer, DXGI_FORMAT_R32_UINT, 0);
+	_context->IASetIndexBuffer(indexBuffer, DXGI_FORMAT_R32_UINT, 0);
 	//Set the vertex buffer
-	_d3dImmediateContext->IASetVertexBuffers(0, 1, &vertBuffer, &stride, &offset);
+	_context->IASetVertexBuffers(0, 1, &vertBuffer, &stride, &offset);
 
 	cbBuffer.World = XMMatrixTranspose(worldMat);
 	cbBuffer.WorldInvTranspose = D3DUtils::InverseTranspose(worldMat);
 	cbBuffer.WorldViewProj = XMMatrixTranspose(worldMat * _camera.GetViewProj());
 	cbBuffer.TexTransform = waterTexTransform;
 
-	_d3dImmediateContext->UpdateSubresource(constBuffer, 0, NULL, &cbBuffer, 0, 0);
-	_d3dImmediateContext->VSSetConstantBuffers(0, 1, &constBuffer);
-	_d3dImmediateContext->PSSetConstantBuffers(1, 1, &constBuffer);
-	_d3dImmediateContext->PSSetShaderResources(0, 1, &shaderResView);
-	_d3dImmediateContext->PSSetShaderResources(1, 1, &normalShaderResView);
-	_d3dImmediateContext->PSSetSamplers(0, 1, &texSamplerState);
-	_d3dImmediateContext->RSSetState(_rs);
-	_d3dImmediateContext->OMSetBlendState(_bs, _bf, 0xffffffff);
-	_d3dImmediateContext->DrawIndexed(3 * waves.TriangleCount(), 0, 0);
+	_context->UpdateSubresource(constBuffer, 0, NULL, &cbBuffer, 0, 0);
+	_context->VSSetConstantBuffers(0, 1, &constBuffer);
+	_context->PSSetConstantBuffers(1, 1, &constBuffer);
+	_context->PSSetShaderResources(0, 1, &shaderResView);
+	_context->PSSetShaderResources(1, 1, &normalShaderResView);
+	_context->PSSetSamplers(0, 1, &texSamplerState);
+	_context->RSSetState(_rs);
+	_context->OMSetBlendState(_bs, _bf, 0xffffffff);
+	_context->DrawIndexed(3 * waves.TriangleCount(), 0, 0);
 
 }

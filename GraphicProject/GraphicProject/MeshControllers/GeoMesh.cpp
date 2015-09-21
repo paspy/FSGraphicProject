@@ -162,9 +162,9 @@ float GeoMesh::GetDistanceFromCamera(XMFLOAT4X4 _m4x4, const Camera &_camera) {
 }
 
 
-void GeoMesh::Update(ID3D11DeviceContext * _d3dImmediateContext, const Camera &_camera) {
+void GeoMesh::Update(ID3D11DeviceContext * _context, const Camera &_camera) {
 	D3D11_MAPPED_SUBRESOURCE mapSubres;
-	_d3dImmediateContext->Map(instancedBuffer, 0, D3D11_MAP_WRITE_DISCARD, 0, &mapSubres);
+	_context->Map(instancedBuffer, 0, D3D11_MAP_WRITE_DISCARD, 0, &mapSubres);
 
 	if ( GetDistanceFromCamera(instancedData[0].World, _camera) < GetDistanceFromCamera(instancedData[1].World, _camera) ) {
 		swap(instancedData[0].World, instancedData[1].World);
@@ -178,23 +178,23 @@ void GeoMesh::Update(ID3D11DeviceContext * _d3dImmediateContext, const Camera &_
 	}
 
 	memcpy(mapSubres.pData, instancedData.data(), sizeof(InstancedData)*instancedData.size());
-	_d3dImmediateContext->Unmap(instancedBuffer, 0);
+	_context->Unmap(instancedBuffer, 0);
 }
 
-void GeoMesh::Render(ID3D11DeviceContext * _d3dImmediateContext, const Camera &_camera, ID3D11BlendState* _bs = nullptr, float *_bf = nullptr) {
+void GeoMesh::Render(ID3D11DeviceContext * _context, const Camera &_camera, ID3D11BlendState* _bs = nullptr, float *_bf = nullptr) {
 
 	// Set the default VS shader and depth/stencil state and layout
-	_d3dImmediateContext->VSSetShader(vertexShader, NULL, 0);
-	_d3dImmediateContext->PSSetShader(pixelShader, NULL, 0);
-	_d3dImmediateContext->IASetInputLayout(inputLayout);
-	_d3dImmediateContext->OMSetDepthStencilState(NULL, 0);
+	_context->VSSetShader(vertexShader, NULL, 0);
+	_context->PSSetShader(pixelShader, NULL, 0);
+	_context->IASetInputLayout(inputLayout);
+	_context->OMSetDepthStencilState(NULL, 0);
 
 	//Set the index buffer
-	_d3dImmediateContext->IASetIndexBuffer(indexBuffer, DXGI_FORMAT_R32_UINT, 0);
+	_context->IASetIndexBuffer(indexBuffer, DXGI_FORMAT_R32_UINT, 0);
 	
 	//Set the vertex buffer
 	ID3D11Buffer *vbs[2] = { vertBuffer, instancedBuffer };
-	_d3dImmediateContext->IASetVertexBuffers(0, 2, vbs, stride, offset);
+	_context->IASetVertexBuffers(0, 2, vbs, stride, offset);
 
 	cbBuffer.WorldInvTranspose = D3DUtils::InverseTranspose(worldMat);
 
@@ -202,20 +202,20 @@ void GeoMesh::Render(ID3D11DeviceContext * _d3dImmediateContext, const Camera &_
 	cbBuffer.Proj = XMMatrixTranspose(_camera.GetProj());
 	cbBuffer.TexTransform = geoTexTransform;
 
-	_d3dImmediateContext->UpdateSubresource(constBuffer, 0, NULL, &cbBuffer, 0, 0);
+	_context->UpdateSubresource(constBuffer, 0, NULL, &cbBuffer, 0, 0);
 
-	_d3dImmediateContext->VSSetConstantBuffers(0, 1, &constBuffer);
-	_d3dImmediateContext->PSSetConstantBuffers(1, 1, &constBuffer);
-	_d3dImmediateContext->PSSetShaderResources(0, 1, &shaderResView);
-	_d3dImmediateContext->PSSetShaderResources(1, 1, &normalShaderResView);
-	_d3dImmediateContext->PSSetSamplers(0, 1, &texSamplerState);
-	_d3dImmediateContext->OMSetBlendState(_bs, _bf, 0xffffffff);
+	_context->VSSetConstantBuffers(0, 1, &constBuffer);
+	_context->PSSetConstantBuffers(1, 1, &constBuffer);
+	_context->PSSetShaderResources(0, 1, &shaderResView);
+	_context->PSSetShaderResources(1, 1, &normalShaderResView);
+	_context->PSSetSamplers(0, 1, &texSamplerState);
+	_context->OMSetBlendState(_bs, _bf, 0xffffffff);
 
-	_d3dImmediateContext->RSSetState(CCWcullMode);
-	_d3dImmediateContext->DrawIndexedInstanced(indicesCount, (UINT)instancedData.size(), 0, 0, 0);
+	_context->RSSetState(CCWcullMode);
+	_context->DrawIndexedInstanced(indicesCount, (UINT)instancedData.size(), 0, 0, 0);
 
-	_d3dImmediateContext->RSSetState(CWcullMode);
-	_d3dImmediateContext->DrawIndexedInstanced(indicesCount, (UINT)instancedData.size(), 0, 0, 0);
+	_context->RSSetState(CWcullMode);
+	_context->DrawIndexedInstanced(indicesCount, (UINT)instancedData.size(), 0, 0, 0);
 }
 
 

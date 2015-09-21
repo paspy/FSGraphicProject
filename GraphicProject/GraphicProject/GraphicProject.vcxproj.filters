@@ -39,6 +39,9 @@
     <Filter Include="D3DApp\D3DHelper">
       <UniqueIdentifier>{0b1a2e29-6403-4626-a4d7-e3dd0f8acf73}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Source Files\Scenes\Shaders\Terrain">
+      <UniqueIdentifier>{d30799a1-a5a6-40b6-b8e3-eacf44edad0c}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Main.cpp">
@@ -159,14 +162,20 @@
     <FxCompile Include="Shaders\Skybox\Skybox.hlsl">
       <Filter>Source Files\Scenes\Shaders\Skybox</Filter>
     </FxCompile>
-    <FxCompile Include="Shaders\Base\Lighting.hlsl">
-      <Filter>Source Files\Scenes\Shaders\Base</Filter>
-    </FxCompile>
     <FxCompile Include="Shaders\Base\InstancedBase.hlsl">
       <Filter>Source Files\Scenes\Shaders\Base</Filter>
     </FxCompile>
     <FxCompile Include="Shaders\Base\Base.hlsl">
       <Filter>Source Files\Scenes\Shaders\Base</Filter>
+    </FxCompile>
+    <FxCompile Include="Shaders\Terrain\BaseTerrain.hlsl">
+      <Filter>Source Files\Scenes\Shaders\Terrain</Filter>
+    </FxCompile>
+    <FxCompile Include="Shaders\Base\Lighting.hlsl">
+      <Filter>Source Files\Scenes\Shaders\Base</Filter>
+    </FxCompile>
+    <FxCompile Include="Shaders\Terrain\DirLight.hlsl">
+      <Filter>Source Files\Scenes\Shaders\Terrain</Filter>
     </FxCompile>
   </ItemGroup>
 </Project>

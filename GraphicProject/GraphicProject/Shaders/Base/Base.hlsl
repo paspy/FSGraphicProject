@@ -7,7 +7,7 @@ cbuffer cbPerFrame {
 	float4 gCameraPos;
 };
 
-cbuffer CBuffer {
+cbuffer cbPerObject {
 	float4x4 gWorld;
 	float4x4 gWorldInvTranspose;
 	float4x4 gWorldViewProj;

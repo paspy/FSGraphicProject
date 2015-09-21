@@ -73,7 +73,7 @@ HRESULT D3DUtils::CreateOptionalShaderFromFile(ID3D11Device * _d3dDevice, const 
 	flags |= D3DCOMPILE_DEBUG;
 #endif
 
-	hr = D3DCompileFromFile(_tesselFileName, NULL, D3D_COMPILE_STANDARD_FILE_INCLUDE, "HullMain", "hs_5_0", flags, 0, &hullShaderBlob, &errorBlob);
+	hr = D3DCompileFromFile(_tesselFileName, NULL, D3D_COMPILE_STANDARD_FILE_INCLUDE, "HSMain", "hs_5_0", flags, 0, &hullShaderBlob, &errorBlob);
 	if ( FAILED(hr) ) {
 		if ( errorBlob ) {
 			string err = (char*)errorBlob->GetBufferPointer();
@@ -86,7 +86,7 @@ HRESULT D3DUtils::CreateOptionalShaderFromFile(ID3D11Device * _d3dDevice, const 
 		return hr;
 	}
 
-	hr = D3DCompileFromFile(_tesselFileName, NULL, D3D_COMPILE_STANDARD_FILE_INCLUDE, "DoMain", "ds_5_0", flags, 0, &domainShaderBlob, &errorBlob);
+	hr = D3DCompileFromFile(_tesselFileName, NULL, D3D_COMPILE_STANDARD_FILE_INCLUDE, "DSMain", "ds_5_0", flags, 0, &domainShaderBlob, &errorBlob);
 	if ( FAILED(hr) ) {
 		if ( errorBlob ) {
 			string err = (char*)errorBlob->GetBufferPointer();
@@ -118,7 +118,7 @@ HRESULT D3DUtils::CreateOptionalShaderFromFile(ID3D11Device * _d3dDevice, const 
 	flags |= D3DCOMPILE_DEBUG;
 #endif
 
-	hr = D3DCompileFromFile(_geoFileName, NULL, D3D_COMPILE_STANDARD_FILE_INCLUDE, "GeoMain", "gs_5_0", flags, 0, &geoShaderBlob, &errorBlob);
+	hr = D3DCompileFromFile(_geoFileName, NULL, D3D_COMPILE_STANDARD_FILE_INCLUDE, "GSMain", "gs_5_0", flags, 0, &geoShaderBlob, &errorBlob);
 	if ( FAILED(hr) ) {
 		if ( errorBlob ) {
 			string err = (char*)errorBlob->GetBufferPointer();
@@ -148,7 +148,7 @@ HRESULT D3DUtils::CreateOptionalShaderFromFile(ID3D11Device * _d3dDevice, const 
 	flags |= D3DCOMPILE_DEBUG;
 #endif
 
-	hr = D3DCompileFromFile(_compFileName, NULL, D3D_COMPILE_STANDARD_FILE_INCLUDE, "CompMain", "cs_5_0", flags, 0, &compShaderBlob, &errorBlob);
+	hr = D3DCompileFromFile(_compFileName, NULL, D3D_COMPILE_STANDARD_FILE_INCLUDE, "CSMain", "cs_5_0", flags, 0, &compShaderBlob, &errorBlob);
 	if ( FAILED(hr) ) {
 		if ( errorBlob ) {
 			string err = (char*)errorBlob->GetBufferPointer();
@@ -245,7 +245,9 @@ ID3D11ShaderResourceView * D3DUtils::CreateTexture2DArraySRV(
 
 	vector<ID3D11Texture2D*> srcTex(size);
 	for (UINT i = 0; i < size; ++i) {
-		HR(CreateDDSTextureFromFile(device, filenames[i].c_str(), (ID3D11Resource**)&srcTex[i], NULL));
+		//HR(CreateDDSTextureFromFile(device, filenames[i].c_str(), (ID3D11Resource**)&srcTex[i], NULL));
+		CreateDDSTextureFromFileEx(
+			device, context, filenames[i].c_str(), NULL, D3D11_USAGE_STAGING, 0, D3D11_CPU_ACCESS_WRITE | D3D11_CPU_ACCESS_READ, 0, false, (ID3D11Resource**)&srcTex[i], NULL);
 	}
 
 	D3D11_TEXTURE2D_DESC texElementDesc;

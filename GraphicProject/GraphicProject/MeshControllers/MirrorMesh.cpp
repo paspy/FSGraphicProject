@@ -170,22 +170,22 @@ void MirrorMesh::Update() {
 	wallFloorMat = XMMatrixRotationY(0) * XMMatrixScaling(2.0f, 2.0f,2.0f) * XMMatrixTranslation(0.0f, -20.0f, 0.0f);
 }
 
-void MirrorMesh::Render(ID3D11DeviceContext * _d3dImmediateContext, const Camera &_camera, ID3D11RasterizerState *_rs) {
+void MirrorMesh::Render(ID3D11DeviceContext * _context, const Camera &_camera, ID3D11RasterizerState *_rs) {
 	// Set the default VS shader and depth/stencil state and layout
-	_d3dImmediateContext->VSSetShader(vertexShader, NULL, 0);
-	_d3dImmediateContext->PSSetShader(pixelShader, NULL, 0);
-	_d3dImmediateContext->IASetInputLayout(inputLayout);
-	_d3dImmediateContext->OMSetDepthStencilState(NULL, 0);
+	_context->VSSetShader(vertexShader, NULL, 0);
+	_context->PSSetShader(pixelShader, NULL, 0);
+	_context->IASetInputLayout(inputLayout);
+	_context->OMSetDepthStencilState(NULL, 0);
 
 	float blendFactor[] = { 0.5f, 0.5f, 0.5f, 0.0f };
 
 	// Restore states.
-	_d3dImmediateContext->OMSetDepthStencilState(0, 0);
-	_d3dImmediateContext->OMSetBlendState(0, blendFactor, 0xffffffff);
+	_context->OMSetDepthStencilState(0, 0);
+	_context->OMSetBlendState(0, blendFactor, 0xffffffff);
 
 // draw the normal wall and floor
 	//Set the vertex buffer
-	_d3dImmediateContext->IASetVertexBuffers(0, 1, &vertBuffer[0], &stride, &offset);
+	_context->IASetVertexBuffers(0, 1, &vertBuffer[0], &stride, &offset);
 
 	cbObject.World = XMMatrixTranspose(wallFloorMat);
 	cbObject.WorldInvTranspose = D3DUtils::InverseTranspose(wallFloorMat);
@@ -193,26 +193,26 @@ void MirrorMesh::Render(ID3D11DeviceContext * _d3dImmediateContext, const Camera
 	cbObject.material = mtWallAndFloor;
 	cbObject.TexTransform = XMMatrixIdentity();
 
-	_d3dImmediateContext->UpdateSubresource(constBuffer, 0, NULL, &cbObject, 0, 0);
-	_d3dImmediateContext->VSSetConstantBuffers(0, 1, &constBuffer);
-	_d3dImmediateContext->PSSetConstantBuffers(1, 1, &constBuffer);
-	_d3dImmediateContext->PSSetShaderResources(0, 1, &shaderResViews[0]);
-	_d3dImmediateContext->PSSetShaderResources(1, 1, &normalShaderResViews[0]);
-	_d3dImmediateContext->PSSetSamplers(0, 1, &texSamplerState);
-	_d3dImmediateContext->RSSetState(RenderStates::NoCullRS);
+	_context->UpdateSubresource(constBuffer, 0, NULL, &cbObject, 0, 0);
+	_context->VSSetConstantBuffers(0, 1, &constBuffer);
+	_context->PSSetConstantBuffers(1, 1, &constBuffer);
+	_context->PSSetShaderResources(0, 1, &shaderResViews[0]);
+	_context->PSSetShaderResources(1, 1, &normalShaderResViews[0]);
+	_context->PSSetSamplers(0, 1, &texSamplerState);
+	_context->RSSetState(RenderStates::NoCullRS);
 	// floor
-	_d3dImmediateContext->Draw(6, 0);
+	_context->Draw(6, 0);
 
-	_d3dImmediateContext->PSSetShaderResources(0, 1, &shaderResViews[1]);
-	_d3dImmediateContext->PSSetShaderResources(1, 1, &normalShaderResViews[1]);
+	_context->PSSetShaderResources(0, 1, &shaderResViews[1]);
+	_context->PSSetShaderResources(1, 1, &normalShaderResViews[1]);
 	// wall
-	_d3dImmediateContext->Draw(18, 6);
+	_context->Draw(18, 6);
 
 // draw the normal object
 	//Set the vertex buffer
-	_d3dImmediateContext->IASetVertexBuffers(0, 1, &vertBuffer[1], &stride, &offset);
+	_context->IASetVertexBuffers(0, 1, &vertBuffer[1], &stride, &offset);
 	//Set the index buffer
-	_d3dImmediateContext->IASetIndexBuffer(indexBuffer, DXGI_FORMAT_R32_UINT, 0);
+	_context->IASetIndexBuffer(indexBuffer, DXGI_FORMAT_R32_UINT, 0);
 
 	cbObject.World = XMMatrixTranspose(worldMat);
 	cbObject.WorldInvTranspose = D3DUtils::InverseTranspose(worldMat);
@@ -220,20 +220,20 @@ void MirrorMesh::Render(ID3D11DeviceContext * _d3dImmediateContext, const Camera
 	cbObject.material = mtObject;
 	cbObject.TexTransform = XMMatrixIdentity();
 
-	_d3dImmediateContext->UpdateSubresource(constBuffer, 0, NULL, &cbObject, 0, 0);
-	_d3dImmediateContext->VSSetConstantBuffers(0, 1, &constBuffer);
-	_d3dImmediateContext->PSSetConstantBuffers(1, 1, &constBuffer);
-	_d3dImmediateContext->PSSetShaderResources(0, 1, &shaderResViews[1]);
-	_d3dImmediateContext->PSSetShaderResources(1, 1, &normalShaderResViews[1]);
-	_d3dImmediateContext->PSSetSamplers(0, 1, &texSamplerState);
-	_d3dImmediateContext->RSSetState(_rs);
+	_context->UpdateSubresource(constBuffer, 0, NULL, &cbObject, 0, 0);
+	_context->VSSetConstantBuffers(0, 1, &constBuffer);
+	_context->PSSetConstantBuffers(1, 1, &constBuffer);
+	_context->PSSetShaderResources(0, 1, &shaderResViews[1]);
+	_context->PSSetShaderResources(1, 1, &normalShaderResViews[1]);
+	_context->PSSetSamplers(0, 1, &texSamplerState);
+	_context->RSSetState(_rs);
 
-	_d3dImmediateContext->DrawIndexed(indicesCount, 0, 0);
+	_context->DrawIndexed(indicesCount, 0, 0);
 
 // draw the objects to the stencil buffer only
 
 //Set the vertex buffer
-	_d3dImmediateContext->IASetVertexBuffers(0, 1, &vertBuffer[0], &stride, &offset);
+	_context->IASetVertexBuffers(0, 1, &vertBuffer[0], &stride, &offset);
 
 	cbObject.World = XMMatrixTranspose(wallFloorMat);
 	cbObject.WorldInvTranspose = D3DUtils::InverseTranspose(wallFloorMat);
@@ -241,30 +241,30 @@ void MirrorMesh::Render(ID3D11DeviceContext * _d3dImmediateContext, const Camera
 	cbObject.material = mtWallAndFloor;
 	cbObject.TexTransform = XMMatrixIdentity();
 
-	_d3dImmediateContext->OMSetBlendState(RenderStates::NoRenderTargetWritesBS, blendFactor, 0xffffffff);
-	_d3dImmediateContext->OMSetDepthStencilState(RenderStates::MarkMirrorDSS, 1);
+	_context->OMSetBlendState(RenderStates::NoRenderTargetWritesBS, blendFactor, 0xffffffff);
+	_context->OMSetDepthStencilState(RenderStates::MarkMirrorDSS, 1);
 
-	_d3dImmediateContext->UpdateSubresource(constBuffer, 0, NULL, &cbObject, 0, 0);
-	_d3dImmediateContext->VSSetConstantBuffers(0, 1, &constBuffer);
-	_d3dImmediateContext->PSSetConstantBuffers(1, 1, &constBuffer);
-	_d3dImmediateContext->PSSetShaderResources(0, 1, &shaderResViews[2]);
-	_d3dImmediateContext->PSSetShaderResources(1, 1, &normalShaderResViews[2]);
-	_d3dImmediateContext->PSSetSamplers(0, 1, &texSamplerState);
-	_d3dImmediateContext->RSSetState(_rs);
+	_context->UpdateSubresource(constBuffer, 0, NULL, &cbObject, 0, 0);
+	_context->VSSetConstantBuffers(0, 1, &constBuffer);
+	_context->PSSetConstantBuffers(1, 1, &constBuffer);
+	_context->PSSetShaderResources(0, 1, &shaderResViews[2]);
+	_context->PSSetShaderResources(1, 1, &normalShaderResViews[2]);
+	_context->PSSetSamplers(0, 1, &texSamplerState);
+	_context->RSSetState(_rs);
 	// mirror
-	_d3dImmediateContext->Draw(6, 24);
+	_context->Draw(6, 24);
 
 	// Restore states.
-	_d3dImmediateContext->OMSetDepthStencilState(0, 0);
-	_d3dImmediateContext->OMSetBlendState(0, blendFactor, 0xffffffff);
+	_context->OMSetDepthStencilState(0, 0);
+	_context->OMSetBlendState(0, blendFactor, 0xffffffff);
 
 
 // Draw the reflection.
 
 	//Set the vertex buffer
-	_d3dImmediateContext->IASetVertexBuffers(0, 1, &vertBuffer[1], &stride, &offset);
+	_context->IASetVertexBuffers(0, 1, &vertBuffer[1], &stride, &offset);
 	//Set the index buffer
-	_d3dImmediateContext->IASetIndexBuffer(indexBuffer, DXGI_FORMAT_R32_UINT, 0);
+	_context->IASetIndexBuffer(indexBuffer, DXGI_FORMAT_R32_UINT, 0);
 
 	XMVECTOR mirrorPlane = XMVectorSet(0.0f, 0.0f, 1.0f, 0.0f); // xy plane
 	XMMATRIX R = XMMatrixReflect(mirrorPlane);
@@ -275,23 +275,23 @@ void MirrorMesh::Render(ID3D11DeviceContext * _d3dImmediateContext, const Camera
 	cbObject.material = mtObject;
 	cbObject.TexTransform = XMMatrixIdentity();
 
-	_d3dImmediateContext->UpdateSubresource(constBuffer, 0, NULL, &cbObject, 0, 0);
-	_d3dImmediateContext->VSSetConstantBuffers(0, 1, &constBuffer);
-	_d3dImmediateContext->PSSetConstantBuffers(1, 1, &constBuffer);
-	_d3dImmediateContext->PSSetShaderResources(0, 1, &shaderResViews[1]);
-	_d3dImmediateContext->PSSetShaderResources(1, 1, &normalShaderResViews[1]);
-	_d3dImmediateContext->PSSetSamplers(0, 1, &texSamplerState);
-	_d3dImmediateContext->RSSetState(RenderStates::CullClockwiseRS);
-	_d3dImmediateContext->OMSetDepthStencilState(RenderStates::DrawReflectionDSS, 1);
+	_context->UpdateSubresource(constBuffer, 0, NULL, &cbObject, 0, 0);
+	_context->VSSetConstantBuffers(0, 1, &constBuffer);
+	_context->PSSetConstantBuffers(1, 1, &constBuffer);
+	_context->PSSetShaderResources(0, 1, &shaderResViews[1]);
+	_context->PSSetShaderResources(1, 1, &normalShaderResViews[1]);
+	_context->PSSetSamplers(0, 1, &texSamplerState);
+	_context->RSSetState(RenderStates::CullClockwiseRS);
+	_context->OMSetDepthStencilState(RenderStates::DrawReflectionDSS, 1);
 
-	_d3dImmediateContext->DrawIndexed(indicesCount, 0, 0);
+	_context->DrawIndexed(indicesCount, 0, 0);
 
 	// Restore default states.
-	_d3dImmediateContext->RSSetState(NULL);
-	_d3dImmediateContext->OMSetDepthStencilState(NULL, NULL);
+	_context->RSSetState(NULL);
+	_context->OMSetDepthStencilState(NULL, NULL);
 
 // Draw the mirror to the back buffer as usual but with transparency blending so the reflection shows through.
-	_d3dImmediateContext->IASetVertexBuffers(0, 1, &vertBuffer[0], &stride, &offset);
+	_context->IASetVertexBuffers(0, 1, &vertBuffer[0], &stride, &offset);
 
 	cbObject.World = XMMatrixTranspose(wallFloorMat);
 	cbObject.WorldInvTranspose = D3DUtils::InverseTranspose(wallFloorMat);
@@ -299,21 +299,21 @@ void MirrorMesh::Render(ID3D11DeviceContext * _d3dImmediateContext, const Camera
 	cbObject.material = mtWallAndFloor;
 	cbObject.TexTransform = XMMatrixIdentity();
 
-	_d3dImmediateContext->UpdateSubresource(constBuffer, 0, NULL, &cbObject, 0, 0);
-	_d3dImmediateContext->VSSetConstantBuffers(0, 1, &constBuffer);
-	_d3dImmediateContext->PSSetConstantBuffers(1, 1, &constBuffer);
-	_d3dImmediateContext->PSSetShaderResources(0, 1, &shaderResViews[2]);
-	_d3dImmediateContext->PSSetShaderResources(1, 1, &normalShaderResViews[2]);
-	_d3dImmediateContext->PSSetSamplers(0, 1, &texSamplerState);
-	_d3dImmediateContext->RSSetState(RenderStates::NoCullRS);
-	_d3dImmediateContext->OMSetBlendState(RenderStates::TransparentBSbyColor, blendFactor, 0xffffffff);
+	_context->UpdateSubresource(constBuffer, 0, NULL, &cbObject, 0, 0);
+	_context->VSSetConstantBuffers(0, 1, &constBuffer);
+	_context->PSSetConstantBuffers(1, 1, &constBuffer);
+	_context->PSSetShaderResources(0, 1, &shaderResViews[2]);
+	_context->PSSetShaderResources(1, 1, &normalShaderResViews[2]);
+	_context->PSSetSamplers(0, 1, &texSamplerState);
+	_context->RSSetState(RenderStates::NoCullRS);
+	_context->OMSetBlendState(RenderStates::TransparentBSbyColor, blendFactor, 0xffffffff);
 
 	// mirror
-	_d3dImmediateContext->Draw(6, 24);
+	_context->Draw(6, 24);
 
 	// Restore states.
-	_d3dImmediateContext->OMSetDepthStencilState(0, 0);
-	_d3dImmediateContext->OMSetBlendState(0, blendFactor, 0xffffffff);
+	_context->OMSetDepthStencilState(0, 0);
+	_context->OMSetBlendState(0, blendFactor, 0xffffffff);
 
 }
 

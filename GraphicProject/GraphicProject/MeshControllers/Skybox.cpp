@@ -64,27 +64,27 @@ void Skybox::LoadStuff(ID3D11Device * _d3dDevice) {
 
 }
 
-void Skybox::Render(ID3D11DeviceContext * _d3dImmediateContext, const Camera& _camera, ID3D11RasterizerState *_rs) {
+void Skybox::Render(ID3D11DeviceContext * _context, const Camera& _camera, ID3D11RasterizerState *_rs) {
 	//Set the proper VS and PS shaders, and layout
-	_d3dImmediateContext->VSSetShader(vertexShader, 0, 0);
-	_d3dImmediateContext->PSSetShader(pixelShader, 0, 0);
-	_d3dImmediateContext->IASetInputLayout(inputLayout);
+	_context->VSSetShader(vertexShader, 0, 0);
+	_context->PSSetShader(pixelShader, 0, 0);
+	_context->IASetInputLayout(inputLayout);
 	//Set the spheres index buffer
-	_d3dImmediateContext->IASetIndexBuffer(indexBuffer, DXGI_FORMAT_R32_UINT, 0);
+	_context->IASetIndexBuffer(indexBuffer, DXGI_FORMAT_R32_UINT, 0);
 	//Set the spheres vertex buffer
-	_d3dImmediateContext->IASetVertexBuffers(0, 1, &vertBuffer, &stride, &offset);
+	_context->IASetVertexBuffers(0, 1, &vertBuffer, &stride, &offset);
 	//Set the WorldViewProj matrix and send it to the constant buffer in shader file
 	cBuffer.WorldViewProj = XMMatrixTranspose(worldMat * _camera.GetViewProj());
 
-	_d3dImmediateContext->UpdateSubresource(constBuffer, 0, NULL, &cBuffer, 0, 0);
-	_d3dImmediateContext->VSSetConstantBuffers(0, 1, &constBuffer);
+	_context->UpdateSubresource(constBuffer, 0, NULL, &cBuffer, 0, 0);
+	_context->VSSetConstantBuffers(0, 1, &constBuffer);
 	//Send our skymap resource view to pixel shader
-	_d3dImmediateContext->PSSetShaderResources(0, 1, &shaderResView);
-	_d3dImmediateContext->PSSetSamplers(0, 1, &texSamplerState);
+	_context->PSSetShaderResources(0, 1, &shaderResView);
+	_context->PSSetSamplers(0, 1, &texSamplerState);
 	//Set the new depth/stencil and RS states
-	_d3dImmediateContext->OMSetDepthStencilState(DSLessEqual, 0);
-	_d3dImmediateContext->RSSetState(_rs);
-	_d3dImmediateContext->DrawIndexed(numFaces * 3, 0, 0);
+	_context->OMSetDepthStencilState(DSLessEqual, 0);
+	_context->RSSetState(_rs);
+	_context->DrawIndexed(numFaces * 3, 0, 0);
 }
 
 void Skybox::BuildSphere(

@@ -40,8 +40,8 @@ public:
 
 	float GetDistanceFromCamera(XMFLOAT4X4 _m4x4, const Camera &_camera);
 
-	void Update(ID3D11DeviceContext * _d3dImmediateContext, const Camera &_camera);
-	void Render(ID3D11DeviceContext *_d3dImmediateContext, const Camera &_camera, ID3D11BlendState* _bs, float *_bf);
+	void Update(ID3D11DeviceContext * _context, const Camera &_camera);
+	void Render(ID3D11DeviceContext *_context, const Camera &_camera, ID3D11BlendState* _bs, float *_bf);
 
 	CBuffer								cbBuffer;
 	ID3D11VertexShader					*vertexShader = nullptr;
