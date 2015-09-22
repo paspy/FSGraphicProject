@@ -13,7 +13,7 @@ int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPTSTR lpCmdLi
 LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wparam, LPARAM lparam);
 
 #if defined(DEBUG) | defined(_DEBUG)
-int main()
+int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE, LPTSTR, int)
 #else
 int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE, LPTSTR, int)
 #endif

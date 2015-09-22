@@ -34,8 +34,6 @@ private:
 
 private:
 	Skybox				m_skyBox;
-	ObjMesh				m_barrel;
-	ObjMesh				m_bed;
 	WaveMesh			m_wave;
 	TerrainMesh			m_terrain;
 	GeoMesh				m_geoMesh;

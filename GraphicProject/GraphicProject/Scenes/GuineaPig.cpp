@@ -1,7 +1,7 @@
 #include "GuineaPig.h"
 #include "../D3DApp/RenderStates.h"
 
-GuineaPig::GuineaPig(HINSTANCE hinst) : D3DApp(hinst), m_camWalkMode(false){ }
+GuineaPig::GuineaPig(HINSTANCE hinst) : D3DApp(hinst), m_camWalkMode(true) { }
 
 GuineaPig::~GuineaPig() {
 	// release lighting ptr
@@ -43,7 +43,6 @@ void GuineaPig::BuildConstBuffer() {
 
 void GuineaPig::BuildGeometry() {
 	m_skyBox.Init(m_d3dDevice);
-	m_barrel.Init(m_d3dDevice, m_swapChain, L"Resources/Models/barrel.obj", true, true, L"Shaders/Base/Base.hlsl");
 	
 	//m_terrain.Init(m_d3dDevice, L"Shaders/Base/Base.hlsl");
 	m_wave.Init(m_d3dDevice, L"Shaders/Base/Base.hlsl");
@@ -86,6 +85,7 @@ void GuineaPig::BuildLighting() {
 
 void GuineaPig::UpdateScene(double _dt) {
 
+
 	// **Update Skybox **//
 	//Reset sphereWorld
 	m_skyBox.worldMat = XMMatrixIdentity();
@@ -97,7 +97,7 @@ void GuineaPig::UpdateScene(double _dt) {
 
 	//Set sphereWorld's world space using the transformations
 	m_skyBox.worldMat = scale * translation;
-	// **Update Skybox **//
+	/// **Update Skybox **//
 
 	// **Update Directional Light **//
 	m_directionalLight.Direction.x = 0.85f * cosf(static_cast<float>(m_timer.TotalTime()));
@@ -119,16 +119,8 @@ void GuineaPig::UpdateScene(double _dt) {
 	XMStoreFloat3(&m_spotLight.Direction, XMVector3Normalize(m_camera.GetLook() - m_camera.GetPosition()));
 	// **Update Spot Light **//
 
-
 	// Update objects
 	XMMATRIX Rotation, Scale, Translation;
-
-	// barrel update
-	m_barrel.worldMat = XMMatrixIdentity();
-	Rotation = XMMatrixRotationY(0);
-	Scale = XMMatrixScaling(5.0f, 5.0f, 5.0f);
-	Translation = XMMatrixTranslation(0.0f, 5.0f, 25.0f);
-	m_barrel.worldMat = Rotation * Scale * Translation;
 
 	// m_geoMesh update
 	m_geoMesh.worldMat = XMMatrixIdentity();
@@ -193,11 +185,10 @@ void GuineaPig::DrawScene() {
 	// obj meshs
 	//m_terrain.Render(m_d3dImmediateContext, m_camera, 0);
 
-	m_wave.Render(m_d3dImmediateContext, m_camera, 0, RenderStates::TransparentBSbyColor, blendFactor1);
-	
-	m_geoMesh.Render(m_d3dImmediateContext, m_camera, RenderStates::TransparentBSbyColor, blendFactor1);
+	//m_mirrorMesh.Render(m_d3dImmediateContext, m_camera, NULL);
+	//m_wave.Render(m_d3dImmediateContext, m_camera, 0, RenderStates::TransparentBSbyColor, blendFactor1);
+	//m_geoMesh.Render(m_d3dImmediateContext, m_camera, RenderStates::TransparentBSbyColor, blendFactor1);
 
-	m_mirrorMesh.Render(m_d3dImmediateContext, m_camera, NULL);
 
 	//Set the default blend state (no blending) for opaque objects
 
@@ -230,7 +221,7 @@ void GuineaPig::UpdateKeyboardInput(double _dt) {
 		XMFLOAT4 camPos;
 		XMStoreFloat4(&camPos, m_camera.GetPosition());
 		float y = m_heighMapTerrain.GetHeight(camPos.x, camPos.z);
-		m_camera.SetPosition(camPos.x, y + 2.0f, camPos.z, camPos.w);
+		m_camera.SetPosition(camPos.x, y + 5.0f, camPos.z, camPos.w);
 	}
 	m_camera.UpdateViewMatrix();
 }

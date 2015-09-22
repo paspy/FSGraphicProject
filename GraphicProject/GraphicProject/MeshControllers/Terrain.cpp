@@ -23,7 +23,7 @@ Terrain::Terrain() :
 	m_numPatchQuadFaces(0),
 	m_numPatchVertRows(0),
 	m_numPatchVertCols(0),
-	m_wireFrameRS(false)
+	m_wireFrameRS(true)
 
 {
 	m_world =  XMMatrixIdentity();
