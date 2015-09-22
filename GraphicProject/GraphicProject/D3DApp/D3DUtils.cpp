@@ -251,9 +251,10 @@ ID3D11ShaderResourceView * D3DUtils::CreateTexture2DArraySRV(
 			D3D11_MAPPED_SUBRESOURCE mappedTex2D;
 			HR(context->Map(srcTex[texElement], mipLevel, D3D11_MAP_READ, 0, &mappedTex2D));
 
-			context->UpdateSubresource(texArray,
-				D3D11CalcSubresource(mipLevel, texElement, texElementDesc.MipLevels),
-				0, mappedTex2D.pData, mappedTex2D.RowPitch, mappedTex2D.DepthPitch);
+			context->UpdateSubresource(
+				texArray, D3D11CalcSubresource(mipLevel, texElement, texElementDesc.MipLevels),
+				0, mappedTex2D.pData, mappedTex2D.RowPitch, mappedTex2D.DepthPitch
+				);
 
 			context->Unmap(srcTex[texElement], mipLevel);
 		}
@@ -281,6 +282,20 @@ ID3D11ShaderResourceView * D3DUtils::CreateTexture2DArraySRV(
 	}
 
 	return texArraySRV;
+}
+
+vector<ID3D11ShaderResourceView*> D3DUtils::CreateTexture2DArraySRV(
+	ID3D11Device * device,
+	vector<wstring>& filenames) {
+
+	UINT size = static_cast<UINT>(filenames.size());
+
+	vector<ID3D11ShaderResourceView*> srcTex(size);
+	for (UINT i = 0; i < size; ++i) {
+		HR(CreateDDSTextureFromFile(device, filenames[i].c_str(), NULL, &srcTex[i]));
+	}
+
+	return srcTex;
 }
 
 // deprecated

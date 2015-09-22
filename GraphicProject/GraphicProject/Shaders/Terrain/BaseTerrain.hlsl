@@ -31,9 +31,14 @@ cbuffer cbPerObject : register(b1) {
 };
 
 // Nonnumeric values cannot be added to a cbuffer.
-Texture2DArray gLayerMapArray : register(t0);
-Texture2D gBlendMap: register(t1);
-Texture2D gHeightMap: register(t2);
+Texture2D gBlendMap: register(t0);
+Texture2D gHeightMap: register(t1);
+//Texture2DArray gLayerMapArray : register(t0);
+Texture2D gLayerMapArray0 : register(t2);
+Texture2D gLayerMapArray1 : register(t3);
+Texture2D gLayerMapArray2 : register(t4);
+Texture2D gLayerMapArray3 : register(t5);
+Texture2D gLayerMapArray4 : register(t6);
 
 SamplerState LinearSamplerState: register(s0);
 SamplerState HeightmapSamplerState: register(s1);
@@ -71,10 +76,6 @@ VS_OUTPUT VSMain(VS_INPUT vsInput) {
 
 float CalcTessFactor(float3 p) {
 	float d = distance(p, gCameraPosW);
-
-	// max norm in xz plane (useful to see detail levels from a bird's eye).
-	//d = max( abs(p.x-gCameraPosW.x), abs(p.z-gCameraPosW.z) );
-
 	float s = saturate((d - gMinDist) / (gMaxDist - gMinDist));
 
 	return (pow(2, (lerp(gMaxTess, gMinTess, s))));
@@ -268,11 +269,11 @@ float4 PSMain(DS_OUTPUT psInput) : SV_Target {
 	// Texturing
 
 	// Sample layers in texture array.
-	float4 c0 = gLayerMapArray.Sample(LinearSamplerState, float3(psInput.TiledTex, 0.0f));
-	float4 c1 = gLayerMapArray.Sample(LinearSamplerState, float3(psInput.TiledTex, 1.0f));
-	float4 c2 = gLayerMapArray.Sample(LinearSamplerState, float3(psInput.TiledTex, 2.0f));
-	float4 c3 = gLayerMapArray.Sample(LinearSamplerState, float3(psInput.TiledTex, 3.0f));
-	float4 c4 = gLayerMapArray.Sample(LinearSamplerState, float3(psInput.TiledTex, 4.0f));
+	float4 c0 = gLayerMapArray0.Sample(LinearSamplerState, psInput.TexCoord);
+	float4 c1 = gLayerMapArray1.Sample(LinearSamplerState, psInput.TexCoord);
+	float4 c2 = gLayerMapArray2.Sample(LinearSamplerState, psInput.TexCoord);
+	float4 c3 = gLayerMapArray3.Sample(LinearSamplerState, psInput.TexCoord);
+	float4 c4 = gLayerMapArray4.Sample(LinearSamplerState, psInput.TexCoord);
 
 	// Sample the blend map.
 	float4 t = gBlendMap.Sample(LinearSamplerState, psInput.TexCoord);
@@ -301,6 +302,5 @@ float4 PSMain(DS_OUTPUT psInput) : SV_Target {
 	litColor = texColor*(ambient + diffuse) + specular;
 
 	return texColor;
-
 
 }

@@ -104,7 +104,8 @@ private:
 	ID3D11SamplerState			*m_heighMapSamplerState;
 	ID3D11InputLayout			*m_inputLayout;
 
-	ID3D11ShaderResourceView	*m_layerMapArraySRV;
+	//ID3D11ShaderResourceView	*m_layerMapArraySRV;
+	vector<ID3D11ShaderResourceView*> m_layerMapArraySRV;
 	ID3D11ShaderResourceView	*m_blendMapSRV;
 	ID3D11ShaderResourceView	*m_heightMapSRV;
 

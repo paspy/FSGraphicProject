@@ -46,11 +46,11 @@ void GuineaPig::BuildGeometry() {
 	m_barrel.Init(m_d3dDevice, m_swapChain, L"Resources/Models/barrel.obj", true, true, L"Shaders/Base/Base.hlsl");
 	
 	//m_terrain.Init(m_d3dDevice, L"Shaders/Base/Base.hlsl");
-	//m_wave.Init(m_d3dDevice, L"Shaders/Base/Base.hlsl");
+	m_wave.Init(m_d3dDevice, L"Shaders/Base/Base.hlsl");
 
-	//m_geoMesh.Init(m_d3dDevice, L"Shaders/Base/InstancedBase.hlsl", GeoMesh::GeoType::Box, L"Resources/Textures/WireFence_diffuse.dds", L"Resources/Textures/WireFence_normal.dds");
+	m_geoMesh.Init(m_d3dDevice, L"Shaders/Base/InstancedBase.hlsl", GeoMesh::GeoType::Box, L"Resources/Textures/WireFence_diffuse.dds", L"Resources/Textures/WireFence_normal.dds");
 
-	//m_mirrorMesh.Init(m_d3dDevice, L"Shaders/Base/Base.hlsl");
+	m_mirrorMesh.Init(m_d3dDevice, L"Shaders/Base/Base.hlsl");
 
 	//m_quadMesh.Init(m_d3dDevice, L"Shaders/Base/InstancedBase.hlsl", GeoMesh::GeoType::Grid, L"Resources/Textures/WireFence_diffuse.dds", L"Resources/Textures/WireFence_normal.dds");
 
@@ -145,10 +145,10 @@ void GuineaPig::UpdateScene(double _dt) {
 	m_terrain.worldMat = Rotation * Scale * Translation;
 
 	// update waves
-	//m_wave.Update(_dt, m_timer.TotalTime(), m_d3dImmediateContext);
-	//m_geoMesh.Update(m_d3dImmediateContext, m_camera);
+	m_wave.Update(_dt, m_timer.TotalTime(), m_d3dImmediateContext);
+	m_geoMesh.Update(m_d3dImmediateContext, m_camera);
 
-	//m_mirrorMesh.Update();
+	m_mirrorMesh.Update();
 
 	m_heighMapTerrain.Update();
 }
@@ -193,11 +193,11 @@ void GuineaPig::DrawScene() {
 	// obj meshs
 	//m_terrain.Render(m_d3dImmediateContext, m_camera, 0);
 
-	//m_wave.Render(m_d3dImmediateContext, m_camera, 0, RenderStates::TransparentBSbyColor, blendFactor1);
+	m_wave.Render(m_d3dImmediateContext, m_camera, 0, RenderStates::TransparentBSbyColor, blendFactor1);
 	
-	//m_geoMesh.Render(m_d3dImmediateContext, m_camera, RenderStates::TransparentBSbyColor, blendFactor1);
+	m_geoMesh.Render(m_d3dImmediateContext, m_camera, RenderStates::TransparentBSbyColor, blendFactor1);
 
-	//m_mirrorMesh.Render(m_d3dImmediateContext, m_camera, NULL);
+	m_mirrorMesh.Render(m_d3dImmediateContext, m_camera, NULL);
 
 	//Set the default blend state (no blending) for opaque objects
 

@@ -55,6 +55,8 @@ public:
 		ID3D11DeviceContext* context,
 		vector<wstring>& filenames);
 
+	static vector<ID3D11ShaderResourceView*> CreateTexture2DArraySRV(ID3D11Device * device, vector<wstring>& filenames);
+
 	static bool CreateModelFromObjFileKaiNi(
 		ID3D11Device *_d3dDevice,
 		IDXGISwapChain *_swapChain,

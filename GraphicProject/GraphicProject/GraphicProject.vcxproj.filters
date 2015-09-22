@@ -171,20 +171,25 @@
     <FxCompile Include="Shaders\Skybox\Skybox.hlsl">
       <Filter>Source Files\Scenes\Shaders\Skybox</Filter>
     </FxCompile>
-    <FxCompile Include="Shaders\Base\InstancedBase.hlsl">
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Shaders\Base\Base.hlsl">
       <Filter>Source Files\Scenes\Shaders\Base</Filter>
-    </FxCompile>
-    <FxCompile Include="Shaders\Base\Base.hlsl">
+    </None>
+    <None Include="Shaders\Base\InstancedBase.hlsl">
       <Filter>Source Files\Scenes\Shaders\Base</Filter>
-    </FxCompile>
-    <FxCompile Include="Shaders\Terrain\BaseTerrain.hlsl">
+    </None>
+    <None Include="Shaders\Base\Lighting.hlsl">
+      <Filter>Source Files\Scenes\Shaders\Base</Filter>
+    </None>
+    <None Include="Shaders\Particle\ParticleBase.hlsl">
+      <Filter>Source Files\Scenes\Shaders\Particle</Filter>
+    </None>
+    <None Include="Shaders\Terrain\BaseTerrain.hlsl">
       <Filter>Source Files\Scenes\Shaders\Terrain</Filter>
-    </FxCompile>
-    <FxCompile Include="Shaders\Base\Lighting.hlsl">
-      <Filter>Source Files\Scenes\Shaders\Base</Filter>
-    </FxCompile>
-    <FxCompile Include="Shaders\Terrain\DirLight.hlsl">
+    </None>
+    <None Include="Shaders\Terrain\DirLight.hlsl">
       <Filter>Source Files\Scenes\Shaders\Terrain</Filter>
-    </FxCompile>
+    </None>
   </ItemGroup>
 </Project>

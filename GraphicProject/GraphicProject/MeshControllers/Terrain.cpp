@@ -6,7 +6,7 @@
 Terrain::Terrain() :
 	m_quadPatchVertBuffer(nullptr),
 	m_quadPatchIndexBuffer(nullptr),
-	m_layerMapArraySRV(nullptr),
+	//m_layerMapArraySRV(nullptr),
 	m_blendMapSRV(nullptr),
 	m_heightMapSRV(nullptr),
 	m_inputLayout(nullptr),
@@ -46,8 +46,10 @@ Terrain::~Terrain() {
 	SafeRelease(m_cbPerFrame);
 	SafeRelease(m_linerSamplerState);
 	SafeRelease(m_heighMapSamplerState);
-	SafeRelease(m_inputLayout)
-	SafeRelease(m_layerMapArraySRV);
+	SafeRelease(m_inputLayout);
+	for (size_t i = 0; i < m_layerMapArraySRV.size(); i++) {
+		SafeRelease(m_layerMapArraySRV[i]);
+	}
 	SafeRelease(m_blendMapSRV);
 	SafeRelease(m_heightMapSRV);
 }
@@ -175,7 +177,8 @@ void Terrain::Init(ID3D11Device* _d3dDevice, ID3D11DeviceContext* _context) {
 	layerFilenames.push_back(m_info.LayerMapFilename2);
 	layerFilenames.push_back(m_info.LayerMapFilename3);
 	layerFilenames.push_back(m_info.LayerMapFilename4);
-	m_layerMapArraySRV = D3DUtils::CreateTexture2DArraySRV(_d3dDevice, _context, layerFilenames);
+	//m_layerMapArraySRV = D3DUtils::CreateTexture2DArraySRV(_d3dDevice, _context, layerFilenames);
+	m_layerMapArraySRV = D3DUtils::CreateTexture2DArraySRV(_d3dDevice, layerFilenames);
 
 	HR(CreateDDSTextureFromFile(_d3dDevice, m_info.BlendMapFilename.c_str(), NULL, &m_blendMapSRV));
 
@@ -247,28 +250,25 @@ void Terrain::Render(ID3D11DeviceContext* _context, const Camera& _camera, D3DSt
 	_context->DSSetConstantBuffers(1, 1, &m_cbPerObject);	
 	_context->PSSetConstantBuffers(1, 1, &m_cbPerObject);	
 
-	_context->VSSetSamplers(0, 1, &m_heighMapSamplerState);
-	_context->DSSetSamplers(0, 1, &m_heighMapSamplerState);
-	_context->PSSetSamplers(0, 1, &m_heighMapSamplerState);
+	_context->PSSetSamplers(0, 1, &m_linerSamplerState);
 	
-	_context->VSSetSamplers(1, 1, &m_linerSamplerState);
-	_context->DSSetSamplers(1, 1, &m_linerSamplerState);
-	_context->PSSetSamplers(1, 1, &m_linerSamplerState);
+	_context->VSSetSamplers(1, 1, &m_heighMapSamplerState);
+	_context->DSSetSamplers(1, 1, &m_heighMapSamplerState);
+	_context->PSSetSamplers(1, 1, &m_heighMapSamplerState);
 
-	_context->VSSetShaderResources(0, 1, &m_layerMapArraySRV);
-	_context->HSSetShaderResources(0, 1, &m_layerMapArraySRV);
-	_context->DSSetShaderResources(0, 1, &m_layerMapArraySRV);
-	_context->PSSetShaderResources(0, 1, &m_layerMapArraySRV);
+	_context->VSSetShaderResources(0, 1, &m_blendMapSRV);
+	_context->HSSetShaderResources(0, 1, &m_blendMapSRV);
+	_context->DSSetShaderResources(0, 1, &m_blendMapSRV);
+	_context->PSSetShaderResources(0, 1, &m_blendMapSRV);
 
-	_context->VSSetShaderResources(1, 1, &m_blendMapSRV);
-	_context->HSSetShaderResources(1, 1, &m_blendMapSRV);
-	_context->DSSetShaderResources(1, 1, &m_blendMapSRV);
-	_context->PSSetShaderResources(1, 1, &m_blendMapSRV);
+	_context->VSSetShaderResources(1, 1, &m_heightMapSRV);
+	_context->HSSetShaderResources(1, 1, &m_heightMapSRV);
+	_context->DSSetShaderResources(1, 1, &m_heightMapSRV);
+	_context->PSSetShaderResources(1, 1, &m_heightMapSRV);
 
-	_context->VSSetShaderResources(2, 1, &m_heightMapSRV);
-	_context->HSSetShaderResources(2, 1, &m_heightMapSRV);
-	_context->DSSetShaderResources(2, 1, &m_heightMapSRV);
-	_context->PSSetShaderResources(2, 1, &m_heightMapSRV);
+	for (size_t i = 0; i < m_layerMapArraySRV.size(); i++) {
+		_context->PSSetShaderResources(i+2, 1, &m_layerMapArraySRV[i]);
+	}
 
 	if (m_wireFrameRS) {
 		_context->RSSetState(RenderStates::WireframeRS);
