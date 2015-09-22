@@ -78,7 +78,7 @@ float CalcTessFactor(float3 p) {
 	float d = distance(p, gCameraPosW);
 	float s = saturate((d - gMinDist) / (gMaxDist - gMinDist));
 
-	return (pow(2, (lerp(gMaxTess, gMinTess, s))));
+	return pow(2, (lerp(gMaxTess, gMinTess, s)));
 }
 
 // Returns true if the box is completely behind (in negative half space) of plane.
@@ -118,7 +118,7 @@ struct PatchTess {
 PatchTess ConstantHS(InputPatch<VS_OUTPUT, 4> patch, uint patchID : SV_PrimitiveID) {
 	PatchTess pt;
 
-	// Frustum cull
+	// Frustum culling
 
 	// We store the patch BoundsY in the first control point.
 	float minY = patch[0].BoundsY.x;
@@ -145,10 +145,6 @@ PatchTess ConstantHS(InputPatch<VS_OUTPUT, 4> patch, uint patchID : SV_Primitive
 
 	// Do normal tessellation based on distance.
 	} else {
-		// It is important to do the tess factor calculation based on the
-		// edge properties so that edges shared by more than one patch will
-		// have the same tessellation factor.  Otherwise, gaps can appear.
-
 		// Compute midpoint on edges, and patch center
 		float3 e0 = 0.5f*(patch[0].PositionW + patch[2].PositionW);
 		float3 e1 = 0.5f*(patch[0].PositionW + patch[1].PositionW);

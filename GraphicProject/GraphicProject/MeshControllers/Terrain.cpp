@@ -223,8 +223,8 @@ void Terrain::Render(ID3D11DeviceContext* _context, const Camera& _camera, D3DSt
 	XMStoreFloat4(&curCamPos, _camera.GetPosition());
 	cbPerFrame.CameraPos = curCamPos;
 	cbPerFrame.DirLight = _light;
-	cbPerFrame.MinDist = 20.0f;
-	cbPerFrame.MaxDist = 500.0f;
+	cbPerFrame.MinDist = 25.0f;
+	cbPerFrame.MaxDist = 1000.0f;
 	cbPerFrame.MinTess = 0.0f;
 	cbPerFrame.MaxTess = 6.0f;
 	cbPerFrame.TexelCellSpaceU = 1.0f / m_info.HeightmapWidth;
@@ -266,7 +266,7 @@ void Terrain::Render(ID3D11DeviceContext* _context, const Camera& _camera, D3DSt
 	_context->DSSetShaderResources(1, 1, &m_heightMapSRV);
 	_context->PSSetShaderResources(1, 1, &m_heightMapSRV);
 
-	for (size_t i = 0; i < m_layerMapArraySRV.size(); i++) {
+	for (UINT i = 0; i < (UINT)m_layerMapArraySRV.size(); i++) {
 		_context->PSSetShaderResources(i+2, 1, &m_layerMapArraySRV[i]);
 	}
 
