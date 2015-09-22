@@ -183,7 +183,7 @@ bool D3DApp::InitDirect3D() {
 		adapterPtr->GetDesc(&adapterDesc);
 
 		if ( adapterDesc.DedicatedVideoMemory > bestMemSize ) {
-			bestAdapterIndex = 0;
+			bestAdapterIndex = i;
 			bestMemSize = adapterDesc.DedicatedVideoMemory;
 		}
 	}

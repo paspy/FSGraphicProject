@@ -119,7 +119,7 @@ void Terrain::Init(ID3D11Device* _d3dDevice, ID3D11DeviceContext* _context) {
 
 	ZeroMemory(&cbbd, sizeof(D3D11_BUFFER_DESC));
 	cbbd.Usage = D3D11_USAGE_DEFAULT;
-	cbbd.ByteWidth = sizeof(cbPerObjectT) * 4;
+	cbbd.ByteWidth = sizeof(cbPerObjectT);
 	cbbd.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
 	cbbd.CPUAccessFlags = 0;
 	cbbd.MiscFlags = 0;
@@ -132,7 +132,7 @@ void Terrain::Init(ID3D11Device* _d3dDevice, ID3D11DeviceContext* _context) {
 	sampDesc.AddressV = D3D11_TEXTURE_ADDRESS_WRAP;
 	sampDesc.AddressW = D3D11_TEXTURE_ADDRESS_WRAP;
 	sampDesc.ComparisonFunc = D3D11_COMPARISON_NEVER;
-	sampDesc.MinLOD = 0;
+	sampDesc.MinLOD = -D3D11_FLOAT32_MAX;
 	sampDesc.MaxLOD = D3D11_FLOAT32_MAX;
 	_d3dDevice->CreateSamplerState(&sampDesc, &m_linerSamplerState);
 
@@ -142,13 +142,13 @@ void Terrain::Init(ID3D11Device* _d3dDevice, ID3D11DeviceContext* _context) {
 	sampDesc.AddressV = D3D11_TEXTURE_ADDRESS_CLAMP;
 	sampDesc.AddressW = D3D11_TEXTURE_ADDRESS_CLAMP;
 	sampDesc.ComparisonFunc = D3D11_COMPARISON_NEVER;
-	sampDesc.MinLOD = 0;
+	sampDesc.MinLOD = -D3D11_FLOAT32_MAX;
 	sampDesc.MaxLOD = D3D11_FLOAT32_MAX;
 	_d3dDevice->CreateSamplerState(&sampDesc, &m_heighMapSamplerState);
 
 	// create the depending shaders
-	HR(D3DUtils::CreateShaderAndLayoutFromFile(_d3dDevice, L"Shaders/Terrain/BaseTerrain.hlsl", vertexLayout, 3, &m_vertexShader, &m_pixelShader, &m_inputLayout));
 	HR(D3DUtils::CreateOptionalShaderFromFile(_d3dDevice, L"Shaders/Terrain/BaseTerrain.hlsl", &m_hullShader, &m_domainShader));
+	HR(D3DUtils::CreateShaderAndLayoutFromFile(_d3dDevice, L"Shaders/Terrain/BaseTerrain.hlsl", vertexLayout, 3, &m_vertexShader, &m_pixelShader, &m_inputLayout));
 
 	m_info.HeightMapFilename = L"Resources/Terrain/terrain.raw";
 	m_info.LayerMapFilename0 = L"Resources/Terrain/grass.dds";
@@ -169,14 +169,6 @@ void Terrain::Init(ID3D11Device* _d3dDevice, ID3D11DeviceContext* _context) {
 	m_numPatchVertices = m_numPatchVertRows*m_numPatchVertCols;
 	m_numPatchQuadFaces = (m_numPatchVertRows - 1)*(m_numPatchVertCols - 1);
 
-	LoadHeightmap();
-	Smooth();
-	CalcAllPatchBoundsY();
-
-	BuildQuadPatchVB(_d3dDevice);
-	BuildQuadPatchIB(_d3dDevice);
-	BuildHeightmapSRV(_d3dDevice);
-
 	vector<wstring> layerFilenames;
 	layerFilenames.push_back(m_info.LayerMapFilename0);
 	layerFilenames.push_back(m_info.LayerMapFilename1);
@@ -186,6 +178,17 @@ void Terrain::Init(ID3D11Device* _d3dDevice, ID3D11DeviceContext* _context) {
 	m_layerMapArraySRV = D3DUtils::CreateTexture2DArraySRV(_d3dDevice, _context, layerFilenames);
 
 	HR(CreateDDSTextureFromFile(_d3dDevice, m_info.BlendMapFilename.c_str(), NULL, &m_blendMapSRV));
+
+	LoadHeightmap();
+	Smooth();
+	CalcAllPatchBoundsY();
+
+	BuildQuadPatchVB(_d3dDevice);
+	BuildQuadPatchIB(_d3dDevice);
+	BuildHeightmapSRV(_d3dDevice);
+
+
+	
 }
 
 void Terrain::Update() {
@@ -195,32 +198,19 @@ void Terrain::Update() {
 
 void Terrain::Render(ID3D11DeviceContext* _context, const Camera& _camera, D3DSturcture::DirectionalLight _light) {
 	_context->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_4_CONTROL_POINT_PATCHLIST);
-	_context->OMSetDepthStencilState(NULL, 0);
-	// Set the default shaders and depth/stencil state and layout
-	_context->IASetInputLayout(m_inputLayout);
+	//_context->OMSetDepthStencilState(NULL, 0);
 	_context->VSSetShader(m_vertexShader, NULL, 0);
 	_context->HSSetShader(m_hullShader, NULL, 0);
 	_context->DSSetShader(m_domainShader, NULL, 0);
 	_context->PSSetShader(m_pixelShader, NULL, 0);
-
-	_context->VSSetSamplers(0, 1, &m_heighMapSamplerState);
-	_context->DSSetSamplers(0, 1, &m_heighMapSamplerState);
-
-	_context->PSSetSamplers(0, 1, &m_linerSamplerState);
-	_context->PSSetSamplers(1, 1, &m_heighMapSamplerState);
-
+	_context->IASetInputLayout(m_inputLayout);
 
 	float blendFactor[] = { 0.0f, 0.0f, 0.0f, 0.0f };
 
 	UINT stride = sizeof(VertexT);
 	UINT offset = 0;
-	_context->IASetVertexBuffers(0, 1, &m_quadPatchVertBuffer, &stride, &offset);
 	_context->IASetIndexBuffer(m_quadPatchIndexBuffer, DXGI_FORMAT_R16_UINT, 0);
-
-	XMMATRIX viewProj = XMMatrixTranspose(_camera.GetViewProj());
-	XMMATRIX world = m_world;
-	XMMATRIX worldInvTranspose = D3DUtils::InverseTranspose(m_world);
-	//XMMATRIX worldViewProj = world*viewProj;
+	_context->IASetVertexBuffers(0, 1, &m_quadPatchVertBuffer, &stride, &offset);
 
 	XMFLOAT4 worldPlanes[6];
 	D3DUtils::ExtractFrustumPlanes(worldPlanes, _camera.GetViewProj());
@@ -243,27 +233,42 @@ void Terrain::Render(ID3D11DeviceContext* _context, const Camera& _camera, D3DSt
 	}
 	// set per object const buffer
 	cbPerObj.material = m_material;
-	cbPerObj.ViewProj = _camera.GetViewProj();
-
-
-	_context->UpdateSubresource(m_cbPerObject, 0, NULL, &cbPerObj, 0, 0);
-	_context->VSSetConstantBuffers(0, 1, &m_cbPerObject);
-	_context->HSSetConstantBuffers(0, 1, &m_cbPerObject);
-	_context->DSSetConstantBuffers(0, 1, &m_cbPerObject);	
-	_context->PSSetConstantBuffers(0, 1, &m_cbPerObject);	
+	cbPerObj.ViewProj = XMMatrixTranspose(_camera.GetViewProj());
 
 	_context->UpdateSubresource(m_cbPerFrame, 0, NULL, &cbPerFrame, 0, 0);
-	_context->VSSetConstantBuffers(1, 1, &m_cbPerFrame);
-	_context->HSSetConstantBuffers(1, 1, &m_cbPerFrame);
-	_context->DSSetConstantBuffers(1, 1, &m_cbPerFrame);	
-	_context->PSSetConstantBuffers(1, 1, &m_cbPerFrame);	
+	_context->VSSetConstantBuffers(0, 1, &m_cbPerFrame);
+	_context->HSSetConstantBuffers(0, 1, &m_cbPerFrame);
+	_context->DSSetConstantBuffers(0, 1, &m_cbPerFrame);	
+	_context->PSSetConstantBuffers(0, 1, &m_cbPerFrame);	
 
-	_context->PSSetShaderResources(0, 1, &m_layerMapArraySRV);
-	_context->PSSetShaderResources(1, 1, &m_blendMapSRV);
-	_context->PSSetShaderResources(2, 1, &m_heightMapSRV);
+	_context->UpdateSubresource(m_cbPerObject, 0, NULL, &cbPerObj, 0, 0);
+	_context->VSSetConstantBuffers(1, 1, &m_cbPerObject);
+	_context->HSSetConstantBuffers(1, 1, &m_cbPerObject);
+	_context->DSSetConstantBuffers(1, 1, &m_cbPerObject);	
+	_context->PSSetConstantBuffers(1, 1, &m_cbPerObject);	
 
-
+	_context->VSSetSamplers(0, 1, &m_heighMapSamplerState);
+	_context->DSSetSamplers(0, 1, &m_heighMapSamplerState);
+	_context->PSSetSamplers(0, 1, &m_heighMapSamplerState);
 	
+	_context->VSSetSamplers(1, 1, &m_linerSamplerState);
+	_context->DSSetSamplers(1, 1, &m_linerSamplerState);
+	_context->PSSetSamplers(1, 1, &m_linerSamplerState);
+
+	_context->VSSetShaderResources(0, 1, &m_layerMapArraySRV);
+	_context->HSSetShaderResources(0, 1, &m_layerMapArraySRV);
+	_context->DSSetShaderResources(0, 1, &m_layerMapArraySRV);
+	_context->PSSetShaderResources(0, 1, &m_layerMapArraySRV);
+
+	_context->VSSetShaderResources(1, 1, &m_blendMapSRV);
+	_context->HSSetShaderResources(1, 1, &m_blendMapSRV);
+	_context->DSSetShaderResources(1, 1, &m_blendMapSRV);
+	_context->PSSetShaderResources(1, 1, &m_blendMapSRV);
+
+	_context->VSSetShaderResources(2, 1, &m_heightMapSRV);
+	_context->HSSetShaderResources(2, 1, &m_heightMapSRV);
+	_context->DSSetShaderResources(2, 1, &m_heightMapSRV);
+	_context->PSSetShaderResources(2, 1, &m_heightMapSRV);
 
 	if (m_wireFrameRS) {
 		_context->RSSetState(RenderStates::WireframeRS);

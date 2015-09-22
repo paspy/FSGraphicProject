@@ -53,17 +53,14 @@ public:
 	void Pitch(float angle);
 	void RotateY(float angle);
 
-	// After modifying camera position/orientation, call to rebuild the view matrix.
 	void UpdateViewMatrix();
 
 private:
-	// Camera coordinate system with coordinates relative to world space.
 	XMVECTOR m_position;
 	XMVECTOR m_right;
 	XMVECTOR m_up;
 	XMVECTOR m_look;
 
-	// Cache frustum properties.
 	float m_nearZ;
 	float m_farZ;
 	float m_aspect;
@@ -71,7 +68,6 @@ private:
 	float m_nearWindowHeight;
 	float m_farWindowHeight;
 
-	// Cache View/Proj matrices.
 	XMMATRIX m_view;
 	XMMATRIX m_projection;
 };

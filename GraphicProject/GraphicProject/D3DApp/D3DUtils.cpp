@@ -169,68 +169,43 @@ HRESULT D3DUtils::CreateOptionalShaderFromFile(ID3D11Device * _d3dDevice, const 
 
 void D3DUtils::ExtractFrustumPlanes(XMFLOAT4 planes[6], XMMATRIX M) {
 	// Left
-	//planes[0].x = M(0, 3) + M(0, 0);
-	//planes[0].y = M(1, 3) + M(1, 0);
-	//planes[0].z = M(2, 3) + M(2, 0);
-	//planes[0].w = M(3, 3) + M(3, 0);
 	planes[0].x = M.r[0].m128_f32[3] + M.r[0].m128_f32[0];
 	planes[0].y = M.r[1].m128_f32[3] + M.r[1].m128_f32[0];
 	planes[0].z = M.r[2].m128_f32[3] + M.r[2].m128_f32[0];
 	planes[0].w = M.r[3].m128_f32[3] + M.r[3].m128_f32[0];
 
 	// Right
-	//planes[1].x = M(0, 3) - M(0, 0);
-	//planes[1].y = M(1, 3) - M(1, 0);
-	//planes[1].z = M(2, 3) - M(2, 0);
-	//planes[1].w = M(3, 3) - M(3, 0);
 	planes[1].x = M.r[0].m128_f32[3] - M.r[0].m128_f32[0];
 	planes[1].y = M.r[1].m128_f32[3] - M.r[1].m128_f32[0];
 	planes[1].z = M.r[2].m128_f32[3] - M.r[2].m128_f32[0];
 	planes[1].w = M.r[3].m128_f32[3] - M.r[3].m128_f32[0];
 
 	// Bottom
-	//planes[2].x = M(0, 3) + M(0, 1);
-	//planes[2].y = M(1, 3) + M(1, 1);
-	//planes[2].z = M(2, 3) + M(2, 1);
-	//planes[2].w = M(3, 3) + M(3, 1);
 	planes[2].x = M.r[0].m128_f32[3] + M.r[0].m128_f32[1];
 	planes[2].y = M.r[1].m128_f32[3] + M.r[1].m128_f32[1];
 	planes[2].z = M.r[2].m128_f32[3] + M.r[2].m128_f32[1];
 	planes[2].w = M.r[3].m128_f32[3] + M.r[3].m128_f32[1];
 
 	// Top
-	//planes[3].x = M(0, 3) - M(0, 1);
-	//planes[3].y = M(1, 3) - M(1, 1);
-	//planes[3].z = M(2, 3) - M(2, 1);
-	//planes[3].w = M(3, 3) - M(3, 1);
 	planes[3].x = M.r[0].m128_f32[3] - M.r[0].m128_f32[1];
 	planes[3].y = M.r[1].m128_f32[3] - M.r[1].m128_f32[1];
 	planes[3].z = M.r[2].m128_f32[3] - M.r[2].m128_f32[1];
 	planes[3].w = M.r[3].m128_f32[3] - M.r[3].m128_f32[1];
 
 	// Near
-	//planes[4].x = M(0, 2);
-	//planes[4].y = M(1, 2);
-	//planes[4].z = M(2, 2);
-	//planes[4].w = M(3, 2);
-
 	planes[4].x = M.r[0].m128_f32[2];
 	planes[4].y = M.r[1].m128_f32[2];
 	planes[4].z = M.r[2].m128_f32[2];
 	planes[4].w = M.r[3].m128_f32[2];
 
 	// Far
-	//planes[5].x = M(0, 3) - M(0, 2);
-	//planes[5].y = M(1, 3) - M(1, 2);
-	//planes[5].z = M(2, 3) - M(2, 2);
-	//planes[5].w = M(3, 3) - M(3, 2);
 	planes[5].x = M.r[0].m128_f32[3] - M.r[0].m128_f32[2];
 	planes[5].y = M.r[1].m128_f32[3] - M.r[1].m128_f32[2];
 	planes[5].z = M.r[2].m128_f32[3] - M.r[2].m128_f32[2];
 	planes[5].w = M.r[3].m128_f32[3] - M.r[3].m128_f32[2];
 
 	// Normalize the plane equations.
-	for (int i = 0; i < 6; ++i) {
+	for ( int i = 0; i < 6; ++i ) {
 		XMVECTOR v = XMPlaneNormalize(XMLoadFloat4(&planes[i]));
 		XMStoreFloat4(&planes[i], v);
 	}
@@ -247,7 +222,7 @@ ID3D11ShaderResourceView * D3DUtils::CreateTexture2DArraySRV(
 	for (UINT i = 0; i < size; ++i) {
 		//HR(CreateDDSTextureFromFile(device, filenames[i].c_str(), (ID3D11Resource**)&srcTex[i], NULL));
 		CreateDDSTextureFromFileEx(
-			device, context, filenames[i].c_str(), NULL, D3D11_USAGE_STAGING, 0, D3D11_CPU_ACCESS_WRITE | D3D11_CPU_ACCESS_READ, 0, false, (ID3D11Resource**)&srcTex[i], NULL);
+			device, context, filenames[i].c_str(), NULL, D3D11_USAGE_STAGING, 0, D3D11_CPU_ACCESS_READ, 0, false, (ID3D11Resource**)&srcTex[i], NULL);
 	}
 
 	D3D11_TEXTURE2D_DESC texElementDesc;

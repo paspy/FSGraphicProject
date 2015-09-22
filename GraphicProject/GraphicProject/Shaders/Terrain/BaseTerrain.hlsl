@@ -1,6 +1,6 @@
 #include <DirLight.hlsl>
 
-cbuffer cbPerFrame {
+cbuffer cbPerFrame : register(b0) {
 	DirectionalLight gDirLights;
 	float3 gCameraPosW;
 
@@ -22,7 +22,7 @@ cbuffer cbPerFrame {
 	float4 gWorldFrustumPlanes[6];
 };
 
-cbuffer cbPerObject {
+cbuffer cbPerObject : register(b1) {
 	// Terrain coordinate specified directly 
 	// at center of world space.
 
@@ -31,12 +31,12 @@ cbuffer cbPerObject {
 };
 
 // Nonnumeric values cannot be added to a cbuffer.
-Texture2DArray gLayerMapArray;
-Texture2D gBlendMap;
-Texture2D gHeightMap;
+Texture2DArray gLayerMapArray : register(t0);
+Texture2D gBlendMap: register(t1);
+Texture2D gHeightMap: register(t2);
 
-SamplerState LinearSamplerState;
-SamplerState HeightmapSamplerState;
+SamplerState LinearSamplerState: register(s0);
+SamplerState HeightmapSamplerState: register(s1);
 
 struct VS_INPUT {
 	float3 PositionL : POSITION;
@@ -73,11 +73,11 @@ float CalcTessFactor(float3 p) {
 	float d = distance(p, gCameraPosW);
 
 	// max norm in xz plane (useful to see detail levels from a bird's eye).
-	//float d = max( abs(p.x-gCameraPosW.x), abs(p.z-gCameraPosW.z) );
+	//d = max( abs(p.x-gCameraPosW.x), abs(p.z-gCameraPosW.z) );
 
 	float s = saturate((d - gMinDist) / (gMaxDist - gMinDist));
 
-	return pow(2, (lerp(gMaxTess, gMinTess, s)));
+	return (pow(2, (lerp(gMaxTess, gMinTess, s))));
 }
 
 // Returns true if the box is completely behind (in negative half space) of plane.
@@ -93,7 +93,7 @@ bool AabbBehindPlaneTest(float3 center, float3 extents, float4 plane) {
 	// If the center point of the box is a distance of e or more behind the
 	// plane (in which case s is negative since it is behind the plane),
 	// then the box is completely in the negative half space of the plane.
-	return (s + r) < 0.0f;
+	return ((s + r) < 0.0f);
 }
 
 // Returns true if the box is completely outside the frustum.
@@ -238,7 +238,7 @@ DS_OUTPUT DSMain(PatchTess patchTess, float2 uv : SV_DomainLocation, const Outpu
 
 
 // Pixel Shader Entry Point
-float4 PSMain(DS_OUTPUT psInput/*, uniform int gLightCount, uniform bool gFogEnabled*/) : SV_Target {
+float4 PSMain(DS_OUTPUT psInput) : SV_Target {
 	//
 	// Estimate normal and tangent using central differences.
 	//
@@ -256,19 +256,16 @@ float4 PSMain(DS_OUTPUT psInput/*, uniform int gLightCount, uniform bool gFogEna
 	float3 biTangent = normalize(float3(0.0f, bottomY - topY, -2.0f*gWorldCellSpace));
 	float3 normalW = cross(tangent, biTangent);
 
-
 	// The toCamera vector is used in lighting.
 	float3 toCamera = gCameraPosW - psInput.PositionW;
 
 	// Cache the distance to the eye from this surface point.
-	float distToEye = length(toCamera);
+	float distToCam = length(toCamera);
 
 	// Normalize.
-	toCamera /= distToEye;
+	toCamera /= distToCam;
 
-	//
 	// Texturing
-	//
 
 	// Sample layers in texture array.
 	float4 c0 = gLayerMapArray.Sample(LinearSamplerState, float3(psInput.TiledTex, 0.0f));
@@ -303,7 +300,7 @@ float4 PSMain(DS_OUTPUT psInput/*, uniform int gLightCount, uniform bool gFogEna
 
 	litColor = texColor*(ambient + diffuse) + specular;
 
-	return litColor;
+	return texColor;
 
 
 }

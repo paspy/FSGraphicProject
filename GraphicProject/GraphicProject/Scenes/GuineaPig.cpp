@@ -48,9 +48,9 @@ void GuineaPig::BuildGeometry() {
 	//m_terrain.Init(m_d3dDevice, L"Shaders/Base/Base.hlsl");
 	//m_wave.Init(m_d3dDevice, L"Shaders/Base/Base.hlsl");
 
-	m_geoMesh.Init(m_d3dDevice, L"Shaders/Base/InstancedBase.hlsl", GeoMesh::GeoType::Box, L"Resources/Textures/WireFence_diffuse.dds", L"Resources/Textures/WireFence_normal.dds");
+	//m_geoMesh.Init(m_d3dDevice, L"Shaders/Base/InstancedBase.hlsl", GeoMesh::GeoType::Box, L"Resources/Textures/WireFence_diffuse.dds", L"Resources/Textures/WireFence_normal.dds");
 
-	m_mirrorMesh.Init(m_d3dDevice, L"Shaders/Base/Base.hlsl");
+	//m_mirrorMesh.Init(m_d3dDevice, L"Shaders/Base/Base.hlsl");
 
 	//m_quadMesh.Init(m_d3dDevice, L"Shaders/Base/InstancedBase.hlsl", GeoMesh::GeoType::Grid, L"Resources/Textures/WireFence_diffuse.dds", L"Resources/Textures/WireFence_normal.dds");
 
@@ -148,7 +148,7 @@ void GuineaPig::UpdateScene(double _dt) {
 	//m_wave.Update(_dt, m_timer.TotalTime(), m_d3dImmediateContext);
 	//m_geoMesh.Update(m_d3dImmediateContext, m_camera);
 
-	m_mirrorMesh.Update();
+	//m_mirrorMesh.Update();
 
 	m_heighMapTerrain.Update();
 }
@@ -187,12 +187,11 @@ void GuineaPig::DrawScene() {
 
 	// Skybox
 	m_skyBox.Render(m_d3dImmediateContext, m_camera, RenderStates::NoCullRS);
-	m_barrel.Render	(m_d3dImmediateContext, m_camera, RenderStates::NoCullRS);
+	//m_barrel.Render	(m_d3dImmediateContext, m_camera, RenderStates::NoCullRS);
 
 	m_heighMapTerrain.Render(m_d3dImmediateContext, m_camera, m_directionalLight);
 	// obj meshs
 	//m_terrain.Render(m_d3dImmediateContext, m_camera, 0);
-
 
 	//m_wave.Render(m_d3dImmediateContext, m_camera, 0, RenderStates::TransparentBSbyColor, blendFactor1);
 	
@@ -228,9 +227,10 @@ void GuineaPig::UpdateKeyboardInput(double _dt) {
 	if (GetAsyncKeyState('M') & 0x8000) m_camWalkMode = !m_camWalkMode;
 
 	if (m_camWalkMode) {
-		//XMFLOAT3 camPos = m_camera.GetPosition();
-		//float y = mTerrain.GetHeight(camPos.x, camPos.z);
-		//mCam.SetPosition(camPos.x, y + 2.0f, camPos.z);
+		XMFLOAT4 camPos;
+		XMStoreFloat4(&camPos, m_camera.GetPosition());
+		float y = m_heighMapTerrain.GetHeight(camPos.x, camPos.z);
+		m_camera.SetPosition(camPos.x, y + 2.0f, camPos.z, camPos.w);
 	}
 	m_camera.UpdateViewMatrix();
 }
