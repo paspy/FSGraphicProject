@@ -178,7 +178,7 @@ HRESULT D3DUtils::CreateOptionalShaderFromFile(
 	return hr;
 }
 
-HRESULT D3DUtils::CreateOptionalShaderFromFile(ID3D11Device * _d3dDevice, const LPCWSTR _compFileName, ID3D11ComputeShader ** _compShader) {
+HRESULT D3DUtils::CreateOptionalShaderFromFile(ID3D11Device * _d3dDevice, const LPCWSTR _compFileName, ID3D11ComputeShader ** _compShader, LPCSTR _entryPoint) {
 	HRESULT hr = E_NOTIMPL;
 
 	ID3DBlob* compShaderBlob = nullptr;
@@ -189,7 +189,7 @@ HRESULT D3DUtils::CreateOptionalShaderFromFile(ID3D11Device * _d3dDevice, const 
 	flags |= D3DCOMPILE_DEBUG;
 #endif
 
-	hr = D3DCompileFromFile(_compFileName, NULL, D3D_COMPILE_STANDARD_FILE_INCLUDE, "CSMain", "cs_5_0", flags, 0, &compShaderBlob, &errorBlob);
+	hr = D3DCompileFromFile(_compFileName, NULL, D3D_COMPILE_STANDARD_FILE_INCLUDE, _entryPoint, "cs_5_0", flags, 0, &compShaderBlob, &errorBlob);
 	if ( FAILED(hr) ) {
 		if ( errorBlob ) {
 			string err = (char*)errorBlob->GetBufferPointer();

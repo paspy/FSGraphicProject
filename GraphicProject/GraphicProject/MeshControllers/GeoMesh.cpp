@@ -129,11 +129,11 @@ void GeoMesh::BuildBuffer(ID3D11Device * _d3dDevice, GeoType _genType) {
 void GeoMesh::BuildInstancedBuffer(ID3D11Device * _d3dDevice) {
 
 	InstancedData tmp;
-	DirectX::XMStoreFloat4x4(&tmp.World, XMMatrixScaling(3.0f, 3.0f, 3.0f) * XMMatrixTranslation(40, 20, 100));
+	DirectX::XMStoreFloat4x4(&tmp.World, XMMatrixScaling(3.0f, 3.0f, 3.0f) * XMMatrixTranslation(95, 5, 40));
 	instancedData.push_back(tmp);
-	DirectX::XMStoreFloat4x4(&tmp.World, XMMatrixScaling(3.0f, 3.0f, 3.0f) * XMMatrixTranslation(45, 20, 100));
+	DirectX::XMStoreFloat4x4(&tmp.World, XMMatrixScaling(3.0f, 3.0f, 3.0f) * XMMatrixTranslation(100, 5, 40));
 	instancedData.push_back(tmp);
-	DirectX::XMStoreFloat4x4(&tmp.World, XMMatrixScaling(3.0f, 3.0f, 3.0f) * XMMatrixTranslation(50, 20, 100));
+	DirectX::XMStoreFloat4x4(&tmp.World, XMMatrixScaling(3.0f, 3.0f, 3.0f) * XMMatrixTranslation(105, 5, 40));
 	instancedData.push_back(tmp);
 
 	D3D11_BUFFER_DESC vbd;

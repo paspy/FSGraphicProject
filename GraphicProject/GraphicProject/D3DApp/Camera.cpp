@@ -1,7 +1,7 @@
 #include "Camera.h"
 
 Camera::Camera() : 
-	m_position(XMVectorSet(40.0f, 5.0f, 100.0f, 1.0f)),
+	m_position(XMVectorSet(100.0f, 5.0f, 10.0f, 1.0f)),
 	m_right(XMVectorSet(1.0f, 0.0f, 0.0f, 0.0f)),
 	m_up(XMVectorSet(0.0f, 1.0f, 0.0f, 0.0f)),
 	m_look(XMVectorSet(0.0f, 0.0f, 1.0f, 1.0f))

@@ -45,6 +45,9 @@
     <Filter Include="Source Files\Scenes\Shaders\Particle">
       <UniqueIdentifier>{aaa745e6-e6dd-4136-a740-ba09edf633fb}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Source Files\Scenes\Shaders\PostFilter">
+      <UniqueIdentifier>{7243d6d5-9eb7-4fd4-89ae-b5c8554855d1}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Main.cpp">
@@ -102,6 +105,9 @@
       <Filter>D3DApp\D3DHelper</Filter>
     </ClCompile>
     <ClCompile Include="D3DApp\ParticleSystem.cpp">
+      <Filter>D3DApp\D3DHelper</Filter>
+    </ClCompile>
+    <ClCompile Include="D3DApp\BlurFilter.cpp">
       <Filter>D3DApp\D3DHelper</Filter>
     </ClCompile>
   </ItemGroup>
@@ -166,6 +172,9 @@
     <ClInclude Include="D3DApp\ParticleSystem.h">
       <Filter>D3DApp\D3DHelper</Filter>
     </ClInclude>
+    <ClInclude Include="D3DApp\BlurFilter.h">
+      <Filter>D3DApp\D3DHelper</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="Shaders\Base\Base.hlsl">
@@ -191,6 +200,9 @@
     </None>
     <None Include="Shaders\Particle\BaseFire.hlsl">
       <Filter>Source Files\Scenes\Shaders\Particle</Filter>
+    </None>
+    <None Include="Shaders\PostFilter\Blur.hlsl">
+      <Filter>Source Files\Scenes\Shaders\PostFilter</Filter>
     </None>
   </ItemGroup>
 </Project>

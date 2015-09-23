@@ -94,5 +94,6 @@ public:
 	static HRESULT CreateOptionalShaderFromFile(
 		ID3D11Device *_d3dDevice,
 		const LPCWSTR _compFileName,
-		ID3D11ComputeShader **_compShader);
+		ID3D11ComputeShader **_compShader,
+		LPCSTR _entryPoint = "CSMain");
 };

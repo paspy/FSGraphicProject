@@ -129,13 +129,6 @@ void GuineaPig::UpdateScene(double _dt) {
 	// Update objects
 	XMMATRIX Rotation, Scale, Translation;
 
-	// m_geoMesh update
-	m_geoMesh.worldMat = XMMatrixIdentity();
-	Rotation = XMMatrixRotationY(0);
-	Scale = XMMatrixScaling(5.0f, 5.0f, 5.0f);
-	Translation = XMMatrixTranslation(0.0f, 20.0f, 0.0f);
-	m_geoMesh.worldMat = Rotation * Scale * Translation;
-
 	// terrain update
 	m_terrain.worldMat = XMMatrixIdentity();
 	Rotation = XMMatrixRotationY(0);
@@ -196,14 +189,14 @@ void GuineaPig::DrawScene() {
 	// obj meshs
 	//m_terrain.Render(m_d3dImmediateContext, m_camera, 0);
 
-	//m_mirrorMesh.Render(m_d3dImmediateContext, m_camera, NULL);
 	//m_wave.Render(m_d3dImmediateContext, m_camera, 0, RenderStates::TransparentBSbyColor, blendFactor1);
-	//m_geoMesh.Render(m_d3dImmediateContext, m_camera, RenderStates::TransparentBSbyColor, blendFactor1);
+	m_geoMesh.Render(m_d3dImmediateContext, m_camera, RenderStates::TransparentBSbyColor, blendFactor1);
+	m_mirrorMesh.Render(m_d3dImmediateContext, m_camera, NULL);
 
 	m_rain.SetEmitPos(XMFLOAT3(curCamPos.x, curCamPos.y, curCamPos.z));
 	m_rain.Render(m_d3dImmediateContext, m_camera);
 
-	m_fire.SetEmitPos(XMFLOAT3(40.0f, 0.5f, 100.0f));
+	m_fire.SetEmitPos(XMFLOAT3(100.0f, 0.5f, 40.0f));
 	m_fire.Render(m_d3dImmediateContext, m_camera, RenderStates::AdditiveBlending, blendFactor1);
 
 	//Set the default blend state (no blending) for opaque objects

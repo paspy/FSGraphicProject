@@ -166,8 +166,8 @@ void MirrorMesh::BuildBuffer(ID3D11Device * _d3dDevice) {
 }
 
 void MirrorMesh::Update() {
-	worldMat = XMMatrixRotationY(0) * XMMatrixScaling(2.5f, 2.5f, 2.5f) * XMMatrixTranslation(0.0f, -15.0f, -10.0f);
-	wallFloorMat = XMMatrixRotationY(0) * XMMatrixScaling(2.0f, 2.0f,2.0f) * XMMatrixTranslation(0.0f, -20.0f, 0.0f);
+	worldMat = XMMatrixRotationY(0) * XMMatrixScaling(2.5f, 2.5f, 2.5f)	*	     XMMatrixTranslation(80.0f, 5.0f, 10.0f);
+	wallFloorMat = XMMatrixRotationY(XM_PI) * XMMatrixScaling(2.0f, 2.0f,2.0f) * XMMatrixTranslation(80.0f, 0.0f, 0.0f);
 }
 
 void MirrorMesh::Render(ID3D11DeviceContext * _context, const Camera &_camera, ID3D11RasterizerState *_rs) {
