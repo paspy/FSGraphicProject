@@ -1,58 +1,29 @@
-
-cbuffer cbPerFrame : register(b0) {
-	float3 gCameraPosW;
+cbuffer cbPerFrame: register(b0) {
+	float4 gCameraPosW;
 
 	// for when the emit position/direction is varying
-	float3 gEmitPosW;
-	float3 gEmitDirW;
+	float4 gEmitPosW;
+	float4 gEmitDirW;
 
 	float gGameTime;
 	float gTimeStep;
+	float Pad1;
+	float Pad2;
+
 	float4x4 gViewProj;
 };
 
-cbuffer cbFixed {
-	// Net constant acceleration used to accerlate the particles.
-	float3 gAccelW = { -1.0f, -9.8f, 0.0f };
-};
-
 // Array of textures for texturing the particles.
-Texture2DArray gTexArray;
+Texture2DArray gTexArray: register(t0);
 
 // Random texture used to generate random numbers in shaders.
-Texture1D gRandomTex;
+Texture1D gRandomTex: register(t1);
 
-SamplerState LinearSamplerState : register(s0) {
-	Filter = MIN_MAG_MIP_LINEAR;
-	AddressU = WRAP;
-	AddressV = WRAP;
-};
-
-DepthStencilState DisableDepth {
-	DepthEnable = FALSE;
-	DepthWriteMask = ZERO;
-};
-
-DepthStencilState NoDepthWrites {
-	DepthEnable = TRUE;
-	DepthWriteMask = ZERO;
-};
-
+SamplerState LinearSamplerState: register(s0);
 
 //***********************************************
 // HELPER FUNCTIONS                             *
 //***********************************************
-float3 RandUnitVec3(float offset) {
-	// Use game time plus offset to sample random texture.
-	float u = (gGameTime + offset);
-
-	// coordinates in [-1,1]
-	float3 v = gRandomTex.SampleLevel(LinearSamplerState, u, 0).xyz;
-
-	// project onto unit sphere
-	return normalize(v);
-}
-
 float3 RandVec3(float offset) {
 	// Use game time plus offset to sample random texture.
 	float u = (gGameTime + offset);
@@ -127,11 +98,12 @@ struct VS_OUTPUT {
 
 VS_OUTPUT VSMain(Particle vsInput) {
 	VS_OUTPUT vsOutput;
+	float3 accelW = { -1.0f, -9.8f, 0.0f };
 
 	float t = vsInput.Age;
 
 	// constant acceleration equation
-	vsOutput.PositionW = 0.5f*t*t*gAccelW + t*vsInput.InitialVelW + vsInput.InitialPosW;
+	vsOutput.PositionW = 0.5f*t*t*accelW + t*vsInput.InitialVelW + vsInput.InitialPosW;
 
 	vsOutput.Type = vsInput.Type;
 
@@ -146,11 +118,12 @@ struct GS_OUTPUT {
 // The draw GS just expands points into lines.
 [maxvertexcount(2)]
 void GSMain(point VS_OUTPUT gsInput[1], inout LineStream<GS_OUTPUT> lineStream) {
+	float3 accelW = { -1.0f, -9.8f, 0.0f };
 	// do not draw emitter particles.
 	if (gsInput[0].Type != PT_EMITTER) {
 		// Slant line in acceleration direction.
 		float3 p0 = gsInput[0].PositionW;
-		float3 p1 = gsInput[0].PositionW + 0.07f*gAccelW;
+		float3 p1 = gsInput[0].PositionW + 0.07f*accelW;
 
 		GS_OUTPUT v0;
 		v0.PositionH = mul(float4(p0, 1.0f), gViewProj);

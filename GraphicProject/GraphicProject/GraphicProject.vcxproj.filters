@@ -189,5 +189,8 @@
     <None Include="Shaders\Skybox\Skybox.hlsl">
       <Filter>Source Files\Scenes\Shaders\Skybox</Filter>
     </None>
+    <None Include="Shaders\Particle\BaseFire.hlsl">
+      <Filter>Source Files\Scenes\Shaders\Particle</Filter>
+    </None>
   </ItemGroup>
 </Project>

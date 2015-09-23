@@ -50,12 +50,14 @@ public:
 
 	static void ExtractFrustumPlanes(XMFLOAT4 planes[6], XMMATRIX M);
 
+	static ID3D11ShaderResourceView* CreateRandomTexture1DSRV(ID3D11Device* _d3dDevice);
 	static ID3D11ShaderResourceView* CreateTexture2DArraySRV(
-		ID3D11Device* device,
+		ID3D11Device* _d3dDevice,
 		ID3D11DeviceContext* context,
 		vector<wstring>& filenames);
 
-	static vector<ID3D11ShaderResourceView*> CreateTexture2DArraySRV(ID3D11Device * device, vector<wstring>& filenames);
+	static vector<ID3D11ShaderResourceView*> CreateTexture2DArraySRV(ID3D11Device * _d3dDevice, vector<wstring>& filenames);
+
 
 	static bool CreateModelFromObjFileKaiNi(
 		ID3D11Device *_d3dDevice,
@@ -85,8 +87,9 @@ public:
 		ID3D11Device *_d3dDevice,
 		const LPCWSTR _geoFileName,
 		ID3D11GeometryShader **_geoShader,
-		bool _streamOut,
-		ID3D11VertexShader **_streamOutVS);
+		bool _streamOut = false,
+		ID3D11VertexShader **_streamOutVS = nullptr,
+		D3D11_SO_DECLARATION_ENTRY *_streamOutDecl = nullptr);
 
 	static HRESULT CreateOptionalShaderFromFile(
 		ID3D11Device *_d3dDevice,

@@ -17,6 +17,7 @@ public:
 	};
 
 	struct cbPerFrameT {
+		cbPerFrameT() { ZeroMemory(this, sizeof(this)); }
 		DirectionalLight DirLight; // 64 bytes
 		XMFLOAT4 CameraPos; 
 
@@ -28,7 +29,7 @@ public:
 		float TexelCellSpaceU;
 		float TexelCellSpaceV;
 		float WorldCellSpace;
-		float Pad = 0;
+		float Pad;
 
 		XMFLOAT4 WorldFrustumPlanes[6];
 

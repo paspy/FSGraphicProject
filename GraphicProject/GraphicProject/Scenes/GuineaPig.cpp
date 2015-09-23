@@ -54,8 +54,15 @@ void GuineaPig::BuildGeometry() {
 	//m_quadMesh.Init(m_d3dDevice, L"Shaders/Base/InstancedBase.hlsl", GeoMesh::GeoType::Grid, L"Resources/Textures/WireFence_diffuse.dds", L"Resources/Textures/WireFence_normal.dds");
 
 	m_heighMapTerrain.Init(m_d3dDevice, m_d3dImmediateContext);
-	
-	D3DUtils::CreateModelFromObjFileKaiNi(NULL, NULL, "Resources/Models/barrel.obj", NULL, NULL);
+
+
+	vector<wstring> raindrops;
+	raindrops.push_back(L"Resources/Particles/raindrop.dds");
+	m_rain.Init(m_d3dDevice, m_d3dImmediateContext, 10000, L"Shaders/Particle/BaseRain.hlsl", raindrops);
+
+	vector<wstring> fiare;
+	fiare.push_back(L"Resources/Particles/flare.dds");
+	m_fire.Init(m_d3dDevice, m_d3dImmediateContext, 500, L"Shaders/Particle/BaseFire.hlsl", fiare);
 }
 
 void GuineaPig::BuildLighting() {
@@ -143,6 +150,10 @@ void GuineaPig::UpdateScene(double _dt) {
 	m_mirrorMesh.Update();
 
 	m_heighMapTerrain.Update();
+
+	m_rain.Update((float)_dt, (float)m_timer.TotalTime());
+	m_fire.Update((float)_dt, (float)m_timer.TotalTime());
+
 }
 
 void GuineaPig::DrawScene() {
@@ -189,6 +200,11 @@ void GuineaPig::DrawScene() {
 	//m_wave.Render(m_d3dImmediateContext, m_camera, 0, RenderStates::TransparentBSbyColor, blendFactor1);
 	//m_geoMesh.Render(m_d3dImmediateContext, m_camera, RenderStates::TransparentBSbyColor, blendFactor1);
 
+	m_rain.SetEmitPos(XMFLOAT3(curCamPos.x, curCamPos.y, curCamPos.z));
+	m_rain.Render(m_d3dImmediateContext, m_camera);
+
+	m_fire.SetEmitPos(XMFLOAT3(40.0f, 0.5f, 100.0f));
+	m_fire.Render(m_d3dImmediateContext, m_camera, RenderStates::AdditiveBlending, blendFactor1);
 
 	//Set the default blend state (no blending) for opaque objects
 

@@ -1,5 +1,6 @@
 #pragma once
 #include "../D3DApp/D3DApp.h"
+#include "../D3DApp/ParticleSystem.h"
 
 #include "../MeshControllers/ObjMesh.h"
 #include "../MeshControllers/Skybox.h"
@@ -50,6 +51,10 @@ private:
 
 	cbPerFrame			m_cbPerFrame;
 	ID3D11Buffer		*m_cbPerFrameBuffer = nullptr;
+
+	// Particle
+	ParticleSystem		m_rain;
+	ParticleSystem		m_fire;
 
 	// camera setting
 	bool				m_camWalkMode;

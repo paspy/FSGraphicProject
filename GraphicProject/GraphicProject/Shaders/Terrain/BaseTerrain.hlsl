@@ -75,6 +75,9 @@ VS_OUTPUT VSMain(VS_INPUT vsInput) {
 	return vsOutput;
 }
 
+//***********************************************
+// HELPER FUNCTIONS                             *
+//***********************************************
 float CalcTessFactor(float3 p) {
 	float d = distance(p, gCameraPosW.xyz);
 	float s = saturate((d - gMinDist) / (gMaxDist - gMinDist));

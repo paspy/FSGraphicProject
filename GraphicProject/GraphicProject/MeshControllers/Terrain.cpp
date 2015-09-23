@@ -208,8 +208,6 @@ void Terrain::Render(ID3D11DeviceContext* _context, const Camera& _camera, D3DSt
 	_context->PSSetShader(m_pixelShader, NULL, 0);
 	_context->IASetInputLayout(m_inputLayout);
 
-	float blendFactor[] = { 0.0f, 0.0f, 0.0f, 0.0f };
-
 	UINT stride = sizeof(VertexT);
 	UINT offset = 0;
 	_context->IASetIndexBuffer(m_quadPatchIndexBuffer, DXGI_FORMAT_R16_UINT, 0);
@@ -223,8 +221,8 @@ void Terrain::Render(ID3D11DeviceContext* _context, const Camera& _camera, D3DSt
 	XMStoreFloat4(&curCamPos, _camera.GetPosition());
 	cbPerFrame.CameraPos = curCamPos;
 	cbPerFrame.DirLight = _light;
-	cbPerFrame.MinDist = 25.0f;
-	cbPerFrame.MaxDist = 1000.0f;
+	cbPerFrame.MinDist = 20.0f;
+	cbPerFrame.MaxDist = 500.0f;
 	cbPerFrame.MinTess = 0.0f;
 	cbPerFrame.MaxTess = 6.0f;
 	cbPerFrame.TexelCellSpaceU = 1.0f / m_info.HeightmapWidth;
