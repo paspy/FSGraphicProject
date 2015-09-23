@@ -6,6 +6,18 @@ class Camera;
 class ParticleSystem {
 public:
 
+	struct cbPerFrameP {
+		XMFLOAT4 CameraPos;
+
+		XMFLOAT4 EmitPositon;
+		XMFLOAT4 EmitDirection;
+
+		float GameTime;
+		float TimeStep;
+		XMMATRIX ViewProj;
+
+	};
+
 	struct Particle {
 		XMFLOAT3 InitialPos;
 		XMFLOAT3 InitialVel;
@@ -37,6 +49,12 @@ private:
 	ParticleSystem& operator=(const ParticleSystem& rhs);
 
 private:
+	ID3D11VertexShader			*m_streamOutVS;
+	ID3D11GeometryShader		*m_streamOutGS;
+
+	ID3D11VertexShader			*m_vertexShader;
+	ID3D11PixelShader			*m_pixelShader;
+	ID3D11GeometryShader		*m_geoShader;
 
 	UINT m_maxParticles;
 	bool m_firstRun;

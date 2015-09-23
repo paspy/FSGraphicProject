@@ -2,6 +2,7 @@
 #include "../D3DApp/Defines.h"
 #include "../D3DApp/D3DSturcture.h"
 
+using namespace D3DSturcture;
 
 class Camera;
 
@@ -16,18 +17,18 @@ public:
 	};
 
 	struct cbPerFrameT {
-		D3DSturcture::DirectionalLight DirLight;
-		XMFLOAT4 CameraPos;
+		DirectionalLight DirLight; // 64 bytes
+		XMFLOAT4 CameraPos; 
 
 		float MinDist;
 		float MaxDist;
 		float MinTess;
 		float MaxTess;
+
 		float TexelCellSpaceU;
 		float TexelCellSpaceV;
-
 		float WorldCellSpace;
-		float __pad;
+		float Pad = 0;
 
 		XMFLOAT4 WorldFrustumPlanes[6];
 

@@ -107,10 +107,16 @@ HRESULT D3DUtils::CreateOptionalShaderFromFile(ID3D11Device * _d3dDevice, const 
 	return hr;
 }
 
-HRESULT D3DUtils::CreateOptionalShaderFromFile(ID3D11Device * _d3dDevice, const LPCWSTR _geoFileName, ID3D11GeometryShader ** _geoShader) {
+HRESULT D3DUtils::CreateOptionalShaderFromFile(
+	ID3D11Device * _d3dDevice, 
+	const LPCWSTR _geoFileName,
+	ID3D11GeometryShader ** _geoShader, 
+	bool _streamOut = false, ID3D11VertexShader **_streamOutVS = nullptr) {
+
 	HRESULT hr = E_NOTIMPL;
 
 	ID3DBlob* geoShaderBlob = nullptr;
+	ID3DBlob* steamOutVSBlob = nullptr;
 	ID3DBlob* errorBlob = nullptr;
 	
 	UINT flags = D3DCOMPILE_ENABLE_STRICTNESS;
@@ -118,22 +124,52 @@ HRESULT D3DUtils::CreateOptionalShaderFromFile(ID3D11Device * _d3dDevice, const 
 	flags |= D3DCOMPILE_DEBUG;
 #endif
 
-	hr = D3DCompileFromFile(_geoFileName, NULL, D3D_COMPILE_STANDARD_FILE_INCLUDE, "GSMain", "gs_5_0", flags, 0, &geoShaderBlob, &errorBlob);
-	if ( FAILED(hr) ) {
-		if ( errorBlob ) {
-			string err = (char*)errorBlob->GetBufferPointer();
-			wstring werr(err.begin(), err.end());
-			MessageBox(0, werr.c_str(), L"Error", MB_OK);
-			SafeRelease(errorBlob);
+	if (!_streamOut) {
+		hr = D3DCompileFromFile(_geoFileName, NULL, D3D_COMPILE_STANDARD_FILE_INCLUDE, "GSMain", "gs_5_0", flags, 0, &geoShaderBlob, &errorBlob);
+		if (FAILED(hr)) {
+			if (errorBlob) {
+				string err = (char*)errorBlob->GetBufferPointer();
+				wstring werr(err.begin(), err.end());
+				MessageBox(0, werr.c_str(), L"Error", MB_OK);
+				SafeRelease(errorBlob);
+			}
+
+			SafeRelease(geoShaderBlob);
+			return hr;
+		}
+		// create geometry shader
+		HR(_d3dDevice->CreateGeometryShader(geoShaderBlob->GetBufferPointer(), geoShaderBlob->GetBufferSize(), NULL, _geoShader));
+	} else {
+		hr = D3DCompileFromFile(_geoFileName, NULL, D3D_COMPILE_STANDARD_FILE_INCLUDE, "StreamOutVS", "vs_5_0", flags, 0, &steamOutVSBlob, &errorBlob);
+
+		if (FAILED(hr)) {
+			if (errorBlob) {
+				string err = (char*)errorBlob->GetBufferPointer();
+				wstring werr(err.begin(), err.end());
+				MessageBox(0, werr.c_str(), L"Error", MB_OK);
+				SafeRelease(errorBlob);
+			}
+
+			SafeRelease(steamOutVSBlob);
+			return hr;
 		}
 
-		SafeRelease(geoShaderBlob);
-		return hr;
+		hr = D3DCompileFromFile(_geoFileName, NULL, D3D_COMPILE_STANDARD_FILE_INCLUDE, "StreamOutGS", "gs_5_0", flags, 0, &geoShaderBlob, &errorBlob);
+		if (FAILED(hr)) {
+			if (errorBlob) {
+				string err = (char*)errorBlob->GetBufferPointer();
+				wstring werr(err.begin(), err.end());
+				MessageBox(0, werr.c_str(), L"Error", MB_OK);
+				SafeRelease(errorBlob);
+			}
+
+			SafeRelease(geoShaderBlob);
+			return hr;
+		}
+		HR(_d3dDevice->CreateVertexShader(steamOutVSBlob->GetBufferPointer(), steamOutVSBlob->GetBufferSize(), NULL, _streamOutVS));
+		HR(_d3dDevice->CreateGeometryShader(geoShaderBlob->GetBufferPointer(), geoShaderBlob->GetBufferSize(), NULL, _geoShader));
 	}
-
-	// create geometry shader
-	HR(_d3dDevice->CreateGeometryShader(geoShaderBlob->GetBufferPointer(), geoShaderBlob->GetBufferSize(), NULL, _geoShader));
-
+	
 	return hr;
 }
 

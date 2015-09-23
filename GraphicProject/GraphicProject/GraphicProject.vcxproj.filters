@@ -168,11 +168,6 @@
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <FxCompile Include="Shaders\Skybox\Skybox.hlsl">
-      <Filter>Source Files\Scenes\Shaders\Skybox</Filter>
-    </FxCompile>
-  </ItemGroup>
-  <ItemGroup>
     <None Include="Shaders\Base\Base.hlsl">
       <Filter>Source Files\Scenes\Shaders\Base</Filter>
     </None>
@@ -182,14 +177,17 @@
     <None Include="Shaders\Base\Lighting.hlsl">
       <Filter>Source Files\Scenes\Shaders\Base</Filter>
     </None>
-    <None Include="Shaders\Particle\ParticleBase.hlsl">
-      <Filter>Source Files\Scenes\Shaders\Particle</Filter>
-    </None>
     <None Include="Shaders\Terrain\BaseTerrain.hlsl">
       <Filter>Source Files\Scenes\Shaders\Terrain</Filter>
     </None>
     <None Include="Shaders\Terrain\DirLight.hlsl">
       <Filter>Source Files\Scenes\Shaders\Terrain</Filter>
+    </None>
+    <None Include="Shaders\Particle\BaseRain.hlsl">
+      <Filter>Source Files\Scenes\Shaders\Particle</Filter>
+    </None>
+    <None Include="Shaders\Skybox\Skybox.hlsl">
+      <Filter>Source Files\Scenes\Shaders\Skybox</Filter>
     </None>
   </ItemGroup>
 </Project>

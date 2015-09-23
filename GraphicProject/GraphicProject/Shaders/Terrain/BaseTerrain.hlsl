@@ -1,24 +1,25 @@
 #include <DirLight.hlsl>
 
 cbuffer cbPerFrame : register(b0) {
-	DirectionalLight gDirLights;
-	float3 gCameraPosW;
+	DirectionalLight gDirLights; //64 
 
+	float4 gCameraPosW; // 16 
+
+	// 16
 	float gMinDist; // When distance is minimum, the tessellation is maximum.
 	float gMaxDist; // When distance is maximum, the tessellation is minimum.
+	float gMinTess;	// Exponents for power of 2 tessellation.  The tessellation
+	float gMaxTess;	// range is [2^(gMinTess), 2^(gMaxTess)].  Since the maximum
+					// tessellation is 64, this means gMaxTess can be at most 6
+					// since 2^6 = 64.
 
-	// Exponents for power of 2 tessellation.  The tessellation
-	// range is [2^(gMinTess), 2^(gMaxTess)].  Since the maximum
-	// tessellation is 64, this means gMaxTess can be at most 6
-	// since 2^6 = 64.
-	float gMinTess;
-	float gMaxTess;
-
+	// 16
 	float gTexelCellSpaceU;
 	float gTexelCellSpaceV;
 	float gWorldCellSpace;
-	float2 gTexScale = 50.0f;
+	float Pad;
 
+	// 96
 	float4 gWorldFrustumPlanes[6];
 };
 
@@ -40,8 +41,8 @@ Texture2D gLayerMapArray2 : register(t4);
 Texture2D gLayerMapArray3 : register(t5);
 Texture2D gLayerMapArray4 : register(t6);
 
-SamplerState LinearSamplerState: register(s0);
-SamplerState HeightmapSamplerState: register(s1);
+SamplerState LinearSamplerState : register(s0);
+SamplerState HeightmapSamplerState : register(s1);
 
 struct VS_INPUT {
 	float3 PositionL : POSITION;
@@ -75,7 +76,7 @@ VS_OUTPUT VSMain(VS_INPUT vsInput) {
 }
 
 float CalcTessFactor(float3 p) {
-	float d = distance(p, gCameraPosW);
+	float d = distance(p, gCameraPosW.xyz);
 	float s = saturate((d - gMinDist) / (gMaxDist - gMinDist));
 
 	return pow(2, (lerp(gMaxTess, gMinTess, s)));
@@ -216,6 +217,8 @@ DS_OUTPUT DSMain(PatchTess patchTess, float2 uv : SV_DomainLocation, const Outpu
 		uv.y
 	);
 
+	float2 gTexScale = 50.0f;
+
 	// Tile layer textures over terrain.
 	dsOutput.TiledTex = dsOutput.TexCoord*gTexScale;
 
@@ -254,7 +257,7 @@ float4 PSMain(DS_OUTPUT psInput) : SV_Target {
 	float3 normalW = cross(tangent, biTangent);
 
 	// The toCamera vector is used in lighting.
-	float3 toCamera = gCameraPosW - psInput.PositionW;
+	float3 toCamera = gCameraPosW.xyz - psInput.PositionW;
 
 	// Cache the distance to the eye from this surface point.
 	float distToCam = length(toCamera);
@@ -265,11 +268,11 @@ float4 PSMain(DS_OUTPUT psInput) : SV_Target {
 	// Texturing
 
 	// Sample layers in texture array.
-	float4 c0 = gLayerMapArray0.Sample(LinearSamplerState, psInput.TexCoord);
-	float4 c1 = gLayerMapArray1.Sample(LinearSamplerState, psInput.TexCoord);
-	float4 c2 = gLayerMapArray2.Sample(LinearSamplerState, psInput.TexCoord);
-	float4 c3 = gLayerMapArray3.Sample(LinearSamplerState, psInput.TexCoord);
-	float4 c4 = gLayerMapArray4.Sample(LinearSamplerState, psInput.TexCoord);
+	float4 c0 = gLayerMapArray0.Sample(LinearSamplerState, psInput.TiledTex);
+	float4 c1 = gLayerMapArray1.Sample(LinearSamplerState, psInput.TiledTex);
+	float4 c2 = gLayerMapArray2.Sample(LinearSamplerState, psInput.TiledTex);
+	float4 c3 = gLayerMapArray3.Sample(LinearSamplerState, psInput.TiledTex);
+	float4 c4 = gLayerMapArray4.Sample(LinearSamplerState, psInput.TiledTex);
 
 	// Sample the blend map.
 	float4 t = gBlendMap.Sample(LinearSamplerState, psInput.TexCoord);
@@ -297,6 +300,6 @@ float4 PSMain(DS_OUTPUT psInput) : SV_Target {
 
 	litColor = texColor*(ambient + diffuse) + specular;
 
-	return texColor;
+	return litColor;
 
 }

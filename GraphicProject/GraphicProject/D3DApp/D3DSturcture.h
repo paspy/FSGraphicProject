@@ -30,7 +30,7 @@ namespace D3DSturcture {
 	}*InstancedData_ptr;
 
 	// constant buffer structures
-	struct DirectionalLight {
+	struct DirectionalLight { // 4 *16 = 64byte;
 		DirectionalLight() { ZeroMemory(this, sizeof(this)); }
 		XMFLOAT4 Ambient;
 		XMFLOAT4 Diffuse;

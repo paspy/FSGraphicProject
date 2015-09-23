@@ -84,7 +84,9 @@ public:
 	static HRESULT CreateOptionalShaderFromFile(
 		ID3D11Device *_d3dDevice,
 		const LPCWSTR _geoFileName,
-		ID3D11GeometryShader **_geoShader);
+		ID3D11GeometryShader **_geoShader,
+		bool _streamOut,
+		ID3D11VertexShader **_streamOutVS);
 
 	static HRESULT CreateOptionalShaderFromFile(
 		ID3D11Device *_d3dDevice,

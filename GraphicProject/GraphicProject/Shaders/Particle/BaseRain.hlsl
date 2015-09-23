@@ -1,5 +1,5 @@
 
-cbuffer cbPerFrame {
+cbuffer cbPerFrame : register(b0) {
 	float3 gCameraPosW;
 
 	// for when the emit position/direction is varying
@@ -22,7 +22,7 @@ Texture2DArray gTexArray;
 // Random texture used to generate random numbers in shaders.
 Texture1D gRandomTex;
 
-SamplerState samLinear {
+SamplerState LinearSamplerState : register(s0) {
 	Filter = MIN_MAG_MIP_LINEAR;
 	AddressU = WRAP;
 	AddressV = WRAP;
@@ -47,7 +47,7 @@ float3 RandUnitVec3(float offset) {
 	float u = (gGameTime + offset);
 
 	// coordinates in [-1,1]
-	float3 v = gRandomTex.SampleLevel(samLinear, u, 0).xyz;
+	float3 v = gRandomTex.SampleLevel(LinearSamplerState, u, 0).xyz;
 
 	// project onto unit sphere
 	return normalize(v);
@@ -58,14 +58,12 @@ float3 RandVec3(float offset) {
 	float u = (gGameTime + offset);
 
 	// coordinates in [-1,1]
-	float3 v = gRandomTex.SampleLevel(samLinear, u, 0).xyz;
+	float3 v = gRandomTex.SampleLevel(LinearSamplerState, u, 0).xyz;
 
 	return v;
 }
 
-//***********************************************
-// STREAM-OUT TECH                              *
-//***********************************************
+// STREAM-OUT
 
 #define PT_EMITTER 0
 #define PT_FLARE 1
@@ -167,5 +165,5 @@ void GSMain(point VS_OUTPUT gsInput[1], inout LineStream<GS_OUTPUT> lineStream) 
 }
 
 float4 PSMain(GS_OUTPUT psInput) : SV_TARGET {
-	return gTexArray.Sample(samLinear, float3(psInput.TexCoord, 0));
+	return gTexArray.Sample(LinearSamplerState, float3(psInput.TexCoord, 0));
 }
