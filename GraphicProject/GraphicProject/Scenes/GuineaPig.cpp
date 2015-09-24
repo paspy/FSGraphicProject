@@ -3,7 +3,7 @@
 #include "../D3DApp/GeoGen.h"
 
 
-GuineaPig::GuineaPig(HINSTANCE hinst) : D3DApp(hinst), m_camWalkMode(true) { }
+GuineaPig::GuineaPig(HINSTANCE hinst) : D3DApp(hinst), m_camWalkMode(true), m_enableBlur(false) { }
 
 GuineaPig::~GuineaPig() {
 	// release lighting ptr
@@ -279,21 +279,32 @@ void GuineaPig::DrawScene() {
 	assert(m_d3dImmediateContext);
 	assert(m_swapChain);
 
-	m_d3dImmediateContext->OMSetRenderTargets(1, &m_offscreenRTV, m_depthStencilView);
-	m_d3dImmediateContext->ClearRenderTargetView(m_offscreenRTV, reinterpret_cast<const float*>(&Colors::Silver));
-	m_d3dImmediateContext->ClearDepthStencilView(m_depthStencilView, D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL, 1.0f, 0);
+	if (m_enableBlur) {
+		m_d3dImmediateContext->OMSetRenderTargets(1, &m_offscreenRTV, m_depthStencilView);
+		m_d3dImmediateContext->ClearRenderTargetView(m_offscreenRTV, reinterpret_cast<const float*>(&Colors::Silver));
+		m_d3dImmediateContext->ClearDepthStencilView(m_depthStencilView, D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL, 1.0f, 0);
 
+		DrawForHold();
 
-	m_d3dImmediateContext->OMSetRenderTargets(1, &m_renderTargetView, m_depthStencilView);
+		m_d3dImmediateContext->OMSetRenderTargets(1, &m_renderTargetView, m_depthStencilView);
 
-	m_blur.BlurInPlace(m_d3dImmediateContext, m_offscreenSRV, m_offscreenUAV, 4);
+		m_blur.BlurInPlace(m_d3dImmediateContext, m_offscreenSRV, m_offscreenUAV, 4);
 
-	m_d3dImmediateContext->ClearRenderTargetView(m_renderTargetView, reinterpret_cast<const float*>(&Colors::Silver));
-	m_d3dImmediateContext->ClearDepthStencilView(m_depthStencilView, D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL, 1.0f, 0);
+		m_d3dImmediateContext->ClearRenderTargetView(m_renderTargetView, reinterpret_cast<const float*>(&Colors::Silver));
+		m_d3dImmediateContext->ClearDepthStencilView(m_depthStencilView, D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL, 1.0f, 0);
 
-	DrawForHold();
-	m_d3dImmediateContext->PSSetConstantBuffers(0, 1, &m_cbPerFrameBuffer);
-	//DrawScreenQuad();
+		m_d3dImmediateContext->PSSetConstantBuffers(0, 1, &m_cbPerFrameBuffer);
+		DrawScreenQuad();
+	} else {
+		m_d3dImmediateContext->OMSetRenderTargets(1, &m_renderTargetView, m_depthStencilView);
+		m_d3dImmediateContext->ClearRenderTargetView(m_renderTargetView, reinterpret_cast<const float*>(&Colors::Silver));
+		m_d3dImmediateContext->ClearDepthStencilView(m_depthStencilView, D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL, 1.0f, 0);
+
+		DrawForHold();
+
+	}
+
+	
 
 	//Present the backbuffer to the screen
 	HR(m_swapChain->Present(0, 0));
@@ -353,8 +364,12 @@ void GuineaPig::UpdateKeyboardInput(double _dt) {
 		m_camera.Strafe(CAMERA_SPEED*static_cast<float>(_dt));
 	}
 
+	if (GetAsyncKeyState('B') & 0x1)
+		m_enableBlur = !m_enableBlur;
+
 	if (GetAsyncKeyState('M') & 0x1 )
 		m_camWalkMode = !m_camWalkMode;
+
 
 	if (m_camWalkMode) {
 		XMFLOAT4 camPos;

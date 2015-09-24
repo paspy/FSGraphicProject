@@ -63,6 +63,7 @@ private:
 
 	// camera setting
 	bool				m_camWalkMode;
+	bool				m_enableBlur;
 
 	// off screen stuff
 	BlurFilter					m_blur;
