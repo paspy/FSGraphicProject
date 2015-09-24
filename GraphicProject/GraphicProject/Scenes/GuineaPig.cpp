@@ -1,11 +1,22 @@
 #include "GuineaPig.h"
 #include "../D3DApp/RenderStates.h"
+#include "../D3DApp/GeoGen.h"
+
 
 GuineaPig::GuineaPig(HINSTANCE hinst) : D3DApp(hinst), m_camWalkMode(true) { }
 
 GuineaPig::~GuineaPig() {
 	// release lighting ptr
+	SafeRelease(m_osVertexShader);
+	SafeRelease(m_osPixelShader);
+	SafeRelease(m_osInputLayout);
 	SafeRelease(m_cbPerFrameBuffer);
+	SafeRelease(m_screenQuadVB);
+	SafeRelease(m_screenQuadIB);
+	SafeRelease(m_offscreenSRV);
+	SafeRelease(m_constOffScreen);
+	SafeRelease(m_offscreenUAV);
+	SafeRelease(m_offscreenRTV);
 	RenderStates::DestroyAll();
 
 }
@@ -18,12 +29,17 @@ bool GuineaPig::Init() {
 	BuildConstBuffer();
 	BuildGeometry();
 	BuildLighting();
+	BuildOffscreenViews();
+	BuildScreenQuadGeometryBuffers();
+
+	m_blur.Init(m_d3dDevice, m_clientWidth, m_clientHeight, DXGI_FORMAT_R8G8B8A8_UNORM);
 
 	return true;
 }
 
 void GuineaPig::OnResize() {
 	D3DApp::OnResize();
+	BuildOffscreenViews();
 	// reset camera
 	m_camera.SetLens(0.4f*XM_PI, AspectRatio(), 1.0f, 3000.0f);
 }
@@ -54,7 +70,6 @@ void GuineaPig::BuildGeometry() {
 	//m_quadMesh.Init(m_d3dDevice, L"Shaders/Base/InstancedBase.hlsl", GeoMesh::GeoType::Grid, L"Resources/Textures/WireFence_diffuse.dds", L"Resources/Textures/WireFence_normal.dds");
 
 	m_heighMapTerrain.Init(m_d3dDevice, m_d3dImmediateContext);
-
 
 	vector<wstring> raindrops;
 	raindrops.push_back(L"Resources/Particles/raindrop.dds");
@@ -90,9 +105,115 @@ void GuineaPig::BuildLighting() {
 
 }
 
+void GuineaPig::BuildOffscreenViews() {
+	SafeRelease(m_offscreenSRV);
+	SafeRelease(m_offscreenRTV);
+	SafeRelease(m_offscreenUAV);
+
+	D3D11_TEXTURE2D_DESC texDesc;
+
+	texDesc.Width = m_clientWidth;
+	texDesc.Height = m_clientHeight;
+	texDesc.MipLevels = 1;
+	texDesc.ArraySize = 1;
+	texDesc.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
+	texDesc.SampleDesc.Count = 1;
+	texDesc.SampleDesc.Quality = 0;
+	texDesc.Usage = D3D11_USAGE_DEFAULT;
+	texDesc.BindFlags = D3D11_BIND_RENDER_TARGET | D3D11_BIND_SHADER_RESOURCE | D3D11_BIND_UNORDERED_ACCESS;
+	texDesc.CPUAccessFlags = 0;
+	texDesc.MiscFlags = 0;
+
+	ID3D11Texture2D* offscreenTex = 0;
+	HR(m_d3dDevice->CreateTexture2D(&texDesc, 0, &offscreenTex));
+
+	// Null description means to create a view to all mipmap levels using 
+	// the format the texture was created with.
+	HR(m_d3dDevice->CreateShaderResourceView(offscreenTex, 0,	&m_offscreenSRV));
+	HR(m_d3dDevice->CreateRenderTargetView(offscreenTex, 0,		&m_offscreenRTV));
+	HR(m_d3dDevice->CreateUnorderedAccessView(offscreenTex, 0,	&m_offscreenUAV));
+
+	// View saves a reference to the texture so we can release our reference.
+	SafeRelease(offscreenTex);
+}
+
+void GuineaPig::BuildScreenQuadGeometryBuffers() {
+
+	D3D11_INPUT_ELEMENT_DESC vertexLayout[4] =
+	{
+		{ "POSITION",	0, DXGI_FORMAT_R32G32B32_FLOAT,		0, D3D11_APPEND_ALIGNED_ELEMENT,	D3D11_INPUT_PER_VERTEX_DATA, 0 },
+		{ "TEXCOORD",	0, DXGI_FORMAT_R32G32_FLOAT,		0, D3D11_APPEND_ALIGNED_ELEMENT,	D3D11_INPUT_PER_VERTEX_DATA, 0 },
+		{ "NORMAL",		0, DXGI_FORMAT_R32G32B32_FLOAT,		0, D3D11_APPEND_ALIGNED_ELEMENT,	D3D11_INPUT_PER_VERTEX_DATA, 0 },
+		{ "TANGENT",	0, DXGI_FORMAT_R32G32B32_FLOAT,		0, D3D11_APPEND_ALIGNED_ELEMENT,	D3D11_INPUT_PER_VERTEX_DATA, 0 }
+	};
+
+	HR(D3DUtils::CreateShaderAndLayoutFromFile(m_d3dDevice, L"Shaders/Base/Base.hlsl", vertexLayout, 4, &m_osVertexShader, &m_osPixelShader, &m_osInputLayout));
+
+	D3D11_BUFFER_DESC cbbd;
+	ZeroMemory(&cbbd, sizeof(D3D11_BUFFER_DESC));
+	cbbd.Usage = D3D11_USAGE_DEFAULT;
+	cbbd.ByteWidth = sizeof(cbOffScreen);
+	cbbd.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
+	cbbd.CPUAccessFlags = 0;
+	cbbd.MiscFlags = 0;
+	HR(m_d3dDevice->CreateBuffer(&cbbd, NULL, &m_constOffScreen));
+
+	GeoGen::MeshData quad;
+	GeoGen::CreateFullscreenQuad(quad);
+	vector<Vertex3D> vertices(quad.Vertices.size());
+
+	for ( UINT i = 0; i < quad.Vertices.size(); ++i ) {
+		vertices[i].Position = quad.Vertices[i].Position;
+		vertices[i].Normal = quad.Vertices[i].Normal;
+		vertices[i].TexCoord = quad.Vertices[i].TexCoord;
+	}
+
+	D3D11_BUFFER_DESC vbd;
+	vbd.Usage = D3D11_USAGE_IMMUTABLE;
+	vbd.ByteWidth = sizeof(Vertex3D) * quad.Vertices.size();
+	vbd.BindFlags = D3D11_BIND_VERTEX_BUFFER;
+	vbd.CPUAccessFlags = 0;
+	vbd.MiscFlags = 0;
+	D3D11_SUBRESOURCE_DATA vinitData;
+	vinitData.pSysMem = vertices.data();
+	HR(m_d3dDevice->CreateBuffer(&vbd, &vinitData, &m_screenQuadVB));
+
+	D3D11_BUFFER_DESC ibd;
+	ibd.Usage = D3D11_USAGE_IMMUTABLE;
+	ibd.ByteWidth = sizeof(UINT) * quad.Indices.size();
+	ibd.BindFlags = D3D11_BIND_INDEX_BUFFER;
+	ibd.CPUAccessFlags = 0;
+	ibd.MiscFlags = 0;
+	D3D11_SUBRESOURCE_DATA iinitData;
+	iinitData.pSysMem = quad.Indices.data();
+	HR(m_d3dDevice->CreateBuffer(&ibd, &iinitData, &m_screenQuadIB));
+}
+
+void GuineaPig::DrawScreenQuad() {
+	m_d3dImmediateContext->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+	m_d3dImmediateContext->VSSetShader(m_osVertexShader, NULL, 0);
+	m_d3dImmediateContext->PSSetShader(m_osPixelShader, NULL, 0);
+	m_d3dImmediateContext->IASetInputLayout(m_osInputLayout);
+	m_d3dImmediateContext->OMSetDepthStencilState(NULL, 0);
+	UINT stride = sizeof(Vertex3D);
+	UINT offset = 0;
+
+	m_d3dImmediateContext->IASetVertexBuffers(0, 1, &m_screenQuadVB, &stride, &offset);
+	m_d3dImmediateContext->IASetIndexBuffer(m_screenQuadIB, DXGI_FORMAT_R32_UINT, 0);
+	m_cbOffScreen.World = XMMatrixIdentity() * XMMatrixScaling(0.5f, 0.5f, 0.5f);
+	m_cbOffScreen.WorldInvTranspose = XMMatrixIdentity();
+	m_cbOffScreen.WorldViewProj = XMMatrixIdentity();
+	m_cbOffScreen.TexTransform = XMMatrixIdentity();
+	ID3D11ShaderResourceView* SRV = m_blur.GetBlurredOutput();
+	m_d3dImmediateContext->UpdateSubresource(m_constOffScreen, 0, NULL, &m_cbOffScreen, 0, 0);
+	m_d3dImmediateContext->VSSetConstantBuffers(1, 1, &m_constOffScreen);
+
+	m_d3dImmediateContext->PSSetShaderResources(0, 1, &SRV);
+
+	m_d3dImmediateContext->DrawIndexed(6, 0, 0);
+}
+
 void GuineaPig::UpdateScene(double _dt) {
-
-
 	// **Update Skybox **//
 	//Reset sphereWorld
 	m_skyBox.worldMat = XMMatrixIdentity();
@@ -144,8 +265,8 @@ void GuineaPig::UpdateScene(double _dt) {
 
 	m_heighMapTerrain.Update();
 
-	m_rain.Update((float)_dt, (float)m_timer.TotalTime());
-	m_fire.Update((float)_dt, (float)m_timer.TotalTime());
+	m_rain.Update(static_cast<float>(_dt), static_cast<float>(m_timer.TotalTime()));
+	m_fire.Update(static_cast<float>(_dt), static_cast<float>(m_timer.TotalTime()));
 
 }
 
@@ -180,7 +301,6 @@ void GuineaPig::DrawScene() {
 
 	// Render opaque objects //
 
-
 	// Skybox
 	m_skyBox.Render(m_d3dImmediateContext, m_camera, RenderStates::NoCullRS);
 	//m_barrel.Render	(m_d3dImmediateContext, m_camera, RenderStates::NoCullRS);
@@ -190,17 +310,21 @@ void GuineaPig::DrawScene() {
 	//m_terrain.Render(m_d3dImmediateContext, m_camera, 0);
 
 	//m_wave.Render(m_d3dImmediateContext, m_camera, 0, RenderStates::TransparentBSbyColor, blendFactor1);
+	m_d3dImmediateContext->PSSetConstantBuffers(0, 1, &m_cbPerFrameBuffer);
 	m_geoMesh.Render(m_d3dImmediateContext, m_camera, RenderStates::TransparentBSbyColor, blendFactor1);
+	m_d3dImmediateContext->PSSetConstantBuffers(0, 1, &m_cbPerFrameBuffer);
 	m_mirrorMesh.Render(m_d3dImmediateContext, m_camera, NULL);
 
 	m_rain.SetEmitPos(XMFLOAT3(curCamPos.x, curCamPos.y, curCamPos.z));
 	m_rain.Render(m_d3dImmediateContext, m_camera);
-
+	//
 	m_fire.SetEmitPos(XMFLOAT3(100.0f, 0.5f, 40.0f));
 	m_fire.Render(m_d3dImmediateContext, m_camera, RenderStates::AdditiveBlending, blendFactor1);
 
-	//Set the default blend state (no blending) for opaque objects
 
+	m_d3dImmediateContext->PSSetConstantBuffers(0, 1, &m_cbPerFrameBuffer);
+	//DrawScreenQuad();
+	//Set the default blend state (no blending) for opaque objects
 	m_d3dImmediateContext->OMSetBlendState(0, blendFactor1, 0xffffffff);
 	//Present the backbuffer to the screen
 	HR(m_swapChain->Present(0, 0));
@@ -208,23 +332,24 @@ void GuineaPig::DrawScene() {
 
 void GuineaPig::UpdateKeyboardInput(double _dt) {
 
-	if (GetAsyncKeyState('W') & 0x8000) {
+	if (GetAsyncKeyState('W')) {
 		m_camera.Walk(CAMERA_SPEED*static_cast<float>(_dt));
 	}
 
-	if (GetAsyncKeyState('S') & 0x8000) {
+	if (GetAsyncKeyState('S')) {
 		m_camera.Walk(-CAMERA_SPEED*static_cast<float>(_dt));
 	}
 
-	if (GetAsyncKeyState('A') & 0x8000) {
+	if (GetAsyncKeyState('A')) {
 		m_camera.Strafe(-CAMERA_SPEED*static_cast<float>(_dt));
 	}
 
-	if (GetAsyncKeyState('D') & 0x8000) {
+	if (GetAsyncKeyState('D')) {
 		m_camera.Strafe(CAMERA_SPEED*static_cast<float>(_dt));
 	}
 
-	if (GetAsyncKeyState('M') & 0x8000) m_camWalkMode = !m_camWalkMode;
+	if (GetAsyncKeyState('M') & 0x1 )
+		m_camWalkMode = !m_camWalkMode;
 
 	if (m_camWalkMode) {
 		XMFLOAT4 camPos;

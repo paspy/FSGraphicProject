@@ -1,13 +1,13 @@
 #include <Lighting.hlsl>
 
-cbuffer cbPerFrame {
+cbuffer cbPerFrame : register(b0){
 	DirectionalLight gDirLight;
 	PointLight gPointLight;
 	SpotLight gSpotLight;
 	float4 gCameraPos;
 };
 
-cbuffer cbPerObject {
+cbuffer cbPerObject : register(b1){
 	float4x4 gWorld;
 	float4x4 gWorldInvTranspose;
 	float4x4 gWorldViewProj;

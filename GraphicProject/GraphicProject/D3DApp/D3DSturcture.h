@@ -74,7 +74,14 @@ namespace D3DSturcture {
 		PointLight pointLight;
 		SpotLight spotLight;
 		XMFLOAT4 cameraPos;
+	};
 
+	struct cbOffScreen {
+		cbOffScreen() { ZeroMemory(this, sizeof(this)); }
+		XMMATRIX World;
+		XMMATRIX WorldInvTranspose;
+		XMMATRIX WorldViewProj;
+		XMMATRIX TexTransform;
 	};
 
 }

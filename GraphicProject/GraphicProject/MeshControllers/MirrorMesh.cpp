@@ -177,7 +177,7 @@ void MirrorMesh::Render(ID3D11DeviceContext * _context, const Camera &_camera, I
 	_context->IASetInputLayout(inputLayout);
 	_context->OMSetDepthStencilState(NULL, 0);
 
-	float blendFactor[] = { 0.5f, 0.5f, 0.5f, 0.0f };
+	float blendFactor[] = { 0.25f, 0.25f, 0.25f, 0.0f };
 
 	// Restore states.
 	_context->OMSetDepthStencilState(0, 0);

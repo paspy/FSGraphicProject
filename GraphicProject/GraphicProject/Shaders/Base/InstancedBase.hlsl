@@ -1,13 +1,13 @@
 #include <Lighting.hlsl>
 
-cbuffer cbPerFrame {
+cbuffer cbPerFrame : register(b0) {
 	DirectionalLight gDirLight;
 	PointLight gPointLight;
 	SpotLight gSpotLight;
 	float4 gCameraPos;
 };
 
-cbuffer CBuffer {
+cbuffer CBuffer : register(b1) {
 	float4x4 gWorldInvTranspose;
 	float4x4 gView;
 	float4x4 gProj;
@@ -15,10 +15,9 @@ cbuffer CBuffer {
 	Material gMaterial;
 };
 
-Texture2D ObjTexture;
-Texture2D ObjNormMap;
+Texture2D ObjTexture: register(t0);
+Texture2D ObjNormMap: register(t1);
 SamplerState ObjSamplerState;
-
 
 struct VS_INPUT {
 	float3 PositionL : POSITION;

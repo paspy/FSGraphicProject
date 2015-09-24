@@ -1,6 +1,7 @@
 #pragma once
 #include "../D3DApp/D3DApp.h"
 #include "../D3DApp/ParticleSystem.h"
+#include "../D3DApp/BlurFilter.h"
 
 #include "../MeshControllers/ObjMesh.h"
 #include "../MeshControllers/Skybox.h"
@@ -32,6 +33,9 @@ private:
 	void BuildConstBuffer();
 	void BuildGeometry();
 	void BuildLighting();
+	void BuildOffscreenViews();
+	void BuildScreenQuadGeometryBuffers();
+	void DrawScreenQuad();
 
 private:
 	Skybox				m_skyBox;
@@ -58,6 +62,19 @@ private:
 
 	// camera setting
 	bool				m_camWalkMode;
+
+	// off screen stuff
+	BlurFilter					m_blur;
+	cbOffScreen					m_cbOffScreen;
+	ID3D11VertexShader			*m_osVertexShader = nullptr;
+	ID3D11PixelShader			*m_osPixelShader = nullptr;
+	ID3D11InputLayout			*m_osInputLayout = nullptr;
+	ID3D11Buffer				*m_screenQuadVB = nullptr;
+	ID3D11Buffer				*m_screenQuadIB = nullptr;
+	ID3D11Buffer				*m_constOffScreen = nullptr;
+	ID3D11ShaderResourceView	*m_offscreenSRV = nullptr;
+	ID3D11UnorderedAccessView	*m_offscreenUAV = nullptr;
+	ID3D11RenderTargetView		*m_offscreenRTV = nullptr;
 
 };
 

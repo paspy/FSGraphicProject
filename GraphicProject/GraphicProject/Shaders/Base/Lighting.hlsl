@@ -1,4 +1,4 @@
-struct DirectionalLight {
+struct DirectionalLight { // 4 * 4 * 4 = 64
 	float4 Ambient;
 	float4 Diffuse;
 	float4 Specular;
@@ -6,7 +6,7 @@ struct DirectionalLight {
 	float Pad;
 };
 
-struct PointLight {
+struct PointLight { // 4*5*4 = 80
 	float4 Ambient;
 	float4 Diffuse;
 	float4 Specular;
@@ -18,7 +18,7 @@ struct PointLight {
 	float Pad;
 };
 
-struct SpotLight {
+struct SpotLight { // 4*6*4 = 96
 	float4 Ambient;
 	float4 Diffuse;
 	float4 Specular;

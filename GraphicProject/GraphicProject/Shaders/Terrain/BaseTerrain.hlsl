@@ -17,10 +17,18 @@ cbuffer cbPerFrame : register(b0) {
 	float gTexelCellSpaceU;
 	float gTexelCellSpaceV;
 	float gWorldCellSpace;
-	float Pad;
+	float Pad1;
 
 	// 96
 	float4 gWorldFrustumPlanes[6];
+
+	bool   gIsFog;
+	float  gFogStart;
+	float  gFogRange;
+	float  Pad2;
+
+	float4 gFogColor;
+
 };
 
 cbuffer cbPerObject : register(b1) {
@@ -302,6 +310,13 @@ float4 PSMain(DS_OUTPUT psInput) : SV_Target {
 	specular += S;
 
 	litColor = texColor*(ambient + diffuse) + specular;
+
+	if ( gIsFog ) {
+		float fogLerp = saturate((distToCam - gFogStart) / gFogRange);
+
+		// Blend the fog color and the lit color.
+		litColor = lerp(litColor, gFogColor, fogLerp);
+	}
 
 	return litColor;
 

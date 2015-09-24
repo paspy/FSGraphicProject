@@ -24,7 +24,7 @@ public:
 	};
 
 	struct CBuffer {
-		CBuffer() {}
+		CBuffer() { ZeroMemory(this, sizeof(this)); }
 		XMMATRIX WorldInvTranspose;
 		XMMATRIX View;
 		XMMATRIX Proj;

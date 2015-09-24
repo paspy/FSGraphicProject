@@ -29,10 +29,16 @@ public:
 		float TexelCellSpaceU;
 		float TexelCellSpaceV;
 		float WorldCellSpace;
-		float Pad;
+		float Pad1;
 
 		XMFLOAT4 WorldFrustumPlanes[6];
 
+		BOOL IsFog;
+		float FogStart;
+		float FogRange;
+		float Pad2;
+
+		XMFLOAT4 FogColor;
 	};
 
 	struct cbPerObjectT {
@@ -137,4 +143,5 @@ private:
 	};
 	
 	bool m_wireFrameRS;
+	bool m_enableFog;
 };

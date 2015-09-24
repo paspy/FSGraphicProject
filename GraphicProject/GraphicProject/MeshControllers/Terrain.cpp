@@ -23,7 +23,8 @@ Terrain::Terrain() :
 	m_numPatchQuadFaces(0),
 	m_numPatchVertRows(0),
 	m_numPatchVertCols(0),
-	m_wireFrameRS(false)
+	m_wireFrameRS(false),
+	m_enableFog(true)
 
 {
 	m_world =  XMMatrixIdentity();
@@ -195,8 +196,12 @@ void Terrain::Init(ID3D11Device* _d3dDevice, ID3D11DeviceContext* _context) {
 }
 
 void Terrain::Update() {
-	if (GetAsyncKeyState('L') & 0x8000) 
+	if (GetAsyncKeyState('L') & 0x1) 
 		m_wireFrameRS = !m_wireFrameRS;
+
+	if (GetAsyncKeyState('F') & 0x1)
+		m_enableFog = !m_enableFog;
+
 }
 
 void Terrain::Render(ID3D11DeviceContext* _context, const Camera& _camera, D3DSturcture::DirectionalLight _light) {
@@ -228,7 +233,14 @@ void Terrain::Render(ID3D11DeviceContext* _context, const Camera& _camera, D3DSt
 	cbPerFrame.TexelCellSpaceU = 1.0f / m_info.HeightmapWidth;
 	cbPerFrame.TexelCellSpaceV = 1.0f / m_info.HeightmapHeight;
 	cbPerFrame.WorldCellSpace = m_info.CellSpacing;
-	
+	cbPerFrame.FogStart = 15.0f;
+	cbPerFrame.FogRange = 175.0f;
+	if ( m_enableFog ) {
+		cbPerFrame.IsFog = TRUE;
+	} else {
+		cbPerFrame.IsFog = FALSE;
+	}
+	XMStoreFloat4(&cbPerFrame.FogColor, Colors::Silver);
 	for (int i = 0; i < 6; i++) {
 		cbPerFrame.WorldFrustumPlanes[i] = worldPlanes[i];
 	}

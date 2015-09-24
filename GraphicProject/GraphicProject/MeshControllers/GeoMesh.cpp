@@ -204,7 +204,7 @@ void GeoMesh::Render(ID3D11DeviceContext * _context, const Camera &_camera, ID3D
 
 	_context->UpdateSubresource(constBuffer, 0, NULL, &cbBuffer, 0, 0);
 
-	_context->VSSetConstantBuffers(0, 1, &constBuffer);
+	_context->VSSetConstantBuffers(1, 1, &constBuffer);
 	_context->PSSetConstantBuffers(1, 1, &constBuffer);
 	_context->PSSetShaderResources(0, 1, &shaderResView);
 	_context->PSSetShaderResources(1, 1, &normalShaderResView);
