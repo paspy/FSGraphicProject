@@ -13,17 +13,7 @@ public:
 
 	// Manually specify blur weights.
 	void SetWeights(const float weights[9]);
-
-	///<summary>
-	/// The _width and _height should match the dimensions of the input texture to blur.
-	/// It is OK to call Init() again to reinitialize the blur filter with a different 
-	/// dimension or _format.
-	///</summary>
 	void Init(ID3D11Device* _d3dDevice, UINT _width, UINT _height, DXGI_FORMAT _format, bool _msaa);
-
-	///<summary>
-	/// Blurs the input texture _blurCount times.  Note that this modifies the input texture, not a copy of it.
-	///</summary>
 	void BlurInPlace(ID3D11DeviceContext* _context, ID3D11ShaderResourceView* _inputSRV, ID3D11UnorderedAccessView* _inputUAV, int _blurCount);
 
 private:

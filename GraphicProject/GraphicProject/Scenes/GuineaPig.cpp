@@ -34,7 +34,7 @@ bool GuineaPig::Init() {
 	BuildScreenQuadGeometryBuffers();
 
 	m_blur.Init(m_d3dDevice, m_clientWidth, m_clientHeight, DXGI_FORMAT_R8G8B8A8_UNORM, m_enable4xMsaa);
-
+	MessageBox(0, L"WSAD for moving\nF for Fog\nL for wireframe\nM for switch moving and flying\nB for fullscreen Blur", L"Tips", MB_OK);
 	return true;
 }
 
@@ -67,8 +67,6 @@ void GuineaPig::BuildGeometry() {
 	m_geoMesh.Init(m_d3dDevice, L"Shaders/Base/InstancedBase.hlsl", GeoMesh::GeoType::Box, L"Resources/Textures/WireFence_diffuse.dds", L"Resources/Textures/WireFence_normal.dds");
 
 	m_mirrorMesh.Init(m_d3dDevice, L"Shaders/Base/Base.hlsl");
-
-	//m_quadMesh.Init(m_d3dDevice, L"Shaders/Base/InstancedBase.hlsl", GeoMesh::GeoType::Grid, L"Resources/Textures/WireFence_diffuse.dds", L"Resources/Textures/WireFence_normal.dds");
 
 	m_heighMapTerrain.Init(m_d3dDevice, m_d3dImmediateContext);
 
@@ -304,8 +302,6 @@ void GuineaPig::DrawScene() {
 
 	}
 
-	
-
 	//Present the backbuffer to the screen
 	HR(m_swapChain->Present(0, 0));
 }
@@ -333,9 +329,6 @@ void GuineaPig::DrawForHold() {
 
 	m_d3dImmediateContext->PSSetConstantBuffers(0, 1, &m_cbPerFrameBuffer);
 	m_geoMesh.Render(m_d3dImmediateContext, m_camera, RenderStates::TransparentBSbyColor, blendFactor1);
-
-	m_d3dImmediateContext->PSSetConstantBuffers(0, 1, &m_cbPerFrameBuffer);
-	m_mirrorMesh.Render(m_d3dImmediateContext, m_camera, NULL);
 
 	m_rain.SetEmitPos(XMFLOAT3(curCamPos.x, curCamPos.y, curCamPos.z));
 	m_rain.Render(m_d3dImmediateContext, m_camera);

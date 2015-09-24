@@ -47,8 +47,6 @@ private:
 
 	Terrain				m_heighMapTerrain;
 
-	GeoMesh				m_quadMesh;
-
 	// Lighting
 	DirectionalLight	m_directionalLight;
 	PointLight			m_pointLight;
