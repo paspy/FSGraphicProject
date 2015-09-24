@@ -1,20 +1,14 @@
 
-cbuffer cbSettings {
-	float gWeights[11] =
-	{
-		0.05f, 0.05f, 0.1f, 0.1f, 0.1f, 0.2f, 0.1f, 0.1f, 0.1f, 0.05f, 0.05f,
-	};
-};
 
-cbuffer cbFixed {
-	static const int gBlurRadius = 5;
-};
+//cbuffer cbFixed {
+//	static const int gBlurRadius = 5;
+//};
 
-Texture2D gInput;
-RWTexture2D<float4> gOutput;
+Texture2D gInput : register(t0);
+RWTexture2D<float4> gOutput /*: register(t1)*/;
 
 #define N 256
-#define CacheSize (N + 2*gBlurRadius)
+#define CacheSize (N + 2*5)
 groupshared float4 gCache[CacheSize];
 
 [numthreads(N, 1, 1)]
@@ -24,6 +18,7 @@ void HorzBlurCS(int3 groupThreadID : SV_GroupThreadID, int3 dispatchThreadID : S
 	// N pixels, we will need to load N + 2*BlurRadius pixels
 	// due to the blur radius.
 	//
+	int gBlurRadius = 5;
 
 	// This thread group runs N threads.  To get the extra 2*BlurRadius pixels, 
 	// have 2*BlurRadius threads sample an extra pixel.
@@ -49,6 +44,10 @@ void HorzBlurCS(int3 groupThreadID : SV_GroupThreadID, int3 dispatchThreadID : S
 	//
 
 	float4 blurColor = float4(0, 0, 0, 0);
+	float gWeights[11] =
+	{
+		0.05f, 0.05f, 0.1f, 0.1f, 0.1f, 0.2f, 0.1f, 0.1f, 0.1f, 0.05f, 0.05f,
+	};
 
 	[unroll]
 	for (int i = -gBlurRadius; i <= gBlurRadius; ++i) {
@@ -67,7 +66,7 @@ void VertBlurCS(int3 groupThreadID : SV_GroupThreadID, int3 dispatchThreadID : S
 	// N pixels, we will need to load N + 2*BlurRadius pixels
 	// due to the blur radius.
 	//
-
+	int gBlurRadius = 5;
 	// This thread group runs N threads.  To get the extra 2*BlurRadius pixels, 
 	// have 2*BlurRadius threads sample an extra pixel.
 	if (groupThreadID.y < gBlurRadius) {
@@ -93,6 +92,10 @@ void VertBlurCS(int3 groupThreadID : SV_GroupThreadID, int3 dispatchThreadID : S
 	//
 
 	float4 blurColor = float4(0, 0, 0, 0);
+	float gWeights[11] =
+	{
+		0.05f, 0.05f, 0.1f, 0.1f, 0.1f, 0.2f, 0.1f, 0.1f, 0.1f, 0.05f, 0.05f,
+	};
 
 	[unroll]
 	for (int i = -gBlurRadius; i <= gBlurRadius; ++i) {

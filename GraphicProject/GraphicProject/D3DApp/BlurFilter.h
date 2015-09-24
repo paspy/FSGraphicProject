@@ -19,7 +19,7 @@ public:
 	/// It is OK to call Init() again to reinitialize the blur filter with a different 
 	/// dimension or _format.
 	///</summary>
-	void Init(ID3D11Device* _d3dDevice, UINT _width, UINT _height, DXGI_FORMAT _format);
+	void Init(ID3D11Device* _d3dDevice, UINT _width, UINT _height, DXGI_FORMAT _format, bool _msaa);
 
 	///<summary>
 	/// Blurs the input texture _blurCount times.  Note that this modifies the input texture, not a copy of it.

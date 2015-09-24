@@ -22,7 +22,7 @@ D3DApp::D3DApp(HINSTANCE hinst) :
 	m_d3dDriverType(D3D_DRIVER_TYPE_HARDWARE),
 	m_clientWidth(BACKBUFFER_WIDTH),
 	m_clientHeight(BACKBUFFER_HEIGHT),
-	m_enable4xMsaa(true),
+	m_enable4xMsaa(false),
 	m_appPaused(false),
 	m_minimized(false),
 	m_maximized(false),

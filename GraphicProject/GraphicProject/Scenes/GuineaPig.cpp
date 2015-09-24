@@ -11,6 +11,7 @@ GuineaPig::~GuineaPig() {
 	SafeRelease(m_osPixelShader);
 	SafeRelease(m_osInputLayout);
 	SafeRelease(m_cbPerFrameBuffer);
+	// Off screen
 	SafeRelease(m_screenQuadVB);
 	SafeRelease(m_screenQuadIB);
 	SafeRelease(m_offscreenSRV);
@@ -32,7 +33,7 @@ bool GuineaPig::Init() {
 	BuildOffscreenViews();
 	BuildScreenQuadGeometryBuffers();
 
-	m_blur.Init(m_d3dDevice, m_clientWidth, m_clientHeight, DXGI_FORMAT_R8G8B8A8_UNORM);
+	m_blur.Init(m_d3dDevice, m_clientWidth, m_clientHeight, DXGI_FORMAT_R8G8B8A8_UNORM, m_enable4xMsaa);
 
 	return true;
 }
@@ -117,8 +118,13 @@ void GuineaPig::BuildOffscreenViews() {
 	texDesc.MipLevels = 1;
 	texDesc.ArraySize = 1;
 	texDesc.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
-	texDesc.SampleDesc.Count = 1;
-	texDesc.SampleDesc.Quality = 0;
+	if (m_enable4xMsaa) {
+		texDesc.SampleDesc.Count = 4;
+		texDesc.SampleDesc.Quality = m_4xMsaaQuality - 1;
+	} else {
+		texDesc.SampleDesc.Count = 1;
+		texDesc.SampleDesc.Quality = 0;
+	}
 	texDesc.Usage = D3D11_USAGE_DEFAULT;
 	texDesc.BindFlags = D3D11_BIND_RENDER_TARGET | D3D11_BIND_SHADER_RESOURCE | D3D11_BIND_UNORDERED_ACCESS;
 	texDesc.CPUAccessFlags = 0;
@@ -170,7 +176,7 @@ void GuineaPig::BuildScreenQuadGeometryBuffers() {
 
 	D3D11_BUFFER_DESC vbd;
 	vbd.Usage = D3D11_USAGE_IMMUTABLE;
-	vbd.ByteWidth = sizeof(Vertex3D) * quad.Vertices.size();
+	vbd.ByteWidth = sizeof(Vertex3D) * (UINT)quad.Vertices.size();
 	vbd.BindFlags = D3D11_BIND_VERTEX_BUFFER;
 	vbd.CPUAccessFlags = 0;
 	vbd.MiscFlags = 0;
@@ -180,7 +186,7 @@ void GuineaPig::BuildScreenQuadGeometryBuffers() {
 
 	D3D11_BUFFER_DESC ibd;
 	ibd.Usage = D3D11_USAGE_IMMUTABLE;
-	ibd.ByteWidth = sizeof(UINT) * quad.Indices.size();
+	ibd.ByteWidth = sizeof(UINT) * (UINT)quad.Indices.size();
 	ibd.BindFlags = D3D11_BIND_INDEX_BUFFER;
 	ibd.CPUAccessFlags = 0;
 	ibd.MiscFlags = 0;
@@ -194,13 +200,12 @@ void GuineaPig::DrawScreenQuad() {
 	m_d3dImmediateContext->VSSetShader(m_osVertexShader, NULL, 0);
 	m_d3dImmediateContext->PSSetShader(m_osPixelShader, NULL, 0);
 	m_d3dImmediateContext->IASetInputLayout(m_osInputLayout);
-	m_d3dImmediateContext->OMSetDepthStencilState(NULL, 0);
 	UINT stride = sizeof(Vertex3D);
 	UINT offset = 0;
 
 	m_d3dImmediateContext->IASetVertexBuffers(0, 1, &m_screenQuadVB, &stride, &offset);
 	m_d3dImmediateContext->IASetIndexBuffer(m_screenQuadIB, DXGI_FORMAT_R32_UINT, 0);
-	m_cbOffScreen.World = XMMatrixIdentity() * XMMatrixScaling(0.5f, 0.5f, 0.5f);
+	m_cbOffScreen.World = XMMatrixIdentity() /** XMMatrixScaling(0.5f, 0.5f, 0.5f)*/;
 	m_cbOffScreen.WorldInvTranspose = XMMatrixIdentity();
 	m_cbOffScreen.WorldViewProj = XMMatrixIdentity();
 	m_cbOffScreen.TexTransform = XMMatrixIdentity();
@@ -274,12 +279,27 @@ void GuineaPig::DrawScene() {
 	assert(m_d3dImmediateContext);
 	assert(m_swapChain);
 
-	//Refresh the render target view
-	m_d3dImmediateContext->ClearRenderTargetView(m_renderTargetView, reinterpret_cast<const float*>(&Colors::Black));
-
-	//Refresh the Depth/Stencil view
+	m_d3dImmediateContext->OMSetRenderTargets(1, &m_offscreenRTV, m_depthStencilView);
+	m_d3dImmediateContext->ClearRenderTargetView(m_offscreenRTV, reinterpret_cast<const float*>(&Colors::Silver));
 	m_d3dImmediateContext->ClearDepthStencilView(m_depthStencilView, D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL, 1.0f, 0);
 
+
+	m_d3dImmediateContext->OMSetRenderTargets(1, &m_renderTargetView, m_depthStencilView);
+
+	m_blur.BlurInPlace(m_d3dImmediateContext, m_offscreenSRV, m_offscreenUAV, 4);
+
+	m_d3dImmediateContext->ClearRenderTargetView(m_renderTargetView, reinterpret_cast<const float*>(&Colors::Silver));
+	m_d3dImmediateContext->ClearDepthStencilView(m_depthStencilView, D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL, 1.0f, 0);
+
+	DrawForHold();
+	m_d3dImmediateContext->PSSetConstantBuffers(0, 1, &m_cbPerFrameBuffer);
+	//DrawScreenQuad();
+
+	//Present the backbuffer to the screen
+	HR(m_swapChain->Present(0, 0));
+}
+
+void GuineaPig::DrawForHold() {
 	m_d3dImmediateContext->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 
 	float blendFactor1[] = { 0.5f, 0.5f, 0.5f, 1.0f };
@@ -296,22 +316,13 @@ void GuineaPig::DrawScene() {
 	m_d3dImmediateContext->UpdateSubresource(m_cbPerFrameBuffer, 0, NULL, &m_cbPerFrame, 0, 0);
 	m_d3dImmediateContext->PSSetConstantBuffers(0, 1, &m_cbPerFrameBuffer);
 
-	// Bind the render target view and depth/stencil view to the pipeline.
-	m_d3dImmediateContext->OMSetRenderTargets(1, &m_renderTargetView, m_depthStencilView);
-
-	// Render opaque objects //
-
 	// Skybox
 	m_skyBox.Render(m_d3dImmediateContext, m_camera, RenderStates::NoCullRS);
-	//m_barrel.Render	(m_d3dImmediateContext, m_camera, RenderStates::NoCullRS);
-
 	m_heighMapTerrain.Render(m_d3dImmediateContext, m_camera, m_directionalLight);
-	// obj meshs
-	//m_terrain.Render(m_d3dImmediateContext, m_camera, 0);
 
-	//m_wave.Render(m_d3dImmediateContext, m_camera, 0, RenderStates::TransparentBSbyColor, blendFactor1);
 	m_d3dImmediateContext->PSSetConstantBuffers(0, 1, &m_cbPerFrameBuffer);
 	m_geoMesh.Render(m_d3dImmediateContext, m_camera, RenderStates::TransparentBSbyColor, blendFactor1);
+
 	m_d3dImmediateContext->PSSetConstantBuffers(0, 1, &m_cbPerFrameBuffer);
 	m_mirrorMesh.Render(m_d3dImmediateContext, m_camera, NULL);
 
@@ -320,14 +331,8 @@ void GuineaPig::DrawScene() {
 	//
 	m_fire.SetEmitPos(XMFLOAT3(100.0f, 0.5f, 40.0f));
 	m_fire.Render(m_d3dImmediateContext, m_camera, RenderStates::AdditiveBlending, blendFactor1);
-
-
-	m_d3dImmediateContext->PSSetConstantBuffers(0, 1, &m_cbPerFrameBuffer);
-	//DrawScreenQuad();
 	//Set the default blend state (no blending) for opaque objects
 	m_d3dImmediateContext->OMSetBlendState(0, blendFactor1, 0xffffffff);
-	//Present the backbuffer to the screen
-	HR(m_swapChain->Present(0, 0));
 }
 
 void GuineaPig::UpdateKeyboardInput(double _dt) {

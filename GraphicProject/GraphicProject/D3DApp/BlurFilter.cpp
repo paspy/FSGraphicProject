@@ -45,7 +45,7 @@ void BlurFilter::SetWeights(const float weights[9]) {
 	//Effects::BlurFX->SetWeights(weights);
 }
 
-void BlurFilter::Init(ID3D11Device* _d3dDevice, UINT _width, UINT _height, DXGI_FORMAT _format) {
+void BlurFilter::Init(ID3D11Device* _d3dDevice, UINT _width, UINT _height, DXGI_FORMAT _format, bool _msaa) {
 
 	// Start fresh.
 	SafeRelease(m_blurredOutputTexSRV);
@@ -69,8 +69,13 @@ void BlurFilter::Init(ID3D11Device* _d3dDevice, UINT _width, UINT _height, DXGI_
 	blurredTexDesc.MipLevels = 1;
 	blurredTexDesc.ArraySize = 1;
 	blurredTexDesc.Format = _format;
-	blurredTexDesc.SampleDesc.Count = 1;
-	blurredTexDesc.SampleDesc.Quality = 0;
+	if (_msaa) {
+		blurredTexDesc.SampleDesc.Count = 4;
+		blurredTexDesc.SampleDesc.Quality = 0;
+	} else {
+		blurredTexDesc.SampleDesc.Count = 1;
+		blurredTexDesc.SampleDesc.Quality = 0;
+	}
 	blurredTexDesc.Usage = D3D11_USAGE_DEFAULT;
 	blurredTexDesc.BindFlags = D3D11_BIND_SHADER_RESOURCE | D3D11_BIND_UNORDERED_ACCESS;
 	blurredTexDesc.CPUAccessFlags = 0;
@@ -100,27 +105,18 @@ void BlurFilter::Init(ID3D11Device* _d3dDevice, UINT _width, UINT _height, DXGI_
 }
 
 void BlurFilter::BlurInPlace(ID3D11DeviceContext* _context, ID3D11ShaderResourceView* _inputSRV, ID3D11UnorderedAccessView* _inputUAV, int _blurCount) {
-	//
 	// Run the compute shader to blur the offscreen texture.
-	// 
 
 	for (int i = 0; i < _blurCount; i++) {
-
 		// HORIZONTAL blur pass.
-		//D3DX11_TECHNIQUE_DESC techDesc;
-		//Effects::BlurFX->HorzBlurTech->GetDesc(&techDesc);
-		//for (UINT p = 0; p < techDesc.Passes; ++p) {
-		//	Effects::BlurFX->SetInputMap(_inputSRV);
-		//	Effects::BlurFX->SetOutputMap(m_blurredOutputTexUAV);
-		//	Effects::BlurFX->HorzBlurTech->GetPassByIndex(p)->Apply(0, _context);
-
-		
+		_context->CSSetShader(m_horzBlurCS, 0, 0);
+		_context->CSSetShaderResources(0, 1, &_inputSRV);
+		_context->CSSetUnorderedAccessViews(0, 1, &m_blurredOutputTexUAV, NULL);
 
 		// How many groups do we need to dispatch to cover a row of pixels, where each
 		// group covers 256 pixels (the 256 is defined in the ComputeShader).
 		UINT numGroupsX = (UINT)ceilf(m_width / 256.0f);
 		_context->Dispatch(numGroupsX, m_height, 1);
-
 
 		// Unbind the input texture from the CS for good housekeeping.
 		ID3D11ShaderResourceView* nullSRV[1] = { 0 };
@@ -129,21 +125,17 @@ void BlurFilter::BlurInPlace(ID3D11DeviceContext* _context, ID3D11ShaderResource
 		// Unbind output from compute shader (we are going to use this output as an input in the next pass, 
 		// and a resource cannot be both an output and input at the same time.
 		ID3D11UnorderedAccessView* nullUAV[1] = { 0 };
-		_context->CSSetUnorderedAccessViews(0, 1, nullUAV, 0);
+		_context->CSSetUnorderedAccessViews(0, 1, nullUAV, NULL);
 
 		// VERTICAL blur pass.
-		//Effects::BlurFX->VertBlurTech->GetDesc(&techDesc);
-		//for (UINT p = 0; p < techDesc.Passes; ++p) {
-		//	Effects::BlurFX->SetInputMap(m_blurredOutputTexSRV);
-		//	Effects::BlurFX->SetOutputMap(_inputUAV);
-		//	Effects::BlurFX->VertBlurTech->GetPassByIndex(p)->Apply(0, _context);
+		_context->CSSetShader(m_vertBlurCS, 0, 0);
+		_context->CSSetShaderResources(0, 1, &m_blurredOutputTexSRV);
+		_context->CSSetUnorderedAccessViews(0, 1, &_inputUAV, NULL);
 
-		//	// How many groups do we need to dispatch to cover a column of pixels, where each
-		//	// group covers 256 pixels  (the 256 is defined in the ComputeShader).
-		//	UINT numGroupsY = (UINT)ceilf(m_height / 256.0f);
-		//	_context->Dispatch(m_width, numGroupsY, 1);
-		//}
-
+		// How many groups do we need to dispatch to cover a column of pixels, where each
+		// group covers 256 pixels  (the 256 is defined in the ComputeShader).
+		UINT numGroupsY = (UINT)ceilf(m_height / 256.0f);
+		_context->Dispatch(m_width, numGroupsY, 1);
 		_context->CSSetShaderResources(0, 1, nullSRV);
 		_context->CSSetUnorderedAccessViews(0, 1, nullUAV, 0);
 	}

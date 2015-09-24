@@ -24,6 +24,7 @@ public:
 	void UpdateKeyboardInput(double _dt);
 	void UpdateScene(double _dt);
 	void DrawScene();
+	void DrawForHold();
 
 	void OnMouseDown(WPARAM _btnState, int _x, int _y);
 	void OnMouseUp(WPARAM _btnState, int _x, int _y);
